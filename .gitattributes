@@ -1,0 +1,9 @@
+# Force LF for everything so cloud (Linux) gets correct line endings.
+# A CRLF setup.sh or .cjs hook breaks on Ubuntu ("bad interpreter" / parse errors).
+* text=auto eol=lf
+
+*.sh   text eol=lf
+*.cjs  text eol=lf
+*.js   text eol=lf
+*.json text eol=lf
+*.md   text eol=lf
