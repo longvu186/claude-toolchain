@@ -1,0 +1,9 @@
+{
+  "name": "long-toolchain",
+  "description": "Long's personal Claude Code toolchain: skills, subagents, session hooks, profile/guidance injection, and the self-improving learning loop. Cloud- and local-portable. Version is the git commit SHA (omit explicit version so every push is a new version).",
+  "author": {
+    "name": "longvu",
+    "email": "longvu186@gmail.com"
+  },
+  "homepage": "https://github.com/longvu186/claude-toolchain"
+}

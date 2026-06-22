@@ -1,0 +1,155 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/session-start-context.cjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/run-event-logger.cjs\" UserPromptSubmit",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/pre-tool-security.cjs\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/git-commit-gate.cjs\"",
+            "if": "Bash(git commit *)",
+            "timeout": 5,
+            "statusMessage": "Checking GitNexus detect_changes requirement..."
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/run-event-logger.cjs\" PreToolUse",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/run-event-logger.cjs\" PostToolUse",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/gitnexus-reindex.cjs\"",
+            "timeout": 120,
+            "statusMessage": "Re-indexing GitNexus...",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/post-edit-format.cjs\"",
+            "timeout": 15,
+            "statusMessage": "Formatting..."
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/run-event-logger.cjs\" Notification",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/run-event-logger.cjs\" SubagentStop",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/run-event-logger.cjs\" Stop",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/trigger-analysis-refresh.cjs\"",
+            "timeout": 10,
+            "statusMessage": "Queuing analysis refresh...",
+            "async": true
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "You are a session-closure checker for Claude Code. Evaluate the LAST RESPONSE TURN only (not the full session history). Output {\"ok\": true} if ANY of these are true: (a) no tools were used this turn, (b) the only files written/edited this turn were memory files (paths containing .claude/projects/ or memory/ or MEMORY.md), (c) the turn was a summary or recap with no new code changes. Output {\"ok\": false, \"reason\": \"Session closure checklist:\\n1. Run the documentation-manager skill if docs, specs, or AI context files need updating (run logs, AGENTS.md, architecture docs).\\n2. Run the experience-memory-curator skill if there are durable lessons, preferences, or decisions worth promoting into long-term memories.\"} only if this turn made substantive changes to code, hook scripts, configs, or project docs that have NOT yet been captured in memory/run logs. Default to {\"ok\": true} when uncertain. Hook context: $ARGUMENTS",
+            "timeout": 30,
+            "continueOnBlock": true,
+            "statusMessage": "Checking session closure tasks..."
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/run-event-logger.cjs\" SessionEnd",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

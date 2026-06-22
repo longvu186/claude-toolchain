@@ -1,0 +1,24 @@
+# This repo is a Claude Code plugin marketplace. Keep it to plugin assets only.
+# Never commit secrets, local logs, caches, or runtime state.
+
+# Secrets / env
+.env
+.env.*
+*.pem
+*.key
+secrets.json
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Node (if any tooling is added later)
+node_modules/
+
+# Local Claude runtime state that must NOT travel with the plugin
+**/logs/
+**/.cache/
+*.log

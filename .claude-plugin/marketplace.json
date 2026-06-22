@@ -1,0 +1,18 @@
+{
+  "name": "long-tools",
+  "owner": {
+    "name": "longvu",
+    "email": "longvu186@gmail.com"
+  },
+  "metadata": {
+    "description": "Long's personal Claude Code toolchain, packaged for cloud (Routines/Web) and local reuse."
+  },
+  "plugins": [
+    {
+      "name": "long-toolchain",
+      "source": "./plugins/long-toolchain",
+      "description": "Skills, 7 subagents, session hooks (run-logging, learning loop, security gate, formatter, GitNexus reindex), profile/guidance injection, and the cloud-ready command.",
+      "category": "productivity"
+    }
+  ]
+}
