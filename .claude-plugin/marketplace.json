@@ -10,7 +10,11 @@
   "plugins": [
     {
       "name": "long-toolchain",
-      "source": "./plugins/long-toolchain",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/longvu186/claude-toolchain.git",
+        "path": "plugins/long-toolchain"
+      },
       "description": "Skills, 7 subagents, session hooks (run-logging, learning loop, security gate, formatter, GitNexus reindex), profile/guidance injection, and the cloud-ready command.",
       "category": "productivity"
     }
