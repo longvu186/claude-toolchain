@@ -2,23 +2,19 @@
  * SessionStart hook for Claude Code.
  *
  * Injects, via additionalContext:
- *   1) the user-model profile digest,
- *   2) the global user-guidance digest (policy that does NOT auto-load in cloud),
- *   3) the project quick-understanding digest,
- *   4) consolidation-due reminders,
- *   5) a common-feature quality reminder, and
- *   6) a concise summary of the latest run logs (if any) for session continuity.
+ *   1) a common-feature quality reminder, and
+ *   2) a concise summary of the latest run logs (if any) for session continuity.
  *
- * Cloud-portable: when bundled in a plugin, profile.md and global-guidance.md are
- * read from ${CLAUDE_PLUGIN_ROOT} (managed cloud has no ~/.claude). Locally it falls
- * back to ~/.claude so the same script works in both places.
+ * Ported from the Copilot session-start-version-check hook; the toolchain
+ * version-drift check is intentionally dropped (Copilot-specific). Reads run
+ * logs from the nearest ancestor of cwd containing docs/ai/run-logs, else from
+ * ~/.claude/logs/run-logs (matching run-event-logger.cjs).
  */
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
 
 const HOME = process.env.USERPROFILE || process.env.HOME || os.homedir();
-const PLUGIN_ROOT = process.env.CLAUDE_PLUGIN_ROOT || "";
 const MAX_SUMMARY_LENGTH = 180;
 const RUN_LOG_COUNT = 3;
 
@@ -50,42 +46,19 @@ function safeReadFile(filePath) {
   }
 }
 
-// Read the delimited digest block (token-light) from a profile/guidance doc.
-function extractDigest(content) {
+// Pull the compact, behavior-shaping user model from ~/.claude/profile.md. Only the delimited
+// digest block is injected each session (token-light); the full profile is read on demand.
+function buildProfileDigest() {
+  const content = safeReadFile(path.join(HOME, ".claude", "profile.md"));
   if (!content) return "";
   const match = content.match(
     /<!--\s*digest:start\s*-->([\s\S]*?)<!--\s*digest:end\s*-->/i,
   );
   if (!match) return "";
-  return match[1].replace(/^\s*##.*$/m, "").trim();
-}
-
-// Prefer the plugin-bundled copy (works in cloud); fall back to ~/.claude (local).
-function resolveBundled(pluginRelPath, homeRelSegments) {
-  if (PLUGIN_ROOT) {
-    const p = path.join(PLUGIN_ROOT, pluginRelPath);
-    if (fs.existsSync(p)) return p;
-  }
-  return path.join(HOME, ".claude", ...homeRelSegments);
-}
-
-// The compact, behavior-shaping user model. Only the digest block is injected each session.
-function buildProfileDigest() {
-  const body = extractDigest(
-    safeReadFile(resolveBundled("profile.md", ["profile.md"])),
-  );
+  const body = match[1].replace(/^\s*##.*$/m, "").trim();
   return body
-    ? `User profile digest (read the full profile when personalizing approach, scoping, or judgment calls):\n${body}`
+    ? `User profile digest (full model in ~/.claude/profile.md — read it when personalizing approach):\n${body}`
     : "";
-}
-
-// Global user-level guidance (i18n, stack, agent routing, policy). This auto-loads locally via
-// ~/.claude/CLAUDE.md but NOT in managed cloud, so inject its digest from the bundled copy.
-function buildGlobalGuidanceDigest() {
-  const body = extractDigest(
-    safeReadFile(resolveBundled("global-guidance.md", ["CLAUDE.md"])),
-  );
-  return body ? `Global user guidance (always apply):\n${body}` : "";
 }
 
 // Walk up from cwd to the workspace root (nearest ancestor with memories/repo or docs/ai).
@@ -104,14 +77,22 @@ function resolveWorkspaceRoot(startPath) {
   }
 }
 
-// Inject the project's quick-understanding digest (memories/repo/project-profile.md).
+// Inject the project's quick-understanding digest (memories/repo/project-profile.md). Only the
+// delimited block loads each session; the full doc loads on demand. The digest is the project's
+// ALWAYS-FED working context and must be self-sufficient across six dimensions (what/stack, feature→path
+// map, key symbols, lexicon/glossary, pending/half-done, hard rules & destructive invariants) so agents
+// never have to search for load-bearing facts — see the `consolidate-project` skill's "Digest standard".
 function buildProjectDigest(workspaceRoot) {
   if (!workspaceRoot) return "";
-  const body = extractDigest(
-    safeReadFile(
-      path.join(workspaceRoot, "memories", "repo", "project-profile.md"),
-    ),
+  const content = safeReadFile(
+    path.join(workspaceRoot, "memories", "repo", "project-profile.md"),
   );
+  if (!content) return "";
+  const match = content.match(
+    /<!--\s*digest:start\s*-->([\s\S]*?)<!--\s*digest:end\s*-->/i,
+  );
+  if (!match) return "";
+  const body = match[1].replace(/^\s*##.*$/m, "").trim();
   return body
     ? `Project digest (full quick-understanding in memories/repo/project-profile.md):\n${body}`
     : "";
@@ -166,6 +147,23 @@ function safeReadJson(filePath) {
   } catch {
     return null;
   }
+}
+
+// Notify: the event-driven auto-consolidate worker drafts a profile rewrite when the backlog crosses
+// threshold, but never applies it (always-loaded surfaces are human-ratified). Surface the pending draft.
+function buildConsolidationDraftReady() {
+  const marker = safeReadJson(
+    path.join(HOME, ".claude", "logs", "_consolidation-draft-ready.json"),
+  );
+  if (!marker) return "";
+  const when = marker.createdAt
+    ? marker.createdAt.slice(0, 16).replace("T", " ")
+    : "recently";
+  return [
+    `Consolidation DRAFT ready for review (auto-generated ${when}):`,
+    `- A proposed ~/.claude/profile.md rewrite is at ~/.claude/profile.md.draft; summary: ${marker.reportPath || "(see ~/.claude/learning/queue/)"}.`,
+    "- Review & apply with `/apply-consolidation`, or discard the draft. profile.md was NOT changed.",
+  ].join("\n");
 }
 
 function truncate(text, max) {
@@ -256,14 +254,14 @@ async function main() {
   const workspaceRoot = resolveWorkspaceRoot(cwd);
   const runLogContext = buildRunLogContext(runLogDir);
   const profileDigest = buildProfileDigest();
-  const guidanceDigest = buildGlobalGuidanceDigest();
   const projectDigest = buildProjectDigest(workspaceRoot);
   const consolidationDue = buildConsolidationDue(workspaceRoot);
+  const consolidationDraft = buildConsolidationDraftReady();
 
   const additionalContext = [
     profileDigest,
-    guidanceDigest,
     projectDigest,
+    consolidationDraft,
     consolidationDue,
     FEATURE_QUALITY_REMINDER,
     runLogContext,

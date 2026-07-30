@@ -117,6 +117,7 @@ Implementation notes:
 - MFA selected users bypassing challenge routes because `two_fa_authenticated` was not reset on new sign-in.
 - MFA guard checks executed in the wrong order, causing setup/challenge redirect loops.
 - Missing explicit handling for suspended/blocked/deactivated users in guards and session bootstrap logic.
+- Middleware calling the auth provider's user-fetch (e.g. Supabase `auth.getUser()`) a second time when the shared client-factory helper (e.g. `createMiddlewareClient()`) already called it internally for its own cookie-refresh side effect — doubles the auth network round-trip on every protected request. Have the factory return the `user` it already fetched (`{ supabase, response, user }`) instead of requiring callers to re-fetch it.
 
 ## Account Lifecycle Baseline
 
@@ -145,6 +146,13 @@ Every restricted-state transition should include:
 - All data-fetching and display components use `effectiveUserId` from context, not raw auth user.
 - Hide sensitive tabs (settings, account deletion) during impersonation.
 - Pitfall: Supabase RLS still enforces the admin's real session — impersonation is UI-only. For write operations, consider whether the impersonated user's permissions or admin's should apply.
+
+### Admin Impersonation — Server-Verified Overlay Cookie (Alternative To A Second Session)
+
+- When the auth provider owns session issuance (e.g. Supabase Auth) and you don't want to mint a second, provider-level session for the impersonated identity, layer a separate short-lived, HMAC-signed "overlay" cookie on top of the admin's real session instead: it carries only the target user id + admin identity + expiry, verified server-side on every request in the same auth-resolution helper that reads the real session.
+- Structurally safer against privilege escalation than a client-side `sessionStorage` override (see the pattern above) because the overlay is verified server-side, not just trusted from client state — but it shares the same underlying limitation: privileged write paths (RLS, RPCs) still run under the admin's real credentials unless the write path explicitly re-checks the overlay target.
+- Provide an explicit "stop impersonating" route that clears only the overlay cookie (don't touch the real session cookie), and keep the signing key separate/scoped so overlay-signature verification can't be confused with primary session verification.
+- Independently hand-trace this cookie's issuance path before shipping: confirm the branch that sets it is structurally unreachable except behind an already-verified privileged identity (e.g. a freshly-checked `super_admin` role), not just gated by a UI-level check.
 
 ### Custom Role Extension
 

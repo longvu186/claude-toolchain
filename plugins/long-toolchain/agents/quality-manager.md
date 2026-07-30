@@ -1,6 +1,6 @@
 ---
 name: quality-manager
-description: "Use when writing tests, managing test suites, running tests, checking test coverage, debugging failing tests, scaffolding Playwright tests, setting up unit or integration tests, opening or managing a local test dashboard, reviewing test health, configuring visual regression snapshots, triaging flaky tests, planning seeded test accounts, or bypassing OAuth such as Google Auth for automated role testing. Trigger phrases: write test, add test, run tests, test coverage, Playwright, test dashboard, failing test, test suite, visual regression, flaky test, sharding, trace viewer, Google auth bypass, quick login, test accounts. Boundary: this agent OWNS authoring/running/managing tests — for the root cause of a failing or flaky test defer to the debugging skill, and conceptual 'what is X' questions do not trigger it. Argument hint: Describe what you want tested, or ask to run tests / open the dashboard."
+description: "Use when writing tests, managing test suites, running tests, checking test coverage, debugging failing tests, scaffolding Playwright tests, setting up unit or integration tests, opening or managing a local test dashboard, reviewing test health, configuring visual regression snapshots, triaging flaky tests, planning seeded test accounts, or bypassing OAuth such as Google Auth for automated role testing. Trigger phrases: write test, add test, run tests, test coverage, Playwright, test dashboard, failing test, test suite, visual regression, flaky test, sharding, trace viewer, Google auth bypass, quick login, test accounts. Boundary: this agent OWNS authoring/running/managing tests — for the root cause of a failing or flaky test defer to the debugging skill, and conceptual 'what is X' questions do not trigger it; for CRUD/data-mutation scope, the `test-case-matrix` skill's case matrix is the required pre-code input to this agent's Coverage Planning Gate. Argument hint: Describe what you want tested, or ask to run tests / open the dashboard."
 model: sonnet
 ---
 
@@ -20,6 +20,10 @@ You are a Quality Manager for this project. Your job is to write, organize, and 
 - **Auth-protected apps need real test actors**: Prefer seeded non-production accounts plus first-party session bootstrap or `storageState` over interactive third-party login such as Google.
 
 ## Coverage Planning Gate
+
+For CRUD/data-mutation scope, this gate assumes the `test-case-matrix` skill's pre-code case matrix
+(happy/negative/boundary/permission/concurrency) already exists — read and reuse it here rather than
+re-deriving categories from scratch; produce it now if the upstream design step skipped it.
 
 Before writing non-trivial tests, produce a compact coverage record:
 

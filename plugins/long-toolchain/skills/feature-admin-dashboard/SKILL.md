@@ -16,11 +16,36 @@ Reusable feature playbook for secure, scalable admin panels.
 - High-density list/kanban/calendar views where applicable.
 - Safe destructive actions and confirmation dialogs.
 
+## Sidebar Layout Pattern (preferred over top-tab-bar)
+
+For dark-branded admin consoles, use a fixed 240px sidebar instead of a horizontal tab bar:
+
+- Fixed sidebar with branded dark background; main content area `bg-gray-50`.
+- Nav items grouped into labeled sections; active item `bg-<brand>/15 text-white`.
+- Sidebar footer: lang toggle + sign-out.
+- Mobile: hamburger button + overlay drawer (not a permanent sidebar at mobile widths).
+- Do NOT add a redundant `<h1>` page title inside tab/panel content when the sidebar already provides section context.
+- For list-heavy panels, use `space-y-4` as the outer wrapper — not `mx-auto max-w-6xl px-4 py-12` (that pattern is for public pages).
+
+Reference implementation: `/root/projects/thepenlab.vn/src/app/(admin-portal)/layout.tsx`
+
+## Stat Card Design (Overview / Dashboard panels)
+
+Preferred anatomy for admin KPI cards:
+
+- Small label above the value (`text-xs text-gray-500 uppercase tracking-widest`).
+- Large tabular numeric value with tone-colored text (`text-2xl font-bold tabular-nums`).
+- Colored icon chip with tone-based background: success=emerald, warning=amber, danger=red, info=blue, accent=violet, neutral=gray.
+- Optional trend arrow + helper text below value.
+- Group related cards under section labels: `text-[11px] font-semibold uppercase tracking-widest text-gray-400`.
+
+Reference component: `/root/projects/thepenlab.vn/src/components/admin/AdminStatCard.tsx`
+
 ## Preferred Build Pattern
 
 1. Define role access matrix by route/module/action.
 2. Load `common-feature-research` if the dashboard contains standard CRUD/list/chart/form surfaces.
-3. Implement shared admin layout with stable navigation and explicit scroll ownership.
+3. Implement shared admin layout with stable navigation and explicit scroll ownership (prefer sidebar over top-tab-bar — see above).
 4. Keep page-level containment for complex views; keep shared layout generally scrollable.
 5. Implement module-level filters/search/sort/pagination.
 6. Put primary create/import/export actions in the page header or table toolbar; default create/edit flows to dialog or sheet patterns.

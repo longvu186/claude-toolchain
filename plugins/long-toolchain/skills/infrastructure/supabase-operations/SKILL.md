@@ -140,6 +140,11 @@ Operational knowledge for Supabase data/auth workflows, especially in static-exp
   - Confirm `ctx.authMode` matches the configured mode.
   - Confirm `ctx.supabase` remains anon for `publishable` and `none`, and use `ctx.supabaseAdmin` only when privileged access is required.
 
+### 11) Connecting to Supabase Postgres from Cloudflare Workers
+
+- Prefer a direct connection over Hyperdrive: `postgres-js` supports raw TCP natively via `cloudflare:sockets` when it detects the Workers runtime (needs `nodejs_compat`), so a Worker can reach Supabase's Supavisor pooler without a Hyperdrive binding at all.
+- Pick pooler mode deliberately: transaction-mode (port 6543) needs `{ prepare: false, max: 1 }`; session-mode (port 5432) supports prepared statements but pins one backend per connection. See `tech-pitfalls` ("Cloudflare Hyperdrive False Invalid Database Credentials..." and "Supabase Supavisor Pooler Mode Selection...") for the full incident and the exact symptom-to-fix mapping if Hyperdrive provisioning itself fails.
+
 ## MCP and Tooling Issue Patterns
 
 - Infra tooling may fail while database is healthy; keep a manual fallback path.
@@ -151,18 +156,21 @@ Operational knowledge for Supabase data/auth workflows, especially in static-exp
 ## Advanced Data Patterns
 
 ### JSONB State Consolidation
+
 - When multiple small tables store per-user state (e.g., rankings, inclusions, exclusions), consolidate into a single table with JSONB columns.
 - Reduces page-load queries (e.g., 4 → 2) and simplifies atomic updates.
 - Create a single `SECURITY DEFINER` RPC for atomic upsert of all JSONB fields.
 - Keep high-volume event/log tables (e.g., individual comparison records) as separate rows for future streaming migration.
 
 ### Hybrid Cache-First RPC
+
 - For expensive aggregate queries (stats, counts), create a cache table (e.g., `stats_cache`) with a `computed_at` timestamp.
 - RPC reads cache first; only recomputes when stale (e.g., >12h).
 - Mark as `SECURITY DEFINER` so public callers can read without RLS overhead.
 - Pair with edge KV cache for additional layer (see `cloudflare-operations`).
 
 ### Phantom Data Prevention
+
 - Auto-save features that fire on page load can create phantom rows (e.g., default rankings saved without user interaction).
 - Always guard background save operations with an interaction check (e.g., `comparisons.size > 0`, `isDirty` flag).
 - If phantom data occurs, clean up with targeted DELETE + add guard.

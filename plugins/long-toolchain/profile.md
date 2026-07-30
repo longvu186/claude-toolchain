@@ -17,7 +17,7 @@ beliefs. Atoms feed this; this is never just a list of atoms.
 - **Comms:** Terse, direct. Action over explanation — implement, don't describe. Challenges assumptions and asks "is X actually better than Y?" — expects evidence, not agreement.
 - **Decision lens:** Architecture over wording. Automation over polling. Prompt-budget conscious (keep always-loaded context tiny). Verify before claiming done.
 - **Hard rules:** i18n Vietnamese-first (never hardcode VN text). `typecheck`+build must pass before any deploy. UI validation is screenshot-backed, not code-only. Styled confirm modals, never native `window.confirm`. System-first UI (shared tokens/shells before page-local).
-- **Stack:** Vue 3 `<script setup lang="ts">` + Pinia + Tailwind + Supabase. Also Cloudflare, Vercel, Bubble.io. No Supabase calls in components — via stores/composables.
+- **Stack:** Primary architecture is **Next.js + Supabase + Cloudflare Workers** (+ Tailwind). Vue 3 `<script setup lang="ts">` + Pinia is a secondary framework, not the default. Also Vercel, Bubble.io. Never call Supabase directly in components — route through the data layer (Next.js: server actions / route handlers / hooks; Vue: stores/composables).
 - **Tooling:** Claude Code is the primary (and now only) AI coding tool. GitNexus for structure/impact. Crawl4AI for web reads. Context7 only for version-sensitive APIs.
 <!-- digest:end -->
 
@@ -57,7 +57,7 @@ beliefs. Atoms feed this; this is never just a list of atoms.
 
 ## Domain & skill map
 
-- **Strong:** Vue/Pinia/Tailwind frontend architecture; Supabase; design-system/token thinking;
+- **Strong:** Next.js + Supabase + Cloudflare Workers architecture (primary); Vue/Pinia/Tailwind (secondary); design-system/token thinking;
   AI-toolchain engineering (hooks, skills, agents, MCP wiring); prompt/context economics.
 - **Active focus areas:** Claude Code automation depth, memory/learning systems, UI consistency
   guardrails, common-feature research baselines.

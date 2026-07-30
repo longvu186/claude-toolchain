@@ -30,12 +30,12 @@ Before accepting page-local JSX or Tailwind as the answer, ask whether the surfa
 
 Use these layers consistently. A component should normally belong to one of them.
 
-| Layer | Responsibility | Typical Examples |
-|---|---|---|
-| Primitive | Generic, reusable, accessibility-critical UI building blocks | `Button`, `Input`, `Dialog`, `Table`, `Sidebar` |
-| Pattern | Reusable composition of primitives with one clear interaction purpose | `ConfirmDialog`, `FilterToolbar`, `EmptyState`, `DataTableShell` |
-| Feature UI | UI tied to one business action or domain flow | `InviteMemberForm`, `ArchiveProjectDialog` |
-| Page Composition | Screen assembly, routing composition, view-specific orchestration | `ProjectSettingsPage`, `BillingOverviewPage` |
+| Layer            | Responsibility                                                        | Typical Examples                                                 |
+| ---------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Primitive        | Generic, reusable, accessibility-critical UI building blocks          | `Button`, `Input`, `Dialog`, `Table`, `Sidebar`                  |
+| Pattern          | Reusable composition of primitives with one clear interaction purpose | `ConfirmDialog`, `FilterToolbar`, `EmptyState`, `DataTableShell` |
+| Feature UI       | UI tied to one business action or domain flow                         | `InviteMemberForm`, `ArchiveProjectDialog`                       |
+| Page Composition | Screen assembly, routing composition, view-specific orchestration     | `ProjectSettingsPage`, `BillingOverviewPage`                     |
 
 If a file spans multiple layers, split it.
 
@@ -96,8 +96,8 @@ Example:
 
 ```ts
 // features/archive-project/index.ts
-export { ArchiveProjectDialog } from "./ui/archive-project-dialog"
-export { useArchiveProject } from "./model/use-archive-project"
+export { ArchiveProjectDialog } from "./ui/archive-project-dialog";
+export { useArchiveProject } from "./model/use-archive-project";
 ```
 
 Do not force consumers to deep-import volatile internals such as `./ui/internal/footer-actions`.
@@ -167,11 +167,20 @@ If the component is custom, document why the primitive composition path was insu
 - Page-local rewrites of recurring headers, cards, toolbars, or section shells that should be fixed once in the shared layer
 - Large UI rewrites without story coverage or a public API seam
 
+## System Component Manifest
+
+For a Next.js + shadcn + Supabase app, do not invent the shared set from scratch each time. The concrete
+"build these first" manifest — `AppShell`, `AppSidebar`, `PageHeader`, `DataTable`, `FormDialog`/`FormSheet`,
+`ConfirmDialog`, `Button`, `FormField`, `MoneyInput`, `Toaster`, `EmptyState`, skeletons — with the **contract
+each one guarantees** (so page code cannot reproduce common UI/UX defects) and the render-first route
+template, lives in **[references/system-component-manifest.md](references/system-component-manifest.md)**.
+This is the enforcement layer: rules baked into a required component can't be skipped the way prose rules are.
+
 ## Adoption Path
 
 Introduce this incrementally:
 
-1. Enforce shadcn-first primitives for new UI work.
+1. Enforce shadcn-first primitives for new UI work; stand up the System Component Manifest set first.
 2. Add Storybook coverage for reusable patterns and failure-prone states.
 3. Add slice public APIs and reduce deep imports.
 4. Move one high-churn feature into clear boundaries before expanding further.

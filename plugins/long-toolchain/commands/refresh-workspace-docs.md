@@ -21,10 +21,18 @@ You are refreshing an existing VS Code workspace's documentation scaffold files.
 These files should exist in every project. Check each one:
 
 ### `.github/`
+
 - `.github/copilot-instructions.md` — workspace instructions with Documentation Assets, Custom Agents table, Session Completion Workflow
 - `.github/instructions/styling.instructions.md` — styling tokens (applyTo CSS/TSX/etc.)
 
+### `memories/repo/` (knowledge-cache registries)
+
+- `memories/repo/commands.md` — run/build/typecheck/lint/test/deploy/db/codegen invocations (write-back target)
+- `memories/repo/design-system.md` — tokens, component variants, repeated-surface conventions (write-back target)
+- (create each with a `<!-- last-verified -->` header if missing; see the `knowledge-cache` skill)
+
 ### `docs/ai/`
+
 - `docs/ai/context.md` — AI-facing project context
 - `docs/ai/code-index.json` — machine-readable file & symbol index
 - `docs/ai/symbol-map.md` — fast symbol lookup table
@@ -32,6 +40,7 @@ These files should exist in every project. Check each one:
 - `docs/ai/run-logs/README.md` — run-log naming convention and required sections
 
 ### `docs/specs/`
+
 - `docs/specs/README.md` — spec system overview and folder rules
 - `docs/specs/active/README.md` — active slice folder convention
 - `docs/specs/archive/README.md` — archive guidance for completed or dropped slices
@@ -42,12 +51,14 @@ These files should exist in every project. Check each one:
 - `docs/specs/templates/decision-template.md` — decision note template
 
 ### `docs/architecture/`
+
 - `docs/architecture/codebase-guide.md` — architecture overview
 - `docs/architecture/env-vars.md` — environment variable reference
 - `docs/architecture/edge-functions.md` — edge/serverless function catalog
 - `docs/architecture/modules.md` — module ownership guide
 
 ### `docs/ui/`
+
 - `docs/ui/spec.md` — master UI specification
 - `docs/ui/component-inventory.md` — component catalog
 - `docs/ui/design-tokens.md` — extracted design tokens

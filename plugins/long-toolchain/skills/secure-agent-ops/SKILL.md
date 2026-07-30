@@ -25,6 +25,13 @@ the attack surface; these are the defenses.
 - High-risk actions (destructive file ops, outbound network, deploy/publish, credential use) need
   explicit confirmation — for apps use the styled-confirm modal; for the toolchain, the
   `pre-tool-security.cjs` gate. Don't expand the blast radius silently.
+- **A general "go ahead, finish the rest" does not transitively authorize every plan item already
+  flagged as "needs your access."** The auto-mode safety classifier will still individually gate
+  DNS/shared-infra-config edits and persistent-service installs even after a broad go-ahead —
+  that's correct, not a bug to work around. When blocked mid-run: don't retry the same blocked
+  action or re-explain it serially; finish all other unblocked work first, then bring back ONE
+  consolidated `AskUserQuestion` covering every blocked action together (plus any other decision
+  now ripe for confirmation). Cheaper for the user than N separate interruptions.
 
 ## Skill / hook integrity (LLM03 Supply Chain — Skill-Inject)
 
@@ -39,6 +46,28 @@ the attack surface; these are the defenses.
 - The run-logger redacts sensitive keys live. Periodically run `node ~/.claude/security/secret-scan.cjs`
   to sweep durable memory/profile/learning/log surfaces (not transcripts). Strip + rotate anything real.
 - Never write secrets/keys/private URLs into memories, profiles, proposals, or the ledger.
+- **Transforming a secret into a new format (e.g. a Docker env-file into another tool's own config
+  command) should happen entirely server-side, never round-tripped through the agent's own transcript.**
+  Source the env file into shell variables inside a single remote script, pipe them straight into the
+  target tool's config command, and redirect that command's own output to `/dev/null` — the plaintext
+  value should never appear in a command the agent issues or a response it reads back, not even
+  transiently "just to check." If the auto-mode classifier blocks a plain `cat`/`grep` of a credential
+  file, that's the intended guardrail working — don't retry with a narrower grep of the same secret;
+  rewrite the step to parse/consume it server-side instead.
+
+## Autonomous production-action agents (headless triage/ops agents)
+
+- **Code-level allowlist is the primary gate; the system prompt is secondary.** When a headless agent
+  can take production actions (deploys, rollbacks, config flips), enumerate every allowed side effect as
+  a named script it invokes (e.g. `ops/actions/*.mjs`) instead of granting open Bash/tool access plus
+  prompt instructions telling it what not to do. A closed action set can't be talked past; prose-only
+  restrictions can.
+- **Ship risky capabilities code-complete but structurally inert, not deferred entirely.** E.g. an
+  autonomous-autofix action script that always refuses + logs, or an allowlist file that ships
+  deliberately empty until a human ratifies the first entry. This proves the safe parts of the pipeline
+  end-to-end before the highest-risk surface goes live, without a second build/integration pass later.
+- Ambiguity always resolves to escalation/no-op, never action — the same "a bare yes is not
+  authorization" discipline used for human approvals, applied to an autonomous agent's own uncertainty.
 
 ## System-prompt / context integrity (LLM07, context rot)
 

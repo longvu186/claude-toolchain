@@ -1,6 +1,6 @@
 ---
 name: bubble-json-export-analysis
-description: "Analyze and inventory Bubble.io JSON exports for migration. Use when auditing Bubble pages, workflows, actions, data types, plugins, and API workflows, or doing behavior-first discovery before migrating Bubble to code. Trigger phrases: analyze bubble export, bubble json forensic, bubble workflow inventory, bubble migration discovery, bubble AST extraction."
+description: Analyze and inventory Bubble.io JSON exports for migration. Use when auditing Bubble pages, workflows, actions, data types, plugins, and API workflows, or doing behavior-first discovery before migrating Bubble to code. Trigger phrases: analyze bubble export, bubble json forensic, bubble workflow inventory, bubble migration discovery, bubble AST extraction.
 ---
 
 # Skill: Bubble JSON Export Analysis

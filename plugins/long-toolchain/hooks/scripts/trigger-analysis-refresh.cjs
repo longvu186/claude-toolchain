@@ -7,10 +7,15 @@ const childProcess = require("child_process");
 const fs = require("fs");
 const path = require("path");
 
-// Resolve the worker as a sibling of this script so it works identically when
-// run from ~/.claude locally, from the plugin cache, and in cloud (no dependency
-// on ~/.claude existing).
-const REFRESH_SCRIPT = path.join(__dirname, "analysis-refresh.cjs");
+const HOME =
+  process.env.USERPROFILE || process.env.HOME || require("os").homedir();
+const REFRESH_SCRIPT = path.join(
+  HOME,
+  ".claude",
+  "hooks",
+  "scripts",
+  "analysis-refresh.cjs",
+);
 
 function readStdin() {
   return new Promise((resolve) => {

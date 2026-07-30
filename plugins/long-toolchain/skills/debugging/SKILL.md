@@ -1,6 +1,6 @@
 ---
 name: debugging
-description: "Systematic debugging and root-cause investigation through structured hypothesis testing. Use when a bug's cause is unknown, fixes keep regressing, or multiple symptoms may share a root cause. This skill LEADS root-cause diagnosis of a failing or flaky/intermittent test (quality-manager authors and runs tests but does not diagnose them). For a KNOWN recurring trap, check tech-pitfalls first. Trigger phrases: investigate bug, debug this, find root cause, why is this failing, trace this issue, flaky test root cause."
+description: Systematic debugging and root-cause investigation through structured hypothesis testing. Use when a bug's cause is unknown, fixes keep regressing, or multiple symptoms may share a root cause. This skill LEADS root-cause diagnosis of a failing or flaky/intermittent test (quality-manager authors and runs tests but does not diagnose them). For a KNOWN recurring trap, check tech-pitfalls first. Trigger phrases: investigate bug, debug this, find root cause, why is this failing, trace this issue, flaky test root cause.
 ---
 
 # Systematic Debugging & Root Cause Investigation
@@ -25,7 +25,7 @@ Before investigating:
 
 Gather facts before forming hypotheses:
 
-1. **Reproduce**: Confirm the bug is reproducible. Document exact steps.
+1. **Reproduce**: Confirm the bug is reproducible. Document exact steps. For a prod-only bug suspected to be old-code-vs-new-environment (schema/config) version skew, reproduce it offline first: `git worktree add /tmp/x <suspect-ref>` and run the project's real production build/start script inside it — confirms root cause before any rollback/deploy decision, without touching prod. (See tech-pitfalls: "Reproduce A Prod-Only Bug By Building An Old Commit In A Git Worktree".)
 2. **Isolate**: Find the smallest input/state that triggers the bug.
 3. **Read canonical references**: Before searching code for recurring facts, read relevant `memories/repo/` files (`third-party-apis.md`, `api-routes.md`, `data-model.md`, `query-catalog.md`, `edge-functions.md`, `env-vars.md`, `functions-and-symbols.md`, `project-map.md`).
 4. **Trace**: Follow the data path from input to failure point.

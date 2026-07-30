@@ -39,6 +39,14 @@ const PROFILE_SIGNAL_FILE = path.join(
   "logs",
   "profile-signals.jsonl",
 );
+// Self-correction lesson atoms (tried->failed->worked) mirrored cross-project for /consolidate-memory,
+// /learn-from-failures, and the knowledge-cache skill (which promotes command-fixes into commands.md).
+const LESSON_SIGNAL_FILE = path.join(
+  HOME,
+  ".claude",
+  "logs",
+  "lesson-signals.jsonl",
+);
 
 function ensureDir(dirPath) {
   fs.mkdirSync(dirPath, { recursive: true });
@@ -279,6 +287,7 @@ function getStatePaths(workspaceRoot, runLogDir, sessionId) {
     rawLogFile: path.join(runLogDir, ".raw", `${sessionId}.jsonl`),
     curationQueueFile: path.join(runLogDir, "_memory-curation-queue.jsonl"),
     tokenLedgerFile: path.join(runLogDir, "_token-ledger.jsonl"),
+    lessonAtomsFile: path.join(runLogDir, "_lesson-atoms.jsonl"),
   };
 }
 
@@ -359,6 +368,7 @@ function createRun(state, prompt) {
     preferences: [],
     assumptionCandidates: [],
     corrections: [],
+    lessons: [],
     actions: [],
     outcome: "success",
     finalized: false,
@@ -416,6 +426,7 @@ function getOrCreateTool(run, data) {
       toolName: data.tool_name || "",
       status: "started",
       inputSummary: summarizeValue(data.tool_input),
+      actionLabel: classifyAction(data.tool_name || "", data.tool_input),
       responseSummary: "",
       error: "",
     };
@@ -534,7 +545,64 @@ function summarizeTopTools(run) {
     .map(([n, c]) => `${n} x${c}`);
 }
 
+// Self-correction lesson atoms: a tried->failed->worked pair within a run, matched per tool in
+// chronological order. The highest-signal experience there is. For Bash this is usually a command-fix
+// (e.g. wrong deploy command -> right one) -> promote into memories/repo/commands.md (knowledge-cache).
+function buildLessons(run) {
+  const lessons = [];
+  const pendingByTool = new Map(); // toolName -> { tried, error }
+  for (const t of run.tools) {
+    const name = t.toolName || "tool";
+    if (t.status === "failure") {
+      pendingByTool.set(name, {
+        tried: t.actionLabel || t.inputSummary || name,
+        error: t.error,
+      });
+    } else if (t.status === "success" && pendingByTool.has(name)) {
+      const failed = pendingByTool.get(name);
+      const worked = t.actionLabel || t.inputSummary || name;
+      if (worked && worked !== failed.tried) {
+        lessons.push({
+          tool: name,
+          tried: truncate(failed.tried, 200),
+          error: truncate(failed.error, 300),
+          worked: truncate(worked, 200),
+        });
+      }
+      pendingByTool.delete(name);
+    }
+  }
+  return lessons;
+}
+
+function writeLessonAtoms(state, run, lessonAtomsFile) {
+  if (!run.lessons || run.lessons.length === 0) return;
+  for (const lesson of run.lessons) {
+    const record = JSON.stringify({
+      timestamp: isoNow(),
+      kind: "self-correction",
+      sessionId: state.sessionId,
+      workspaceRoot: state.workspaceRoot,
+      runIndex: run.index,
+      ...lesson,
+    });
+    // Project-scoped atoms beside run logs; global mirror for cross-project synthesis.
+    try {
+      appendLine(lessonAtomsFile, record);
+    } catch {
+      /* ignore */
+    }
+    try {
+      appendLine(LESSON_SIGNAL_FILE, record);
+    } catch {
+      /* ignore */
+    }
+  }
+}
+
 function buildTakeaway(run) {
+  if (run.lessons && run.lessons.length > 0)
+    return `Self-correction: ${run.lessons[0].tool} "${run.lessons[0].tried}" failed; "${run.lessons[0].worked}" worked. Promote durable commands/conventions into the knowledge-cache registries.`;
   if (run.failures.length > 0)
     return `${run.failures[0].toolName || "A tool"} failed during the run (${run.failures[0].error}). Preserve as a recurring troubleshooting signal if it recurs.`;
   if (run.preferences.length > 0)
@@ -610,6 +678,14 @@ function buildRunLogContent(state, run) {
     "## Issues Encountered",
     ...(issueLines.length > 0 ? issueLines : ["- None captured."]),
     "",
+    "## Self-Correction Lessons",
+    ...(run.lessons && run.lessons.length > 0
+      ? run.lessons.map(
+          (l) =>
+            `- ${l.tool}: tried \`${l.tried}\` (failed: ${l.error}) → \`${l.worked}\` worked`,
+        )
+      : ["- None captured."]),
+    "",
     "## Memory Curation Candidates",
     "### Takeaway",
     `- ${buildTakeaway(run)}`,
@@ -650,6 +726,8 @@ function bumpConsolidationState(filePath, run) {
   s.correctionsSinceConsolidation =
     (s.correctionsSinceConsolidation || 0) +
     (run.corrections ? run.corrections.length : 0);
+  s.lessonsSinceConsolidation =
+    (s.lessonsSinceConsolidation || 0) + (run.lessons ? run.lessons.length : 0);
   s.updatedAt = isoNow();
   try {
     writeJson(filePath, s);
@@ -683,6 +761,7 @@ function appendCurationQueue(curationQueueFile, run, logRelativePath) {
       preferences: run.preferences,
       assumptionCandidates: run.assumptionCandidates,
       corrections: run.corrections,
+      lessons: run.lessons || [],
       searchQueries: run.searchQueries,
       failures: run.failures,
       filesChanged: run.filesChanged,
@@ -722,10 +801,68 @@ function writeRefreshRequest(workspaceRoot, run) {
   }
 }
 
+// --- Context-freshness gate (Stop hook) --------------------------------------
+// A recurring toolchain failure: sessions ship real code changes but never update the always-loaded
+// context (project-profile.md digest / context.md / specs / changelog), so the next session's injected
+// digest is stale and the agent re-derives via search. This gate blocks the FIRST Stop of a run that
+// changed real code without touching any context surface, telling the agent exactly what to update. It
+// is guarded (`run.contextFreshnessBlocked`) so a second Stop always passes — never a trap or loop, and
+// the human/agent can always override by simply stopping again.
+
+// A change to any of these counts as "context was refreshed" — the gate passes.
+const CONTEXT_SURFACE_PATTERN =
+  /(^|\/)(project-profile\.md|context\.md|MEMORY\.md|CHANGELOG(\.\w+)?|AGENTS\.md|CLAUDE\.md|GEMINI\.md)$|(^|\/)docs\/specs\/|(^|\/)docs\/ai\/|(^|\/)memories\/repo\//i;
+
+// Real source files. Docs (.md), tests, and build artifacts are excluded so they don't trigger the gate.
+const REAL_CODE_PATTERN =
+  /\.(ts|tsx|js|jsx|mjs|cjs|vue|svelte|py|go|rs|rb|java|kt|php|sql|css|scss|sass)$/i;
+const CODE_EXCLUDE_PATTERN =
+  /\.(test|spec)\.|(^|\/)(node_modules|\.next|\.open-next|dist|build|out|coverage)\//i;
+// A single one of these ("huge update" signals) is enough to require a context refresh.
+const HIGH_VALUE_CODE_PATTERN =
+  /(^|\/)supabase\/migrations\/|webhook|lifecycle|daily-maintenance|migration|schema/i;
+
+function contextFreshnessBlock(run) {
+  if (!run || run.contextFreshnessBlocked) return null;
+  const changed = run.filesChanged || [];
+  if (!changed.length) return null;
+  // If any context surface was updated this run, the agent already did the work — pass.
+  if (changed.some((f) => CONTEXT_SURFACE_PATTERN.test(f))) return null;
+  const codeFiles = changed.filter(
+    (f) => REAL_CODE_PATTERN.test(f) && !CODE_EXCLUDE_PATTERN.test(f),
+  );
+  const highValue = codeFiles.filter((f) => HIGH_VALUE_CODE_PATTERN.test(f));
+  // Trigger: >=2 code files, or any single high-value ("huge update") file. Trivial 1-file tweaks pass.
+  if (codeFiles.length < 2 && highValue.length === 0) return null;
+  const shown = codeFiles.slice(0, 8);
+  const more =
+    codeFiles.length > shown.length
+      ? ` (+${codeFiles.length - shown.length} more)`
+      : "";
+  const bigNote = highValue.length
+    ? ` This looks like a significant/structural change (${highValue[0]}), so a context update is especially important.`
+    : "";
+  return [
+    `This session changed ${codeFiles.length} code file(s) but did not update any always-loaded context surface.${bigNote}`,
+    "",
+    "Before finishing, update the surfaces that load on EVERY future run so the next session doesn't have to re-derive by searching:",
+    "- memories/repo/project-profile.md — the `<!-- digest:start -->`/`<!-- digest:end -->` block: new/changed features, file paths, key symbols, lexicon terms, and especially PENDING/half-done state and any destructive-action invariants (grace windows, what's irreversible).",
+    "- docs/specs/active/<slice>/spec.md — if behavior, a state transition, or an invariant changed.",
+    "- docs/ai/context.md and/or a Changelog line — for a notable delta.",
+    "",
+    `Changed code files: ${shown.join(", ")}${more}`,
+    "",
+    "If the context is genuinely already current or this change doesn't warrant a doc update, just stop again — this gate blocks only once per run and will not stop you a second time.",
+  ].join("\n");
+}
+// -----------------------------------------------------------------------------
+
 function finalizeRun(state, run, paths, reason) {
   if (!run || run.finalized) return;
   run.endedAt = isoNow();
   run.outcome = summarizeOutcome(run);
+  run.lessons = buildLessons(run);
+  writeLessonAtoms(state, run, paths.lessonAtomsFile);
   const logFilePath = writeRunLog(paths.runLogDir, state, run);
   const logRelativePath = path
     .relative(state.workspaceRoot, logFilePath)
@@ -788,6 +925,20 @@ async function main() {
   const run = current || ensureCurrentRun(state);
   recordRawEvent(paths.rawLogFile, state, run, data);
   applyEventToRun(run, data, workspaceRoot);
+
+  // Context-freshness gate: only on Stop (SessionEnd cannot be blocked). Block once, before finalizing,
+  // so the run stays open for the doc-update work. Guarded against looping inside contextFreshnessBlock.
+  if (EVENT_NAME === "Stop") {
+    const reason = contextFreshnessBlock(run);
+    if (reason) {
+      run.contextFreshnessBlocked = true;
+      writeJson(paths.stateFile, state);
+      process.stdout.write(JSON.stringify({ decision: "block", reason }), () =>
+        process.exit(0),
+      );
+      return;
+    }
+  }
 
   if (terminal) {
     finalizeRun(state, run, paths, EVENT_NAME);

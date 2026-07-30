@@ -1,7 +1,7 @@
 ---
 name: environment-quirks
-description: "REFERENCE SKILL - Platform and toolchain quirks that cause silent failures or surprising behaviour across projects. Covers Vercel/Next.js serverless lifecycle, Supabase, PowerShell/Windows, Tailwind v4, Electron, and Cloudflare edge. Trigger phrases: silent failure, never fired, works locally but not prod, missing env var, platform lifecycle."
-argument-hint: "Describe the platform (Vercel, Supabase, Cloudflare, Windows), the symptom, and whether the issue is local-only or prod-only."
+description: "REFERENCE SKILL - Platform and toolchain quirks that cause silent failures or surprising behaviour across projects. Covers Vercel/Next.js serverless lifecycle, Supabase, PowerShell/Windows, Tailwind v4, Electron, Cloudflare edge, and Claude Code toolchain hooks. Trigger phrases: silent failure, never fired, works locally but not prod, missing env var, platform lifecycle, old_string no match, formatter hook, port already in use."
+argument-hint: "Describe the platform (Vercel, Supabase, Cloudflare, Windows, Claude Code hooks), the symptom, and whether the issue is local-only or prod-only."
 ---
 
 # Environment Quirks
@@ -72,6 +72,21 @@ See also: `tech-pitfalls` — Migration-in-repo does not mean migration-in-prod.
 
 - **Symptom:** Dynamically constructed class names (e.g., `bg-${color}-500`) are purged from the output CSS.
 - **Fix:** Use full class strings in source, or add to the safelist. Never construct partial Tailwind class names at runtime.
+
+## Claude Code Toolchain
+
+### PostToolUse formatter hook invalidates old_string in the next Edit
+
+- **Symptom:** An Edit call immediately after another Edit fails with "old_string not found" even though the target region was just read or just edited.
+- **Root cause:** A `PostToolUse` hook (e.g., Prettier, ESLint auto-fix, custom formatter) reformats the file after every Edit call. The file on disk no longer matches what was in memory.
+- **Fix:** After any PostToolUse notification appears (or whenever an Edit follows another Edit on the same file), Read the file again before constructing the next `old_string`. This is mandatory whenever a formatter hook is active in the workspace.
+- **Detection:** Check `.claude/settings.json` or `.claude/settings.local.json` for `PostToolUse` hooks targeting `Edit`.
+
+### Dev server port already in use on Linux VPS
+
+- **Symptom:** Starting `next dev` silently binds to an unexpected port or fails with `EADDRINUSE` because previous dev server sessions were not terminated.
+- **Root cause:** Long-running VPS sessions accumulate orphaned Node processes holding ports 3000/3001/3002.
+- **Fix:** Before starting a new dev server, probe the expected port: `curl -s -o /dev/null -w "%{http_code}" http://localhost:3001/`. If it responds, kill the existing process (`fuser -k 3001/tcp`) or use a different port flag.
 
 ## Cloudflare Edge
 

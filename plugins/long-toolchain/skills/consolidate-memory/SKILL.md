@@ -49,8 +49,12 @@ If a path is absent, skip it silently — never fail the pass for missing option
 - Keep the digest block short (≤ ~15 lines). The full sections hold the detail.
 - Do **not** edit `~/.claude/CLAUDE.md` here — instead, when a correction is strong enough to become
   policy, flag it in the change report and let the user decide. (If they say "go ahead," then edit it.)
-- This pass is read-mostly on the episodic layer: do not delete run-logs or queue files. You may mark a
-  consumed `profile-signals.jsonl` by leaving it (the logger rotates it) — do not truncate it unless asked.
+- Do not delete run-logs or curation queues. **Do archive the signals you consumed** so future passes
+  don't re-read the full (growing) history: note the line counts of `profile-signals.jsonl` and
+  `lesson-signals.jsonl` at the START of this pass; on completion, move those consumed lines to
+  `~/.claude/learning/archive/profile-signals-<date>.jsonl` (and the lesson equivalent), keep any lines
+  appended during the pass, and set the consolidation counters to the remaining line counts. This is the
+  same archive-on-apply behavior `/apply-consolidation` performs for the auto-draft path.
 
 ## Output
 

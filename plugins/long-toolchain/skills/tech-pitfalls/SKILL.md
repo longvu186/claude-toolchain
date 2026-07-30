@@ -5,6 +5,23 @@ description: "Cross-project failure patterns and recovery strategies (150+ docum
 
 # Reusable Tech Pitfalls
 
+## GitNexus Pre-Commit Gate Ordering
+
+- Run `impact` on every modified function BEFORE `git add`, not after commit. CLAUDE.md in indexed repos makes this a hard requirement.
+- A CRITICAL blast-radius on a function with an unchanged signature and return type reflects call-graph width, not correctness risk. TypeScript typecheck is the correctness gate; GitNexus impact rating is the change-scope gate. Both are needed; neither replaces the other.
+- Workflow: identify modified functions → run `impact` each → if HIGH/CRITICAL surface blast radius to user before staging → run `detect_changes()` after staging before committing.
+
+## `git add <path>` Stages The Whole File, Not Just Your Intended Diff
+
+- `git add <path>` / `git commit` (without `-a`) always stages a path's entire current working-tree content — not a targeted hunk. In repos that habitually carry legitimate, already-decided work uncommitted for a while, touching any file for a small, unrelated fix silently carries along whatever else was already sitting in that file, and a reviewer (human or subagent) can misread the resulting diff as undisclosed scope creep or a regression.
+- Before staging/committing a file you didn't fully author in the current task: `git diff HEAD -- <path>` (or `git diff --cached` before committing) and explicitly separate "my intended change" from "whatever was already there." Never assume a large diff in a touched file is scope creep — check whether the content already existed in the commit _before_ your task's own changes (`git show <prior-commit>:<path>`) before reverting or flagging it.
+- To stage only part of a file's changes, use `git add -p` (interactive hunk selection) or a hand-built patch (`git apply --cached`, verified first with `--check`) when the intended hunk is adjacent to unrelated pre-existing changes that `-p` can't cleanly separate.
+
+## Local Copy / Domain Constant Sync Gap
+
+- When a `"use client"` component cannot import a `as const` domain array (for example to avoid bundling domain logic into the client chunk), a local numeric/string array copy may exist. These are synced by convention, not by import, and TypeScript will not catch divergence.
+- Pattern: before editing a domain constant array, grep for inline literal copies with the same values in component files. Rename-and-import or add a runtime assertion if the gap is high-risk.
+
 ## AI Toolchain Policy Drift
 
 - When updating cross-workspace AI/toolchain policy, scan every deployment surface for stale wording: live user-level files, Codex bridges, workspace templates, and packaged replication artifacts.
@@ -48,6 +65,12 @@ description: "Cross-project failure patterns and recovery strategies (150+ docum
 
 - The local `crawl4ai-url.ps1` wrapper selects output shape with `-Output`; `-Format` is not a valid wrapper parameter. Use `-Output markdown|json|html` or fall back to direct `crwl.exe -o ...` calls.
 
+## Bash Env Var Written After The Command Silently Becomes A Positional Arg
+
+- `command VAR=value` (var assignment placed AFTER the command, e.g. after `node -e '...'`) does NOT export `VAR` into that command's environment — it's parsed as a trailing positional argument instead, so `process.env.VAR` is `undefined` inside the command. Prefix form (`VAR=value command`) or `export VAR=value` beforehand are the only two shapes that actually set it.
+- Concretely dangerous when the undefined value is interpolated into a secret/connection string and written to a file (`.env`/`.dev.vars`) — the result is a file containing the literal substring `undefined` in place of a credential, which then fails downstream with a generic/misleading connection or auth error instead of an obviously-wrong value.
+- Prevention: after constructing any secret/connection-string value from shell variables, print a redacted shape-check (length, prefix, absence of literal `undefined`/`null` substrings) immediately after writing it, before relying on it in any downstream step — never assume a shell variable substitution succeeded silently.
+
 ## Cloudflare Worker Secret Verification
 
 - `wrangler secret list` alone can be misleading during outages; verify live behavior on auth endpoints and inspect deployment version bindings before concluding secrets are missing.
@@ -58,6 +81,14 @@ description: "Cross-project failure patterns and recovery strategies (150+ docum
 - In nested-workspace Next.js rebuilds, root scripts can point at the wrong package surface; use the package-scoped build command (`npm --prefix web run build`) when the app lives under a subfolder, not the root alias.
 - In repos where the root package exposes bridge scripts into a nested app, `npm run <root-alias>` is cwd-sensitive: if the shell has drifted into the child package, npm resolves against that child `package.json` and can false-fail with `Missing script`. Reset to repo root (`Push-Location <repo>`) before release-validation commands.
 - A successful preview deploy does not guarantee unauthenticated browser inspection access. Treat protected preview pages as a separate verification concern and use the required bypass or authenticated inspection path before concluding the preview is visually valid.
+- Before assuming plain `next dev`/`next build` works, check for project-specific multi-target build scripts (e.g. separate admin/public build entrypoints that stash-and-restore overlapping route groups). A project with custom build tooling can make the framework's own default command fail or behave differently from what actually ships; grep `package.json` scripts and any `scripts/build-*` files first.
+
+## Served URL ≠ Filesystem Path (don't string-strip a build path into a URL)
+
+- A framework's on-disk build/output dir is not its public URL. **Next.js serves the `.next/static/` dir at the URL `/_next/static/`** (not `/static/`), optimized images at `/_next/image`; **Vite** serves hashed assets under `/assets/` and `public/` at root; **CRA/webpack** emit under `/static/`. Deriving a URL by stripping the fs prefix (`.next/…` → `/…`) silently produces a 404 (often served as an HTML error page, so a status check "passes" with the wrong content-type). Look the prefix up; don't compute it from the path.
+- `public/` (Next) / `static/` (many frameworks) is served at site root **live from disk** — editing a file there needs no rebuild, unlike hashed build assets.
+- Public env vars (`NEXT_PUBLIC_*`, `VITE_*`, `REACT_APP_*`) are inlined into the client bundle at **build** time; changing one requires a rebuild, not a restart. Verify by grepping the built client bundle for the value.
+- Record these deterministic facts (served-URL prefixes, ports, output/DB paths, key var names) in the project's `commands.md` "Paths, URLs & key variables" block per the `knowledge-cache` skill, and read them before constructing any URL/path/port.
 
 ## Imported Landing Pages In Existing Multi-Route Sites
 
@@ -125,6 +156,13 @@ description: "Cross-project failure patterns and recovery strategies (150+ docum
 - Duplicate synthesis happens when object keys are random or normalization differs across layers.
 - Use a deterministic key from voice plus normalized text, then issue storage `HEAD` before synthesis/upload to reuse existing media.
 - Mirror the same normalization key on client and server, and add client in-memory cache plus in-flight dedupe to collapse concurrent requests.
+
+## SQLite Idempotent Column Migrations (better-sqlite3)
+
+- SQLite has **no `ALTER TABLE ... ADD COLUMN IF NOT EXISTS`**, and `CREATE TABLE IF NOT EXISTS` will not add columns to a table that already exists — so a re-runnable migrate script cannot upgrade a live DB just by editing the `CREATE TABLE` in `schema.sql`.
+- Guard each added column: read `PRAGMA table_info(<table>)`, skip if the column is already present, else run `ALTER TABLE <table> ADD COLUMN ...`. Keep the column in BOTH `schema.sql`'s `CREATE TABLE` (fresh DBs) and the guarded ALTER in the migrate script (existing DBs).
+- Added columns need a **constant** default (`NOT NULL DEFAULT 1`); SQLite rejects non-constant defaults on ALTER.
+- After adding columns, sweep aggregate queries: capacity/stats counts that were `COUNT(*)` may need `SUM(quantity)` once one row represents multiple units.
 
 ## HTTP / JSON Parsing
 
@@ -551,6 +589,13 @@ description: "Cross-project failure patterns and recovery strategies (150+ docum
 - Treat already-processed events as successful duplicates and exit early to avoid replay side effects.
 - Always close the ledger record to `processed` or `failed` with a stored error message and related entity ids for auditability.
 
+## Webhook-Only Ingestion Misses Backlog — Pair With a Reconciliation Sweep
+
+- Any purely webhook/event-driven ingestion (incident triage, sync, notifications, indexing) structurally sees ONLY events that fire after wiring. Pre-existing open items, and anything dropped while the receiver was down/misconfigured, are invisible forever — the pipeline looks "done" while silently missing the entire backlog. This is a design gap, not a bug, and it won't surface in any test that only sends fresh events.
+- Always ship a companion **reconciliation sweep**: a deterministic job that pulls the provider's currently-OPEN items via its query/list API and feeds them through the same downstream path (or writes them to the same queue) as live webhooks. Run it once at cutover to drain the backlog, then on a schedule as a safety net for missed deliveries.
+- Make the sweep **idempotent** and **escalate/surface-only**: dedupe against items already open (by a stable fingerprint), and never let a sweep mass-_act_ on a backlog (a reconciliation surfaces; the live path with its guardrails acts). Use the SAME fingerprint scheme on both paths or they won't dedupe against each other (e.g. Sentry: key both the webhook normalizer and the sweep on `shortId`, since the list API exposes `shortId` while the webhook payload also carries it — a numeric-id-vs-shortId mismatch double-surfaces every issue).
+- Watch the auth asymmetry: the live receiver only needs to _verify_ inbound signatures, but the sweep needs _read_ credentials for each provider's list API — which may be a different/broader token, or only available via an MCP/OAuth session rather than the plain runtime. If a provider can't be swept (no read token), log that gap explicitly rather than silently covering fewer sources.
+
 ## Service-Role vs User-Token Write Boundaries
 
 - In user-initiated endpoints, use caller bearer token and never trust client-provided `user_id` for writes.
@@ -570,11 +615,60 @@ description: "Cross-project failure patterns and recovery strategies (150+ docum
 - Map at the client boundary to localized toasts: `if (error?.code === '23505') toast("Bạn vừa thực hiện thao tác này, vui lòng thử lại sau")`. Avoid swallowing into a generic `"có lỗi xảy ra"` — users can't recover from that.
 - Pair with `RAISE EXCEPTION USING MESSAGE = '...', ERRCODE = '...'` so logs/Sentry still see the human-readable cause.
 
+## PostgREST Silent 1000-Row Cap On Client-Side Aggregation
+
+- `supabase-js` `.from(table).select(columns)` with filters but no `.range()`/`.limit()` is silently capped by PostgREST's `db-max-rows` (default 1000). No error is thrown — the query just returns the first 1000 matching rows and stops. Invisible in dev/testing with small datasets; only manifests once real row volume for that filter crosses the threshold, and gets worse over time as data grows.
+- Concrete failure: a finance dashboard summed `community_orders` client-side with `.reduce()` for a YTD card; once paid orders for the year passed 1000, revenue silently under-reported by exactly the sum of the rows past the cap. Sibling MTD/QTD cards on the same page looked fine only because each stayed under 1000 rows individually — a false all-clear.
+- Fix: never client-side sum/count/reduce over an unbounded or growing `.select()` result. Aggregate server-side via a Postgres RPC (`SELECT SUM(...) FROM table WHERE ...`, `SECURITY DEFINER`) or a view — PostgREST's row cap only applies to raw table/view REST reads, not to RPC return values.
+- Detection heuristic: grep for `.select(` followed by `.reduce(`, `.length`, or manual summation with no accompanying `.range()`, especially on tables that grow unboundedly over time (orders, transactions, events, logs) filtered by date range or status.
+
 ## PL/pgSQL RETURNS TABLE Ambiguity (42702)
 
 - In PL/pgSQL `RETURNS TABLE` functions, OUT column names share scope with local identifiers and query columns; unqualified references can fail at runtime with `42702` (`column reference is ambiguous`).
 - Prevent by defaulting to `#variable_conflict use_column` in function bodies and qualifying source columns with explicit table aliases.
 - Apply this proactively when OUT names overlap common fields (`id`, `status`, `offer_id`) so dry-run success does not mask write-mode failures.
+
+## Nested Aggregate Functions In jsonb_agg (42803)
+
+- Postgres rejects an aggregate call (`AVG()`, `COUNT()`, `SUM()`, etc.) placed as a direct argument inside another aggregate (for example `jsonb_agg(jsonb_build_object(..., 'x', AVG(t.v)))`) in the same `SELECT` scope — fails at execution time with `42803: aggregate function calls cannot be nested`.
+- Fix: compute the per-row aggregate in an inner subquery with its own `GROUP BY` so each group collapses to one pre-aggregated row, then `jsonb_agg()` that row in the outer query: `SELECT jsonb_agg(row) FROM (SELECT jsonb_build_object('x', AVG(t.v)) AS row FROM t GROUP BY t.k) sub`.
+- The broken form is syntactically valid SQL — it passes `tsc --noEmit` and a code-only review, and only fails when actually executed. When writing or reviewing any jsonb-building RPC with computed per-group stats, check specifically for this nesting shape in every function, not just once per file: having written the subquery-wrap pattern correctly in a sibling function in the same migration does not prevent repeating the flat-nested mistake in the next one.
+- Backend RPC changes should be exercised end-to-end (actually called against real data) before being considered verified, not just read for syntax correctness — the same principle as "UI validation is screenshot-backed, not code-inspection-only," extended to SQL execution paths that TypeScript has zero visibility into.
+
+## RETURNS TABLE Column Rename Needs DROP + CREATE
+
+- `CREATE OR REPLACE FUNCTION` cannot rename or retype a column in a `RETURNS TABLE (...)` signature; Postgres rejects the replace outright. Renaming/retyping requires `DROP FUNCTION IF EXISTS public.fn(args);` followed by a fresh `CREATE FUNCTION public.fn(args) RETURNS TABLE (...)`.
+- `DROP FUNCTION` also drops every `GRANT` on that function. Always re-run `GRANT EXECUTE ON FUNCTION public.fn(args) TO <roles>;` immediately after recreating, or the function silently becomes inaccessible to roles (`anon`, `authenticated`) that could call it before — this surfaces later as a permission-denied error, not at migration time.
+- Applies to any Postgres RPC signature change, Supabase or otherwise, whenever a `RETURNS TABLE` column list's names or types change shape.
+
+## Cloudflare Hyperdrive False "Invalid Database Credentials" Against Supabase Postgres
+
+- Symptom: `wrangler hyperdrive create` against a Supabase Postgres direct-connection endpoint fails with Cloudflare-side error code 2013, "Invalid database credentials" — even though the exact same credentials connect successfully both directly and through Supabase's Supavisor pooler from the same machine.
+- Root cause: an IPv6/network-reachability quirk on Cloudflare's Hyperdrive validation path against this class of endpoint, not an actual credential problem.
+- Fix: before concluding the credentials are wrong, verify the same credentials work via a direct/pooled connection test from elsewhere. If Hyperdrive keeps failing, consider dropping it and connecting directly from the Worker instead — `postgres-js` supports raw TCP natively via `cloudflare:sockets` when the Workers runtime is detected (needs `nodejs_compat`), so a Hyperdrive binding isn't a hard requirement to reach Postgres from a Worker.
+
+## Supabase Supavisor Pooler Mode Selection For Serverless/Edge Postgres Clients
+
+- Supavisor's **transaction-mode** pooler (port 6543) does not support session-scoped prepared statements — construct `postgres-js` with `{ prepare: false }` (and typically `max: 1` per Workers isolate) when connecting through it, or every prepared-statement query fails.
+- The **session-mode** pooler (port 5432) does support prepared statements (matches Drizzle's default query behavior with zero code changes) but pins one Postgres backend per client connection — less appropriate for a serverless/edge deployment that wants many short-lived connections.
+- `drizzle-kit` only auto-loads a plain `.env`, not Wrangler's `.dev.vars` — source it manually before running `generate`/`migrate` locally: `set -a; source .dev.vars; set +a`.
+
+## Supabase/PostgREST Layered Overload Diagnosis Ladder
+
+- Symptom cluster: uniform REST `503`/`504` across every table including trivial ones, a client `OPTIONS 200` with no matching `GET` completion, and `execute_sql`/direct-connection queries timing out even on `SELECT 1` while the platform's HTTP management API (project info, logs) still responds.
+- Diagnosis ladder, cheapest/most-decisive check first — don't skip straight to "restart the database":
+  1. **Which layer is actually down?** Direct REST probe (`curl .../rest/v1/<tiny_table>?select=col&limit=1` with the anon key) vs `pg_stat_activity`. If the probe 503s/hangs for 10s+ while `pg_stat_activity` shows Postgres mostly IDLE (0-2 active, connections sitting in `ClientRead`) → the PostgREST/gateway layer is wedged and Postgres itself is healthy. Don't blame "the database" on this evidence alone.
+  2. **Wedge driver:** look for a still-deployed no-limit `select=*` + full-join query streaming multi-MB responses (to crawlers or a hot loop) — that alone can saturate the REST layer's worker pool even though Postgres is fine.
+  3. **Disk-IO burst-budget exhaustion tell:** check the slow-query log for absurdly-slow-trivial plans — e.g. a ~100-row catalog-table seq scan taking 10-30s, or internal telemetry/cron queries taking 10s+ that normally complete in milliseconds. Plans running 10^4-10^6x slower than their normal cost, alongside repeated `statement timeout`/`cron job startup timeout` kills, means the compute instance's disk-IO burst budget is exhausted — not a lock, not a query bug. Confirm on the platform dashboard's IO-budget metric before proposing anything else.
+  4. Only once 1-3 are ruled out, treat it as a genuine query/lock/index-specific problem.
+- Remediation: a project/DB restart clears a wedged gateway process and buys a few minutes, but if the root cause is IO-budget exhaustion the refill burns off almost immediately and it re-wedges — a second/third restart is not the fix. The real fix is (a) reducing whatever read/write amplification burned the budget and (b) bumping compute tier — a resize provisions a fresh instance with a fresh IO budget and higher baseline IOPS, a plain restart does not.
+- Circular trap: if the fix that would relieve the load can only ship via a build/deploy pipeline that itself depends on the wedged API (e.g. static-generation queries needed at build time), the build cannot succeed until the API recovers on its own — see "Outage-Blocked Deploy: Health-Watcher Loop" below to break this without babysitting a manual retry loop.
+
+## SQLite 64-Bit `INTEGER` → Postgres 32-Bit `integer` Silent Narrowing
+
+- SQLite's `INTEGER` affinity is always 64-bit regardless of declared width. Postgres's plain `integer` is only 32-bit. A schema port (e.g. Drizzle `sqlite-core` → `pg-core`) that maps `integer()` to `integer()` 1:1 silently narrows the column's real range — it type-checks and migrates cleanly, and only overflows once a value exceeds ~2.1 billion (money amounts in minor units, snowflake-style IDs, transaction counters).
+- Fix: for any column that held SQLite `INTEGER` money/amount/external-id values, use `bigint({ mode: "number" })` (or `mode: "bigint"` if values can exceed `Number.MAX_SAFE_INTEGER`) in Drizzle's `pg-core` instead of `integer()`.
+- Check every money/amount/counter/external-id column during a SQLite-to-Postgres port specifically for this — it's easy to convert the schema mechanically column-by-column without re-evaluating range per column.
 
 ## Migration + Backfill Rollout Safety Gate
 
@@ -679,9 +773,58 @@ description: "Cross-project failure patterns and recovery strategies (150+ docum
 
 - A bare un-awaited `fn().catch(console.error)` fired during a request handler is silently dropped on Vercel: the function freezes once the HTTP response returns, killing the in-flight promise mid-work. Symptom: a DB "sent"/status flag the function sets FIRST gets persisted, but the slower follow-up (SMTP send, webhook POST, third-party API) never completes — looks done, no delivery, no error logged. Fix: wrap deferred work in `after()` from `next/server` (or `waitUntil()` from `@vercel/functions`). Awaited sends in cron routes / server actions are unaffected. Rule: "never await email in the response path" is WRONG on serverless — use `after()`/`waitUntil()`, never a bare un-awaited `.catch()`. (BSides Hanoi 2026-06-08: registration emails silently never sent for exactly this reason.)
 
+## Verify Deployment Shipped Before Claiming "Resolved/Live/Sent"
+
+- Symptom: a run log or status update declares an issue "resolved," a fix "live," or a notification "sent" — but the underlying artifact was only built/typechecked locally, or a dispatch's success was assumed rather than confirmed. Production keeps exhibiting the original symptom because the fix never actually shipped (or the send never actually fired). This has recurred across unrelated incidents (an egress fix built but not deployed for a full day; an announcement email/DM logged as sent that was never actually dispatched).
+- Why it happens: "implemented + built + typechecked" *feels* done, so it gets written up as done. But the user's actual concern (egress dropping, an email arriving, an outage clearing) only changes once the external effect happens. A false "resolved" is worse than an honest "not done yet" — it stops anyone from looking again while the underlying problem continues.
+- Fix — before writing "resolved/deployed/live/sent" anywhere:
+  1. Check the deploy platform's own record of what's actually running (`wrangler deployments list`, a Vercel/Netlify deployment list, a rollout-status command) and compare its timestamp against the local build's mtime/hash — a build newer than the last deployment record means built-but-not-shipped.
+  2. For any dispatched side-effect (email, webhook, notification), confirm delivery at the provider or recipient, not just that the send call returned 200.
+  3. Add one live-surface spot check (a fetch, screenshot, or log line from the actual running environment) as the closing piece of evidence.
+  4. Only after 1-3 pass may a run log or status message use the word "resolved"/"live"/"sent." Until then, say "built, not yet deployed" or "attempted, delivery unconfirmed."
+- When reading a past "resolved/deployed" claim (your own or someone else's), treat it as unverified until you find that evidence — this exact claim has been wrong twice in the same project.
+
+## Outage-Blocked Deploy: Health-Watcher Loop Breaks The Circular Trap
+
+- Symptom: the fix for an outage can't be deployed because the deploy pipeline itself depends on the thing that's currently down (e.g. a build step fetches data at build time from the same API that's 503ing) — you can't ship the fix until the outage clears, but babysitting a manual retry loop wastes the first viable recovery window.
+- Fix: arm a background watcher that probes the dependency on a short interval (every 15-20s) and, on N consecutive fast/healthy responses, immediately fires the full gated deploy pipeline (typecheck → build → any safety gates → deploy) unattended. Give it a bounded deadline (a few hours) rather than letting it run forever; if it exhausts without a healthy window, escalate to a different remediation (e.g. a resize/restart) instead of re-arming it blindly.
+- This turns "wait around and manually retry the deploy" into a one-shot background task and guarantees the fix ships in the very first viable window instead of losing time to human latency after recovery.
+- Generalizes beyond DB outages: any "can't ship the fix until external system X recovers" situation (CDN purge propagation, a third-party auth provider outage blocking a build-time fetch) can use the same pattern.
+
+## Partial Fixes Silently Persist Without A Repo-Wide Gate
+
+- Symptom: a class of bug (an inefficient query shape, an insecure pattern, a resource-cleanup omission) gets fixed on the surfaces touched in one session, the incident is declared closed, and it later turns out other surfaces in the repo still have the same problem — the symptom returns and gets re-diagnosed from scratch as if it were new.
+- Root cause (two compounding failures): (1) a fix applied only to the surfaces you happened to touch is never audited against the whole repo for the same pattern; (2) a documented-but-unenforced convention (a comment/doc saying "don't do X, do Y instead") has no teeth — it doesn't stop the next surface written from habit/copy-paste from reintroducing X, even when the convention has existed for a long time.
+- Fix: (1) before declaring a bug class "fixed," grep/search the entire repo for the anti-pattern's signature — not just the files you already changed — and fix every hit in the same pass; (2) convert the convention into a mechanical build/deploy-time gate (a lint rule, a CI grep-and-fail step, a type constraint) so a future violation fails the pipeline instead of silently shipping. A comment or doc next to the code is not sufficient once the convention has already been proven violatable in practice.
+- Generalizes beyond query patterns: any "please don't do X" convention (security pattern, resource cleanup, naming, cross-provider parity) earns a mechanical gate once it's been violated once.
+
 ## Migration-In-Repo Is Not Migration-In-Prod
 
 - Symptom: runtime `42703 column does not exist` for a feature that was code-reviewed and merged; the migration file exists in the repo. Root cause: the migration runner is manual / not wired into deploy, so the file was committed but never applied to prod. Fix: verify applied state against prod (`select column_name from information_schema.columns where table_name=...`, or a migrations-tracking table) before trusting a column-gated feature; wire migrations into the deploy pipeline or add a startup assertion. A column-gated feature is not "done" until the column is confirmed present in prod.
+
+## Schema Migration Ahead Of Frontend Deploy Breaks Live Prod, With No Git Rollback
+
+- Symptom: applying a Supabase migration that changes an RPC/table's _return shape_ (renamed or split columns) directly to the production DB, before the compatible frontend is deployed, immediately breaks the ALREADY-LIVE frontend that still expects the old shape — e.g. ISR/SSR pages crash on `undefined.charAt()` and cascade into global site-wide errors.
+- Critical trap: `git checkout`/revert to the last commit does NOT fix this. The old code is now permanently incompatible with the migrated live schema — reverting just re-deploys code that still breaks against the new DB shape. The only forward-consistent recovery is deploying the NEW, schema-compatible frontend, not rolling back.
+- Fix: never let a live-breaking schema migration and its dependent frontend deploy have a gap. Either (a) deploy the compatible frontend in the same breath as the migration (build the new frontend first, apply migration and deploy together), or (b) make the RPC/table change backward-compatible (keep both old and new columns) until the new frontend is confirmed live, then drop the old columns in a follow-up migration.
+- Generalizes: for any live product, "I can always revert to git HEAD" is false once a schema migration that changed a live dependency's return shape has been applied — schema state, not git state, is what the deployed code runs against.
+
+## Reproduce A Prod-Only Bug By Building An Old Commit In A Git Worktree
+
+- To confirm a hypothesis like "the currently-deployed old code is what's crashing against the new schema/environment" without touching production, create an isolated worktree from the suspect commit (`git worktree add /tmp/x <ref>`) and run the project's REAL production build script inside it (not a synthetic repro). This reproduces the exact prerender/runtime crash locally and gives certainty about root cause before taking any deploy or rollback action.
+- Faster and safer than bisecting in the live environment; use before deciding between "roll back" and "roll forward" when a prod incident might be code/schema version-skew.
+- Gotcha when wiring the worktree's dependencies: see Turbopack symlinked `node_modules` entry below — copy, don't symlink, `node_modules` from outside the worktree root.
+
+## Turbopack Rejects A Symlinked `node_modules` Pointing Outside The Project Root
+
+- Symptom: `TurbopackInternalError: Symlink [project]/node_modules is invalid, it points out of the filesystem root` when a Next.js/Turbopack project's `node_modules` is a symlink to a directory outside the current project root (common when using `git worktree add` and symlinking the main repo's `node_modules` in to avoid a full reinstall).
+- Fix: copy the real `node_modules` into the worktree (`cp -r`, or a hardlink-aware copy) instead of symlinking. Applies to any Next.js/Turbopack project using git worktrees with dependencies that live outside the worktree directory.
+
+## An Auto-Assigned Isolation Worktree Can Be Pinned To A Stale Branch/Commit
+
+- When a subagent session runs with `isolation: "worktree"` (dispatched by the harness, not self-created), its worktree may be checked out on an older commit/different branch than the one the task narrative describes — its `src/`/`docs/` can be weeks stale, not merely "missing the latest work."
+- Before trusting a worktree's files as reflecting the described task/branch, verify: `git worktree list`, `git branch --show-current`, `git log --oneline -3`. If it doesn't match, read source-of-truth content from the main working tree via absolute paths, while still writing outputs into the assigned worktree's own paths (don't skip the write just because the read had to be redirected).
+- Symptom this causes if missed: doc/summary output that's internally coherent but describes a stale snapshot of the codebase, silently regressing docs that were already more current in the main tree.
 
 ## Component-Isolation Tests Create False Confidence
 
@@ -710,3 +853,35 @@ description: "Cross-project failure patterns and recovery strategies (150+ docum
   2. If a row was returned, increment the counter on the related table: `UPDATE parent SET counter = counter + 1 WHERE id = $foreign_key_id`.
 - Re-runs (retry, webhook replay) return no row → skip increment → no double-count.
 - Generalizes to any "do once" claim: discount redemptions, coupon uses, seat reservations. Choose the guard column based on the event lifecycle (claimed_at, used_at, locked_at).
+
+## Cache-Until-Content-Changes: Four Reusable Read/Write Patterns
+
+For read-heavy public content backed by a database, "query on every render" doesn't scale. Pick one of these four patterns per surface instead of defaulting to a live query:
+
+1. **ISR/ISG page + DB-trigger purge** — the page sets a long safety-net revalidate window (e.g. 24h), and a DB trigger on the content table calls the framework's on-demand-revalidate endpoint (by path or tag) on any publish-relevant change. Freshness comes from the trigger, not the timer; the timer is purely a fallback.
+2. **Tag-cached route handler + trigger tag-invalidation** — for public JSON read by a client (not a page), wrap a plain unauthenticated/anon-credential fetch in the framework's data-cache primitive (e.g. Next's `unstable_cache`) tagged by resource id, with the same kind of DB trigger invalidating that tag on write. Build the cached fetch on a fixed/anon credential path, not a per-request authenticated client — request-scoped auth (cookies, per-user tokens) breaks most frameworks' data-cache memoization silently. Pair with **optimistic client-side updates** on mutation so the author isn't stuck waiting out the cache/trigger latency to see their own write.
+3. **Per-isolate TTL memo** — for tiny, extremely hot, tolerant-of-minutes-of-staleness config/flag rows, a module-level `{value, expiresAt}` memo with a short TTL (a few minutes) collapses what would otherwise be thousands of daily queries for a handful of booleans into one query per TTL window per isolate.
+4. **Buffered counters via a stateful edge primitive + scheduled flush** — never do `UPDATE <content_table> SET counter = counter + 1` per user action when the row also carries the main content body; that's a full-row rewrite (WAL + index + replication/logical-decode churn) on every click. Buffer the increment in a stateful primitive (Durable-Object-style, or an equivalent in-memory/queue buffer) and flush on a schedule via a batched RPC/update.
+- Key safety insight for patterns 1/2: if the purge/invalidation channel is fire-and-forget (e.g. a DB trigger firing an async HTTP call with no retry), a purge that races a deploy window can be silently dropped. Always keep a safety-net revalidate window even when triggers cover every write path, and document it explicitly as "lost-purge insurance," not as the freshness mechanism — otherwise it gets "optimized away" later by someone who doesn't know why it's there.
+- Pair with a build-time gate that rejects new unbounded/full-column reads on this content (e.g. failing the build on an embedded star-join in a `select` string) — see "Partial Fixes Silently Persist Without A Repo-Wide Gate" above for why the gate matters more than the documented pattern alone.
+
+## Hash-Keyed Build/Install Caches Must Enumerate ALL Governing Inputs
+
+- A cache keyed by `sha256(command + lockfile)` (or any similar "hash the obvious input" scheme for a build/install/compile step) misses config files that sit beside the lockfile and can change the output without touching it -- e.g. `.npmrc`, `pnpm-workspace.yaml` (`allowBuilds`/`overrides`/`onlyBuiltDependencies`), `.nvmrc`, tool config (`.babelrc`, `tsconfig.json` `paths`) read by the same step.
+- Symptom: you fix a broken governing-config file, but the fix appears to do nothing -- the cache key is unchanged (lockfile untouched) so the cache keeps serving the stale, pre-fix artifact forever. No error, no log, just "I fixed it and it's still broken."
+- Fix: before shipping any hash-keyed cache, list every file read during the step being cached (not just the obvious primary input) and fold all of them into the hash, with a stable "absent" marker for files that may not exist (so presence/absence changes the key too).
+- Same rule one level up: cache-invalidation design review should ask "what inputs govern this output?" as an explicit checklist item, not just "what's the primary input?"
+
+## Synchronous Recursive fs Ops Are An Event-Loop-Blocking Hazard, Not Just execSync
+
+- The "never execSync long work inside a long-lived Node server (blocks the event loop, health watchdog/heartbeat misses it, restarts mid-task)" rule generalizes beyond child_process: any synchronous recursive filesystem call on a large tree -- `fs.rmSync(dir, {recursive: true})`, `fs.cpSync`, a synchronous `readdirSync` walk -- blocks the loop for the same reason. A `node_modules`-sized tree (tens of thousands of files) is enough to stall a process long enough to trip a watchdog or miss a heartbeat.
+- Easy blind spot precisely because the surrounding code correctly uses the async pattern (spawn / an async shell-exec wrapper) for the expensive step, then reaches for the synchronous convenience function for a "small" cleanup in the same file -- inconsistency, not a deliberate tradeoff, causes it.
+- Fix: shell out to a recursive delete/copy command via the project's existing async spawn wrapper instead of `rmSync`/`cpSync` for anything that might touch a large directory (build artifacts, `node_modules`, cache dirs).
+- Verification habit: when reviewing/writing code that runs in-process (not forked) inside a long-lived server, grep touched files for `Sync(` combined with `recursive` -- every hit is a candidate, regardless of whether execSync itself appears anywhere.
+
+## Turbopack / Next.js Stale-Chunk Error Recovery
+
+- After a deploy, users with cached old JS chunks hit `ChunkLoadError` or "Module factory is not available" in production.
+- `error.tsx`'s `reset()` only re-renders — it does not flush stale chunk references.
+- Fix: detect chunk errors in `error.tsx` (`error.name === "ChunkLoadError"` or message matches `/Module factory is not available/i`). On first detection, set `sessionStorage.setItem('__chunk_reload', '1')` then `window.location.reload()`. Guard: if the key is already set, clear it and fall through to normal error UI + Sentry capture to prevent infinite reload loops.
+- Use `sessionStorage` (not `localStorage`): survives the single reload but clears on tab close, so the guard never blocks a future session.

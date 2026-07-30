@@ -1,6 +1,6 @@
 ---
 name: frontend-performance-guidelines
-description: "WORKFLOW SKILL - Performance-first rules for app shells, route transitions, data loading, and CRUD mutation UX. Use for slow navigation, API fan-out, reload-heavy CRUD, prefetch abuse, and spinner-heavy admin pages. Trigger phrases: slow navigation, performance optimization, page transition slow, too many API calls, prefetch issue, CRUD reload, loading state, background refresh."
+description: "WORKFLOW SKILL - Performance-first rules for app shells, route transitions, data loading, and CRUD mutation UX, including the render-first / instant-navigation standard for Next.js App Router (shell paints first, data streams via Suspense/loading.tsx, optimistic mutations via server actions + useOptimistic/useTransition). Use for slow navigation, API fan-out, too many queries, page-change cascades, UI that waits on data before rendering, reload-heavy CRUD, prefetch abuse, and spinner-heavy admin pages. Trigger phrases: slow navigation, performance optimization, page transition slow, too many API calls, too many queries, UI should load before data, instant navigation, render first, streaming SSR, suspense, loading.tsx, optimistic update, prefetch issue, CRUD reload, loading state, background refresh, page change triggers fetches."
 argument-hint: "Describe the route or feature, current fetching and mutation pattern, stack, and where latency or jank is visible."
 ---
 
@@ -32,6 +32,79 @@ The performance target is not "show fewer spinners". The target is:
 - Success feedback for transient operations belongs in toast, inline row state, or compact status text, not full-page alert dumps.
 - Background refresh must preserve scroll position, row expansion, selection, active tab, and local draft state.
 - If one route needs many related datasets, prefer server aggregation or a narrower page contract over client fan-out.
+- **Render the shell before the data.** A navigation must paint the new page's structure (chrome, headers, skeletons) immediately; data fills in after. The user should never stare at the old page or a blank screen while data loads.
+
+## Instant / Render-First Navigation (Next.js App Router)
+
+This is the standard way to make navigation feel instant: **the route shell renders synchronously, data streams in.** It directly fixes "page change triggers a bunch of stuff and the user waits before seeing anything."
+
+### The core rule: never block the route on data
+
+- **Do not `await` all data in the page/layout before returning markup.** Awaiting at the top of a Server Component delays the _entire_ route until the slowest query resolves — the classic "click does nothing for 800ms" feeling.
+- Instead, **render the shell immediately and wrap each data region in `<Suspense>`** with a skeleton fallback. Next streams each region in as its data resolves.
+
+```tsx
+// app/(dashboard)/orders/page.tsx  — Server Component
+export default function OrdersPage() {
+  // NOTE: no await here. Shell paints instantly.
+  return (
+    <PageShell title="Orders" action={<NewOrderButton />}>
+      <Suspense fallback={<StatsSkeleton />}>
+        <OrderStats /> {/* async RSC: awaits its own data */}
+      </Suspense>
+      <Suspense fallback={<TableSkeleton rows={10} />}>
+        <OrdersTable /> {/* async RSC: awaits its own data */}
+      </Suspense>
+    </PageShell>
+  );
+}
+
+async function OrdersTable() {
+  const orders = await getOrders(); // each region owns its fetch
+  return <DataTable rows={orders} />;
+}
+```
+
+- **`loading.tsx`** gives a route-level instant skeleton for free during navigation — add one per route segment as the baseline; use inline `<Suspense>` for finer-grained streaming within a loaded route.
+- **Pass promises down, don't await early.** For data a child needs, start the fetch in the parent (no `await`) and pass the promise; the child unwraps it with `use()` inside a Suspense boundary. This starts I/O early without blocking the shell.
+- **Parallelize independent reads** with `Promise.all` (or parallel un-awaited fetches) — never sequential `await` waterfalls.
+- **Keep the outgoing page interactive during transitions.** Client-side navigations triggered programmatically should use `useTransition`; show a subtle pending indicator (`isPending`), not a teardown. Never unmount the current view to show a full-page spinner.
+- **Partial Prerendering (PPR)** where available: a static prerendered shell with streamed dynamic holes is the strongest version of this pattern.
+
+### Mutations: optimistic first, server-confirm second
+
+The UI must reflect the user's action immediately; the network round-trip happens behind it.
+
+```tsx
+"use client";
+const [optimistic, addOptimistic] = useOptimistic(items, reducer);
+const [isPending, startTransition] = useTransition();
+
+function onToggle(id: string) {
+  startTransition(async () => {
+    addOptimistic({ type: "toggle", id }); // UI updates now
+    await toggleItemAction(id); // server action; revalidates narrowly
+  });
+}
+```
+
+- Use **server actions** for mutations; on success call `revalidatePath`/`revalidateTag` for the **narrowest** scope, never a full-page refetch.
+- Pair with `useOptimistic` so the row/control updates before the server responds; reconcile or roll back on error.
+- This replaces the tobuso anti-pattern: _add guest → full client refetch → page teardown → scroll reset_.
+
+### What "render-first" forbids
+
+- Top-level `await` of every query in `page.tsx`/`layout.tsx` so nothing paints until all data is ready.
+- Client `useEffect` + page-wide `isLoading` spinner as the primary data-loading strategy on a route.
+- Navigation that shows the old page frozen, or a blank screen, until data arrives.
+- A mutation that re-runs the route's whole data load instead of patching the affected slice.
+
+### Supabase query discipline (Next.js RSC + Cloudflare Workers)
+
+- Fetch in **Server Components / route handlers / server actions** with the server client; keep secrets server-side. Select only needed columns (`.select('id,name,status')`), not `*`.
+- **Avoid N+1**: use a single joined/embedded query (`select('*, customer:customers(name)')`) instead of per-row fetches in a loop.
+- Ensure indexes exist for filter/sort/foreign-key columns; paginate with range/cursor — never fetch unbounded sets for a table.
+- Keep RLS-relevant filters server-side; one aggregated endpoint when the UI always needs the datasets together.
 
 ## Navigation And Prefetch
 

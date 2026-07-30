@@ -6,8 +6,14 @@ argument-hint: "Optionally describe the project type, stack, or any deviations f
 Bootstrap this workspace with my standard documentation system and workspace instructions.
 
 Requirements:
+
 - Create or update `.github/copilot-instructions.md`.
 - Add the default documentation assets under `docs/ai/`, `docs/specs/`, `docs/architecture/`, and `docs/ui/`.
+- Scaffold the knowledge-cache registries under `memories/repo/`: `commands.md` (run/dev, build,
+  typecheck, lint, test, deploy, db/migrate, codegen) and `design-system.md` (tokens, component
+  variants, repeated-surface conventions). Create them with a `<!-- last-verified: <today> -->` header
+  even if empty, so the write-back target always exists. Add the critical 4–5 commands to an `AGENTS.md`
+  "Commands" block. See the `knowledge-cache` skill for the format and read-first/write-back contract.
 - Include `.github/instructions/styling.instructions.md`.
 - Preserve any existing useful content and merge instead of overwriting blindly.
 - Register the custom agents when relevant: Quality Manager, Documentation Manager, UI Analyst.

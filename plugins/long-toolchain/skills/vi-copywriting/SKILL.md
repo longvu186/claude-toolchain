@@ -66,6 +66,10 @@ Rhetoric that recurs in good VN copy: tricolon · antithesis ("Dịu dàng để
 3. **Register-fit pass.** Pronoun pair + tone-particle level consistent with the Step-1 register? No `nhé` on a combative VRL line; no `tao/mày` outside quotes; no slang in formal/payment copy.
 4. **VN-first pass.** Headlines/CTAs Vietnamese? Only native-reading English terms kept? No literal-MT rhythm?
 
+## Companion skill — anti-slop
+
+Brand-voice (this skill) and *anti-AI-slop* are separate audits; run both on Vietnamese copy. The `anti-slop-writing` skill owns the AI-smell layer — translationese (passive `được/bị`, `một cách + tính từ`, `việc/sự` bloat, calque `đến từ`), the negation-pivot fingerprint (`không phải… mà là…`), machine transitions/recap closers (`Tóm lại/Nhìn chung`), em-dash thickets, and the fabricated-source check. This skill owns register, no-superlatives, and diacritics. When they overlap (e.g. both flag hype), the stricter one wins.
+
 ## References (load on demand)
 
 - `references/pattern-library.md` — full ranked, cited pattern library (the evidence).

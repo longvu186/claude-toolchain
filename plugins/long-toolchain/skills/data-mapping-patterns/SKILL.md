@@ -1,6 +1,6 @@
 ---
 name: data-mapping-patterns
-description: "Map and normalize terminology between systems with different field vocabularies. Use when integrating two APIs with mismatched fields, building bridge/proxy endpoints, normalizing user input to canonical values, or deciding between hardcoded vs dynamic mappings. Trigger phrases: terminology mapping, cross-API translation, field normalization, material mapping, option mapping, dictionary-based translation, text normalization for matching."
+description: Map and normalize terminology between systems with different field vocabularies. Use when integrating two APIs with mismatched fields, building bridge/proxy endpoints, normalizing user input to canonical values, or deciding between hardcoded vs dynamic mappings. Trigger phrases: terminology mapping, cross-API translation, field normalization, material mapping, option mapping, dictionary-based translation, text normalization for matching.
 ---
 
 # Skill: Data Mapping & Terminology Normalization
