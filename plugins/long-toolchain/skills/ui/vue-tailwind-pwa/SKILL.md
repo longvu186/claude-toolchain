@@ -31,40 +31,45 @@ Proven patterns for building bilingual (Vietnamese-first) Vue 3 PWA applications
 
 ```vue
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useStudentStore } from '@/stores/student-store'
+import { ref, computed, onMounted } from "vue";
+import { useStudentStore } from "@/stores/student-store";
 
 const props = defineProps<{
-  studentId: string
-}>()
+  studentId: string;
+}>();
 
 const emit = defineEmits<{
-  updated: [id: string]
-}>()
+  updated: [id: string];
+}>();
 
-const store = useStudentStore()
-const loading = ref(false)
+const store = useStudentStore();
+const loading = ref(false);
 
-const displayName = computed(() => store.currentStudent?.name ?? '')
+const displayName = computed(() => store.currentStudent?.name ?? "");
 
 onMounted(async () => {
-  loading.value = true
-  await store.fetchStudent(props.studentId)
-  loading.value = false
-})
+  loading.value = true;
+  await store.fetchStudent(props.studentId);
+  loading.value = false;
+});
 </script>
 
 <template>
   <div v-if="loading" class="flex items-center justify-center p-8">
-    <span class="animate-spin h-6 w-6 border-2 border-brand-teal border-t-transparent rounded-full" />
+    <span
+      class="animate-spin h-6 w-6 border-2 border-brand-teal border-t-transparent rounded-full"
+    />
   </div>
   <div v-else class="bg-surface rounded-2xl shadow-md p-4">
-    <h2 class="font-heading text-xl font-bold text-brand-navy">{{ displayName }}</h2>
+    <h2 class="font-heading text-xl font-bold text-brand-navy">
+      {{ displayName }}
+    </h2>
   </div>
 </template>
 ```
 
 ### Rules
+
 - Always use `<script setup lang="ts">` — no Options API
 - Use `defineProps<T>()` and `defineEmits<T>()` with TypeScript generics
 - Prefer `ref`/`computed` over `reactive` for primitives
@@ -76,13 +81,14 @@ When a modal, sheet, or detail surface re-displays learning content, keep the pa
 
 ```ts
 type ReviewItem = {
-  text: string
-  audioKey: string | null
-  imageKey?: string | null
-}
+  text: string;
+  audioKey: string | null;
+  imageKey?: string | null;
+};
 ```
 
 ### Rules
+
 - Do not pass display text alone when the rendered content is expected to keep audio, image, or other replay affordances.
 - Treat visible reference text and its linked media keys as one contract from the originating correct option or content record.
 - Make the receiving modal derive interactivity from the rich payload (`audioKey`, `imageKey`, etc.), not by trying to rediscover media from the display string later.
@@ -92,38 +98,37 @@ type ReviewItem = {
 
 ```ts
 // stores/student-store.ts
-import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import { supabase } from '@/lib/supabase'
-import type { Database } from '@shared/types/database'
+import { defineStore } from "pinia";
+import { ref, computed } from "vue";
+import { supabase } from "@/lib/supabase";
+import type { Database } from "@shared/types/database";
 
-type Student = Database['public']['Tables']['students']['Row']
+type Student = Database["public"]["Tables"]["students"]["Row"];
 
-export const useStudentStore = defineStore('student', () => {
-  const students = ref<Student[]>([])
-  const loading = ref(false)
-  const error = ref<string | null>(null)
+export const useStudentStore = defineStore("student", () => {
+  const students = ref<Student[]>([]);
+  const loading = ref(false);
+  const error = ref<string | null>(null);
 
   const sorted = computed(() =>
-    [...students.value].sort((a, b) => (b.xp ?? 0) - (a.xp ?? 0))
-  )
+    [...students.value].sort((a, b) => (b.xp ?? 0) - (a.xp ?? 0)),
+  );
 
   async function fetchAll() {
-    loading.value = true
-    error.value = null
-    const { data, error: err } = await supabase
-      .from('students')
-      .select('*')
-    if (err) error.value = err.message
-    else students.value = data ?? []
-    loading.value = false
+    loading.value = true;
+    error.value = null;
+    const { data, error: err } = await supabase.from("students").select("*");
+    if (err) error.value = err.message;
+    else students.value = data ?? [];
+    loading.value = false;
   }
 
-  return { students, loading, error, sorted, fetchAll }
-})
+  return { students, loading, error, sorted, fetchAll };
+});
 ```
 
 ### Rules
+
 - One store per domain (students, rewards, lessons, auth)
 - Use `defineStore` with setup function syntax (not options)
 - All Supabase queries live in store actions — never in components
@@ -133,28 +138,29 @@ export const useStudentStore = defineStore('student', () => {
 
 ```ts
 // composables/use-countdown.ts
-import { ref, onUnmounted } from 'vue'
+import { ref, onUnmounted } from "vue";
 
 export function useCountdown(seconds: number) {
-  const remaining = ref(seconds)
-  const expired = ref(false)
+  const remaining = ref(seconds);
+  const expired = ref(false);
 
   const interval = setInterval(() => {
     if (remaining.value <= 0) {
-      expired.value = true
-      clearInterval(interval)
+      expired.value = true;
+      clearInterval(interval);
     } else {
-      remaining.value--
+      remaining.value--;
     }
-  }, 1000)
+  }, 1000);
 
-  onUnmounted(() => clearInterval(interval))
+  onUnmounted(() => clearInterval(interval));
 
-  return { remaining, expired }
+  return { remaining, expired };
 }
 ```
 
 ### Rules
+
 - File name: `use-*.ts` (kebab-case with `use` prefix)
 - Export a single function named `use*`
 - Clean up side effects in `onUnmounted`
@@ -165,16 +171,19 @@ export function useCountdown(seconds: number) {
 Use breakpoint-driven control swaps when mobile and desktop need different interaction density.
 
 ```ts
-import { computed } from 'vue'
-import { useBreakpoints } from '@vueuse/core'
+import { computed } from "vue";
+import { useBreakpoints } from "@vueuse/core";
 
-const breakpoints = useBreakpoints({ desktop: 1024 })
-const isDesktop = breakpoints.greaterOrEqual('desktop')
+const breakpoints = useBreakpoints({ desktop: 1024 });
+const isDesktop = breakpoints.greaterOrEqual("desktop");
 
-const branchControlMode = computed(() => (isDesktop.value ? 'segmented' : 'select'))
+const branchControlMode = computed(() =>
+  isDesktop.value ? "segmented" : "select",
+);
 ```
 
 ### Rules
+
 - Keep one shared reactive value for the selected option; only the rendered control changes.
 - Prefer dropdown/select on mobile for long or variable option lists.
 - Prefer pills, tabs, or segmented controls on desktop when horizontal space is stable.
@@ -186,15 +195,18 @@ When a progress surface needs to auto-expand the currently active or partially c
 
 ```ts
 function isUnitInProgress(unitId: string): boolean {
-  const unitLessons = curriculum.getLessonsForUnit(unitId) || []
-  if (unitLessons.length === 0) return false
+  const unitLessons = curriculum.getLessonsForUnit(unitId) || [];
+  if (unitLessons.length === 0) return false;
 
-  const completedCount = unitLessons.filter((lesson) => completedLessonIds.value.has(lesson.id)).length
-  return completedCount > 0 && completedCount < unitLessons.length
+  const completedCount = unitLessons.filter((lesson) =>
+    completedLessonIds.value.has(lesson.id),
+  ).length;
+  return completedCount > 0 && completedCount < unitLessons.length;
 }
 ```
 
 ### Rules
+
 - Keep progress-driven expansion separate from entitlement or unlock checks.
 - Use the helper for default expansion/readability, not permission decisions.
 - Pair the helper with screenshot validation on the primary mobile viewport when expansion behavior is part of a reported regression.
@@ -210,19 +222,20 @@ Tailwind v4 uses `@theme` in CSS instead of `tailwind.config.js`:
 @import "tailwindcss";
 
 @theme {
-  --color-duo-green: #58CC02;
-  --color-duo-green-dark: #58A700;
-  --color-duo-border: #E5E5E5;
-  --color-duo-text: #4B4B4B;
-  --color-duo-text-muted: #AFAFAF;
-  --color-duo-gray-light: #F7F7F7;
-  --font-sans: 'DM Sans', sans-serif;
+  --color-duo-green: #58cc02;
+  --color-duo-green-dark: #58a700;
+  --color-duo-border: #e5e5e5;
+  --color-duo-text: #4b4b4b;
+  --color-duo-text-muted: #afafaf;
+  --color-duo-gray-light: #f7f7f7;
+  --font-sans: "DM Sans", sans-serif;
 }
 ```
 
 This auto-generates utility classes: `bg-duo-green`, `text-duo-text`, `border-duo-border`, `font-sans`.
 
 ### Rules (v4)
+
 - Define all tokens inside `@theme { }` block using `--color-*`, `--font-*`, `--spacing-*` custom properties
 - No `tailwind.config.js` needed — CSS is the single source of truth
 - Hex values directly (no RGB channel workaround needed in v4)
@@ -233,12 +246,12 @@ This auto-generates utility classes: `bg-duo-green`, `text-duo-text`, `border-du
 ```css
 @layer base {
   :root {
-    --color-brand-teal: 22 190 207;    /* #16BECF */
-    --color-brand-navy: 24 47 123;     /* #182F7B */
-    --color-brand-gold: 230 160 0;     /* #E6A000 */
-    --color-text-primary: 52 64 84;    /* #344054 */
-    --font-heading: 'Barlow', sans-serif;
-    --font-body: 'Nunito', sans-serif;
+    --color-brand-teal: 22 190 207; /* #16BECF */
+    --color-brand-navy: 24 47 123; /* #182F7B */
+    --color-brand-gold: 230 160 0; /* #E6A000 */
+    --color-text-primary: 52 64 84; /* #344054 */
+    --font-heading: "Barlow", sans-serif;
+    --font-body: "Nunito", sans-serif;
   }
 }
 ```
@@ -250,20 +263,21 @@ export default {
   theme: {
     extend: {
       colors: {
-        'brand-teal': 'rgb(var(--color-brand-teal) / <alpha-value>)',
-        'brand-navy': 'rgb(var(--color-brand-navy) / <alpha-value>)',
-        'brand-gold': 'rgb(var(--color-brand-gold) / <alpha-value>)',
+        "brand-teal": "rgb(var(--color-brand-teal) / <alpha-value>)",
+        "brand-navy": "rgb(var(--color-brand-navy) / <alpha-value>)",
+        "brand-gold": "rgb(var(--color-brand-gold) / <alpha-value>)",
       },
       fontFamily: {
-        heading: ['var(--font-heading)'],
-        body: ['var(--font-body)'],
+        heading: ["var(--font-heading)"],
+        body: ["var(--font-body)"],
       },
     },
   },
-}
+};
 ```
 
 ### Rules
+
 - All colors defined as CSS custom properties with RGB channels (no hex in Tailwind config)
 - Font families reference CSS custom properties
 - Never hardcode color hex values in templates — always use `brand-*` or `text-*` classes
@@ -273,19 +287,20 @@ export default {
 
 ```ts
 const routes = [
-  { path: '/login', component: () => import('@/views/StudentLogin.vue') },
+  { path: "/login", component: () => import("@/views/StudentLogin.vue") },
   {
-    path: '/',
-    component: () => import('@/views/StudentLayout.vue'),
+    path: "/",
+    component: () => import("@/views/StudentLayout.vue"),
     children: [
-      { path: 'dashboard', component: () => import('@/views/Dashboard.vue') },
-      { path: 'level-map', component: () => import('@/views/LevelMap.vue') },
+      { path: "dashboard", component: () => import("@/views/Dashboard.vue") },
+      { path: "level-map", component: () => import("@/views/LevelMap.vue") },
     ],
   },
-]
+];
 ```
 
 ### Rules
+
 - Always use dynamic `import()` for route components
 - Nest child routes under layout components
 - Auth guard via `beforeEach` checking Supabase session
@@ -293,6 +308,7 @@ const routes = [
 ## PWA Service Worker
 
 Key patterns for offline-first PWA:
+
 - Cache static assets on install (app shell strategy)
 - Cache API responses with stale-while-revalidate for lesson data
 - Skip waiting on update to activate new SW immediately
@@ -303,12 +319,13 @@ Key patterns for offline-first PWA:
 ```ts
 // i18n/vi.ts
 export default {
-  login: { title: 'Đăng nhập', forgotPin: 'Quên mật khẩu' },
-  nav: { dashboard: 'Thống kê', leaderboard: 'Bảng xếp hạng' },
-}
+  login: { title: "Đăng nhập", forgotPin: "Quên mật khẩu" },
+  nav: { dashboard: "Thống kê", leaderboard: "Bảng xếp hạng" },
+};
 ```
 
 ### Rules
+
 - Vietnamese is default locale — all strings go through i18n
 - Never hardcode Vietnamese text in `<template>`
 - Use `$t('key')` or `t('key')` from `useI18n()`
@@ -317,15 +334,40 @@ export default {
 - Keep one terminology and casing system across the locale. Avoid mixed English/Vietnamese controls unless product copy explicitly requires it.
 - Proofread high-salience strings in context after translation changes: nav, CTA labels, placeholders, errors, and badges.
 
+## Boolean Prop Defaults (Vue 3 Compiler Coercion)
+
+A `boolean`-typed optional prop declared with **no** `withDefaults` entry resolves to `false` — never `undefined` — when the caller omits it. Vue's compiler infers `type: Boolean` for any prop typed `boolean` (or `boolean | undefined`) and applies HTML-boolean-attribute-style coercion (mirrors native `<input disabled>` semantics), and this coercion is specifically gated on "no default was ever declared for this prop" — not on the default's value.
+
+```ts
+// BROKEN: showBack is `false` (never undefined) when the caller omits it —
+// any "if unset, compute a fallback" check against undefined silently never runs.
+const props = defineProps<{ showBack?: boolean }>();
+const resolvedShowBack = computed(() =>
+  props.showBack !== undefined ? props.showBack : !route.meta.tab,
+);
+
+// FIX: type it boolean | null and default to null via withDefaults.
+// Supplying ANY explicit default (even null) makes Vue skip the absent-boolean-defaults-to-false coercion.
+const props = withDefaults(defineProps<{ showBack?: boolean | null }>(), {
+  showBack: null,
+});
+const resolvedShowBack = computed(() =>
+  props.showBack !== null ? props.showBack : !route.meta.tab,
+);
+```
+
+- Symptom: an "if the caller didn't specify, fall back to a computed default" pattern that checks `prop !== undefined` silently never falls back — it behaves as if every caller passed `false`. This can look like a single-route bug (one view's back button missing) when it's actually a systemic regression hitting EVERY route that doesn't pass the prop explicitly — verify with a debug log on the prop's raw value, not just the one route being reported.
+- Detection: grep prop definitions for `?: boolean` (or `?: boolean | undefined`) with no matching `withDefaults` entry, wherever the component's logic branches on "was this prop explicitly set."
+
 ## Layout Anti-Patterns
 
-| Anti-Pattern | Symptom | Fix |
-|-------------|---------|-----|
-| `overflow-auto` on root | Whole page scrolls including sidebar | Fixed viewport height on root, `overflow-y-auto` only on center panel |
-| Dark text on dark bg | Unreadable content | Content goes inside WHITE card — dark text on white |
-| White text in content area | Looks wrong on light card | Only sidebar/nav use white text on dark bg |
-| Missing `min-h-0` on flex child | Content doesn't scroll | Add `min-h-0` to scrollable flex children |
-| Logo cropping | Sidebar logo cut off | Use `object-contain` + explicit size + `flex-shrink-0` |
+| Anti-Pattern                    | Symptom                              | Fix                                                                   |
+| ------------------------------- | ------------------------------------ | --------------------------------------------------------------------- |
+| `overflow-auto` on root         | Whole page scrolls including sidebar | Fixed viewport height on root, `overflow-y-auto` only on center panel |
+| Dark text on dark bg            | Unreadable content                   | Content goes inside WHITE card — dark text on white                   |
+| White text in content area      | Looks wrong on light card            | Only sidebar/nav use white text on dark bg                            |
+| Missing `min-h-0` on flex child | Content doesn't scroll               | Add `min-h-0` to scrollable flex children                             |
+| Logo cropping                   | Sidebar logo cut off                 | Use `object-contain` + explicit size + `flex-shrink-0`                |
 
 ## Verification Checklist
 

@@ -17,6 +17,12 @@ at session start). Read the full profile when personalizing approach, scoping, o
   through i18n. Preserve native script and diacritics; proofread high-salience labels.
 - **Planning docs:** use a simple `docs/specs/active/<slice>/{brief,spec,validation}.md` bundle — not
   dashboards or traceability matrices. Use GitNexus for implementation traceability.
+- **Preserve full research-agent output before planning from it.** When parallel research/audit agents
+  produce large findings, write each agent's full output verbatim into its own dedicated file in the
+  spec bundle (e.g. `audit-findings.md`, `gap-delta.md`) BEFORE starting implementation — the condensed
+  plan is a synthesis on top of that record, never a replacement for it. Confirmed preference: "your
+  documented plan above was way larger. document them all carefully before starting so we don't lose
+  context."
 - **Automation over polling:** prefer backend-side automation that reduces client/Bubble polling and
   workflow steps when reliability holds. For third-party integrations, use their webhooks over interval
   polling whenever the provider offers one.

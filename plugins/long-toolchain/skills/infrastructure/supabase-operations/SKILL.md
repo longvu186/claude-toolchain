@@ -145,6 +145,20 @@ Operational knowledge for Supabase data/auth workflows, especially in static-exp
 - Prefer a direct connection over Hyperdrive: `postgres-js` supports raw TCP natively via `cloudflare:sockets` when it detects the Workers runtime (needs `nodejs_compat`), so a Worker can reach Supabase's Supavisor pooler without a Hyperdrive binding at all.
 - Pick pooler mode deliberately: transaction-mode (port 6543) needs `{ prepare: false, max: 1 }`; session-mode (port 5432) supports prepared statements but pins one backend per connection. See `tech-pitfalls` ("Cloudflare Hyperdrive False Invalid Database Credentials..." and "Supabase Supavisor Pooler Mode Selection...") for the full incident and the exact symptom-to-fix mapping if Hyperdrive provisioning itself fails.
 
+### 12) `SECURITY DEFINER` function can't resolve `pgcrypto` functions after `set search_path = public`
+
+- Symptom: `function gen_random_bytes(integer) does not exist` (or `crypt`/`gen_salt`) on a function/script that clearly loaded `pgcrypto` and worked before hardening `search_path`.
+- Root cause: Supabase-hosted Postgres installs `pgcrypto` (and most default extensions) into the `extensions` schema, not `public`. Narrowing a `SECURITY DEFINER` function's `search_path` to `public` — a correct, recommended hardening against search-path-injection — cuts it off from `extensions` at the same time.
+- Fix: add `extensions` to the function's `search_path` (`set search_path = public, extensions`) for every function that calls a pgcrypto function. Grep the migration for `gen_random_bytes|crypt(|gen_salt(` to find every affected function — don't fix only the one that errored first.
+- Same bug, different shape, in raw SQL scripts (e.g. `seed.sql`): a bare `SET search_path = ...;` statement at the top of the script does NOT reliably persist, because Supabase's pooler can reset session state between batched statements. Fix by schema-qualifying every call directly (`extensions.crypt(...)`, `extensions.gen_salt(...)`) instead of relying on a session-level `SET`.
+
+### 13) `verify_jwt` gate rejects non-user-JWT callers before function code ever runs — audit every call path, not just the obvious ones
+
+- Symptom: a webhook receiver, cron job, or shared-secret ops endpoint returns 401 with no logs from inside the function at all — `console.log` at the top of the handler never fires.
+- Root cause: Supabase's platform gateway checks for a valid Supabase user JWT BEFORE the request reaches function code. Any in-function auth logic (a shared job-secret header check, a webhook signature check) never gets a chance to run if the platform-level check rejects first. Per-function `verify_jwt = false` in `config.toml` (or `--no-verify-jwt` on deploy) is the only way to disable this gate — it cannot be worked around from inside the function.
+- **Audit every call path, not just the function that's "obviously" a webhook/cron target**: any function with a DUAL auth path (accepts either a real user JWT OR a shared secret, e.g. because it's called both by a logged-in user's browser AND by an internal scheduler) needs `verify_jwt = false` too — the secret-only leg (no `Authorization: Bearer <user-jwt>` header) hits the exact same platform-level wall as a pure ops endpoint. Grep every edge function for calls to a shared-secret/job-secret checker (not just `requireUser()`) and confirm each one's entry in `config.toml` has `verify_jwt = false`.
+- Validation: after deploying, invoke each secret-only/webhook function with ONLY its intended auth header (no user bearer token) and confirm it reaches application code (a 401 from inside your own auth check is fine; a 401 with zero function logs means the gate, not your code, rejected it).
+
 ## MCP and Tooling Issue Patterns
 
 - Infra tooling may fail while database is healthy; keep a manual fallback path.

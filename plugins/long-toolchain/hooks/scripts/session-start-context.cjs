@@ -242,6 +242,43 @@ function buildRunLogContext(runLogDir) {
   return ["Recent run-log context (latest sessions):", ...blocks].join("\n");
 }
 
+/**
+ * Shared-VPS tenancy notice. Deliberately tiny — the full map lives behind
+ * `vps-map`, not in every context window. It exists because `ps` output on this
+ * host mixes several tenants: in Aug 2026 a session cleaning up its own dev
+ * servers killed HQ production ~50 times because it could not tell them apart.
+ * Returns "" on any failure so a session never fails to start over this.
+ */
+function buildTenancyBlock(cwd) {
+  try {
+    const { createResolver } = require(
+      path.join(
+        process.env.HOME || "/root",
+        ".claude",
+        "scripts",
+        "lib",
+        "vps-tenancy.cjs",
+      ),
+    );
+    const r = createResolver();
+    const reg = r.registry();
+    if (!reg.protectedUnits.length) return "";
+    const me = r.myTenant(cwd);
+    const others = Object.keys(reg.tenants).filter((n) => n !== me);
+    return [
+      `Shared VPS — this host also runs ${reg.protectedUnits.length} protected services and ${others.length} other repos.`,
+      me
+        ? `You are tenant: ${me} · your ports: ${r.formatClaims(me)}`
+        : "You are outside a known project root — assume nothing here is yours.",
+      "Never signal a process you did not spawn: `ps | grep` cannot tell your dev",
+      "server from another tenant's production. Check first: `vps-map pid|port <n>`,",
+      "`vps-map mine` for your claims. Restart a service via systemctl, never kill.",
+    ].join("\n");
+  } catch {
+    return "";
+  }
+}
+
 async function main() {
   const rawInput = await readStdin();
   let data = {};
@@ -258,9 +295,12 @@ async function main() {
   const consolidationDue = buildConsolidationDue(workspaceRoot);
   const consolidationDraft = buildConsolidationDraftReady();
 
+  const tenancyBlock = buildTenancyBlock(cwd);
+
   const additionalContext = [
     profileDigest,
     projectDigest,
+    tenancyBlock,
     consolidationDraft,
     consolidationDue,
     FEATURE_QUALITY_REMINDER,

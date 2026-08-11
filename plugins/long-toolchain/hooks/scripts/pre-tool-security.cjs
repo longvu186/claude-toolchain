@@ -209,6 +209,176 @@ function bashSecretViolation(command) {
   return null;
 }
 
+// --- Protected-service guard ------------------------------------------------
+// 2026-08-09: a Claude session working in another repo ran
+// `ps aux | grep -i "next-server"` and killed every PID it found, taking HQ's
+// PRODUCTION server down ~50 times over 24h (hq.citizendev.io served 502s on
+// every 5s restart gap). A grep over `ps` output cannot distinguish a stray dev
+// server from prod, so this resolves each kill target against the protected
+// units' cgroups instead of trusting the command text. Restarting these
+// services is legitimate — via `systemctl`, never a raw `kill`.
+// Fallback list, used only if the tenancy resolver cannot be loaded. The
+// resolver reads the full protected set from /etc/claude-vps-tenancy.json;
+// this hardcoded minimum keeps the highest-value protection alive even if the
+// toolchain lib goes missing, rather than failing fully open.
+const PROTECTED_UNITS = ["personal-hq.service"];
+
+/** Lazily load the shared tenancy resolver; null if unavailable. */
+let resolverCache;
+function tenancy() {
+  if (resolverCache !== undefined) return resolverCache;
+  try {
+    const lib = require(
+      path.join(HOME, ".claude", "scripts", "lib", "vps-tenancy.cjs"),
+    );
+    resolverCache = lib.createResolver();
+  } catch {
+    resolverCache = null;
+  }
+  return resolverCache;
+}
+
+function protectedUnitPids() {
+  const r = tenancy();
+  if (r) return r.protectedPids();
+  const pids = new Map(); // pid (string) -> unit
+  for (const unit of PROTECTED_UNITS) {
+    try {
+      const procs = fs.readFileSync(
+        `/sys/fs/cgroup/system.slice/${unit}/cgroup.procs`,
+        "utf8",
+      );
+      for (const line of procs.split("\n")) {
+        const pid = line.trim();
+        if (pid) pids.set(pid, unit);
+      }
+    } catch {
+      /* unit not running, or not a cgroup-v2 Linux host */
+    }
+  }
+  return pids;
+}
+
+function procDescriptor(pid) {
+  let comm = "";
+  let cmdline = "";
+  try {
+    comm = fs.readFileSync(`/proc/${pid}/comm`, "utf8").trim();
+  } catch {
+    /* process already gone */
+  }
+  try {
+    cmdline = fs
+      .readFileSync(`/proc/${pid}/cmdline`, "utf8")
+      .replace(/\0/g, " ")
+      .trim();
+  } catch {
+    /* process already gone */
+  }
+  return `${comm} ${cmdline}`.trim();
+}
+
+function protectedKillViolation(command, cwd) {
+  if (!/\b(?:kill|pkill|killall)\b/i.test(command)) return null;
+  const protectedPids = protectedUnitPids();
+  const r = tenancy();
+  const mine = r && cwd ? r.myTenant(cwd) : null;
+  if (protectedPids.size === 0 && !r) return null;
+
+  const advise = (unit) =>
+    `Use \`systemctl restart ${unit.replace(/\.service$/, "")}\` if it genuinely needs restarting.`;
+
+  // Explicit numeric targets: `kill 1234`, `kill -9 1234 5678`, `kill -TERM 1234`.
+  // `\bkill\b` does not match inside `pkill` (no word boundary after `p`).
+  for (const call of command.matchAll(
+    /\bkill\b((?:\s+-[\w-]+)*(?:\s+\d+)+)/gi,
+  )) {
+    for (const target of call[1].matchAll(/\d+/g)) {
+      const pid = target[0];
+      const unit = protectedPids.get(pid);
+      if (unit)
+        return `PID ${pid} belongs to the protected service ${unit} — "${procDescriptor(pid)}". Killing it takes production down. ${advise(unit)}`;
+
+      // Cross-tenant: a process owned by a DIFFERENT repo on this shared box.
+      // `unknown` owners are allowed through on purpose — see whoOwns().
+      if (r && mine) {
+        const owner = r.whoOwns(pid);
+        if (owner.kind === "repo" && owner.repo && owner.repo !== mine)
+          return `PID ${pid} belongs to another tenant on this shared VPS: repo ${owner.repo} — "${owner.desc || ""}". You are ${mine}; your ports are ${r.formatClaims(mine)}. Only signal processes you spawned (\`vps-map pid ${pid}\`).`;
+      }
+    }
+  }
+
+  // Pattern targets: `pkill -f next-server`, `killall node`.
+  const byPattern = command.match(
+    /\b(?:pkill|killall)\b(?:\s+-[\w-]+)*\s+["']?([^"'\s;&|]+)/i,
+  );
+  const needle = byPattern && byPattern[1];
+  if (needle && !/^\d+$/.test(needle)) {
+    for (const [pid, unit] of protectedPids) {
+      const desc = procDescriptor(pid);
+      if (!desc) continue;
+      let matches;
+      try {
+        matches = new RegExp(needle, "i").test(desc);
+      } catch {
+        matches = desc.toLowerCase().includes(needle.toLowerCase());
+      }
+      if (matches)
+        return `That pattern also matches PID ${pid} of the protected service ${unit} — "${desc}". Killing it takes production down. ${advise(unit)}`;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Deny binding a port that belongs to another tenant, and deny starting a
+ * dev/preview server with no explicit port (frameworks default to 3000, which
+ * on this box is HQ production). Mirrors the rule HQ's autonomous dev-runner
+ * already enforces on itself in src/lib/agent/dev-runner/policy.ts — this
+ * extends the same discipline to interactive sessions.
+ */
+function portCollisionViolation(command, cwd) {
+  const r = tenancy();
+  if (!r) return null;
+  const mine = cwd ? r.myTenant(cwd) : null;
+
+  // Evaluate per shell segment, and only treat a segment as a server start
+  // when the runner is the segment's OWN command (anchored, after any env
+  // assignments / sudo / npx). Matching anywhere in the text meant that
+  // `git log -p 3000`, `pkill -f 'vite dev'`, and even a heredoc *describing*
+  // these commands all tripped the guard. A guard that cries wolf gets
+  // switched off, so precision here is a safety property, not politeness.
+  const RUNNER =
+    /^(?:\w+=\S+\s+)*(?:sudo\s+)?(?:npx\s+|(?:pnpm|yarn|bun)\s+dlx\s+)?(?:next|vite|astro|nuxt|remix|react-scripts|serve|http-server)\s+(?:dev|start|preview)\b/i;
+  const PKG_SCRIPT =
+    /^(?:\w+=\S+\s+)*(?:sudo\s+)?(?:npm|pnpm|yarn|bun)\s+(?:run\s+)?(?:dev|start|preview)\b/i;
+
+  for (const segment of command.split(/(?:;|&&|\|\||\||\n)/)) {
+    const seg = segment.trim();
+    if (!seg || !(RUNNER.test(seg) || PKG_SCRIPT.test(seg))) continue;
+
+    let sawPort = false;
+    for (const m of seg.matchAll(
+      /(?:--port|(?:^|\s)-p|\bPORT)\s*=?\s*(\d{2,5})/gi,
+    )) {
+      const port = parseInt(m[1], 10);
+      sawPort = true;
+      const owner = r.ownerOfPort(port);
+      if (owner.kind === "service")
+        return `Port ${port} is production — ${owner.unit}${owner.repo ? ` (${owner.repo})` : ""}. Binding it would collide with a live public service. Your ports: ${mine ? r.formatClaims(mine) : "see `vps-map mine`"}.`;
+      if (owner.kind === "repo" && mine && owner.repo !== mine)
+        return `Port ${port} belongs to another tenant on this shared VPS: repo ${owner.repo}. You are ${mine}; your ports are ${r.formatClaims(mine)}. Check with \`vps-map port ${port}\`.`;
+    }
+
+    if (!sawPort && mine) {
+      return `Starting a dev/preview server without an explicit port: it would default to 3000, which is HQ production on this shared VPS. Pass a port from your band (${r.formatClaims(mine)}).`;
+    }
+  }
+  return null;
+}
+
 function readStdin() {
   return new Promise((resolve) => {
     let input = "";
@@ -348,6 +518,28 @@ async function main() {
   }
 
   const approval = loadManualApproval();
+
+  // --- Shared-VPS tenancy guards. ---
+  // This host runs ~10 services and several repos side by side, and multiple
+  // agent sessions share one process table. These two checks stop a session
+  // from signalling, or colliding with, something it does not own.
+  const cwd = typeof data.cwd === "string" ? data.cwd : "";
+  for (const reason of [
+    protectedKillViolation(command, cwd),
+    portCollisionViolation(command, cwd),
+  ]) {
+    if (!reason || isApproved(approval, "protected-service")) continue;
+    safeWriteAudit({
+      at: new Date().toISOString(),
+      decision: "blocked",
+      scope: "protected-service",
+      reason,
+      command,
+      cwd,
+    });
+    return deny(reason, "protected-service");
+  }
+
   for (const violation of TERMINAL_VIOLATIONS) {
     if (violation.pattern.test(command)) {
       if (isApproved(approval, violation.scope)) {

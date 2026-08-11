@@ -780,6 +780,12 @@ function writeRefreshRequest(workspaceRoot, run) {
     !run.filesChanged.some((f) => HIGH_VALUE_FILE_PATTERN.test(f))
   )
     return;
+  // Only write into a docs/ai/ that already exists. resolveLogTarget's fallback (no ancestor with
+  // docs/ai/ found) leaves workspaceRoot pointing at a bogus cwd; without this guard, writing here
+  // would seed a fresh docs/ai/ tree that makes the NEXT invocation from the same cwd treat it as a
+  // legitimate project root and start writing raw run logs into it too — a self-reinforcing bug that
+  // polluted ~/.claude/hooks/scripts/docs/ with a full run-log tree.
+  if (!fs.existsSync(path.join(workspaceRoot, "docs", "ai"))) return;
   try {
     const requestFile = path.join(
       workspaceRoot,
