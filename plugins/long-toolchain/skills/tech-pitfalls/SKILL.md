@@ -10,6 +10,7 @@ description: "Cross-project failure patterns and recovery strategies (150+ docum
 - Run `impact` on every modified function BEFORE `git add`, not after commit. CLAUDE.md in indexed repos makes this a hard requirement.
 - A CRITICAL blast-radius on a function with an unchanged signature and return type reflects call-graph width, not correctness risk. TypeScript typecheck is the correctness gate; GitNexus impact rating is the change-scope gate. Both are needed; neither replaces the other.
 - Workflow: identify modified functions → run `impact` each → if HIGH/CRITICAL surface blast radius to user before staging → run `detect_changes()` after staging before committing.
+- `detect_changes({scope: "all"})` over a large uncommitted batch (many files, several unrelated slices of work) can exceed the MCP tool's max-token response size — it fails with "result exceeds maximum allowed tokens" and auto-saves the full JSON to a local tool-results file instead. Don't treat the failure as "the check didn't run": read the saved file with `Read`'s `offset`/`limit` (or `jq` for structured queries) rather than retrying the same call. Prefer `detect_changes({scope: "compare", base_ref: "<default-branch>"})` up front when the working tree already carries a large backlog — a diff scoped against the base branch is usually smaller than `scope: "all"` and less likely to hit the limit at all.
 
 ## `git add <path>` Stages The Whole File, Not Just Your Intended Diff
 
@@ -169,6 +170,16 @@ description: "Cross-project failure patterns and recovery strategies (150+ docum
 - Added columns need a **constant** default (`NOT NULL DEFAULT 1`); SQLite rejects non-constant defaults on ALTER.
 - After adding columns, sweep aggregate queries: capacity/stats counts that were `COUNT(*)` may need `SUM(quantity)` once one row represents multiple units.
 
+## Multi-Tenant API: A Second, Finer-Grained Scoping Param May Be Required
+
+- If an endpoint 400s with "missing data: X, Y" for a required param that seems present, check for a
+  **second, finer-grained scoping param** the UI never surfaces a selector for — e.g. a request scoped
+  by a company/org/tenant-level ID alone can require a brand/workspace/sub-tenant-level ID too, when
+  that parent entity turns out to span multiple children.
+- Don't guess or give up: enumerate the finer-grained IDs from a sibling list endpoint (e.g.
+  `/brands?company_uid=X`) rather than trial-and-error, then pin the correct child ID explicitly in
+  every subsequent call.
+
 ## HTTP / JSON Parsing
 
 - Some APIs return JSON bodies without a `Content-Type: application/json` header; strict header-gated parsing can miss structured error payloads.
@@ -269,6 +280,41 @@ description: "Cross-project failure patterns and recovery strategies (150+ docum
 
 - In preview pipelines that support both runtime screenshots and deterministic placeholders, image existence alone is weak evidence; persist capture metadata (for example method + source URL) and verify against that manifest.
 - Split extractor quality gates into baseline completeness and metadata-depth completeness. Baseline method/URL coverage can stay green while header/query/body depth regresses.
+
+## `fullPage` Screenshots Show Lazy Images As Blank — Not A Broken Path
+
+- `page.screenshot({fullPage:true})` expands the viewport but does NOT reliably trigger
+  `loading="lazy"` images below the original fold. Result: a full-page capture with empty
+  image cards that looks exactly like broken `src` paths or missing asset files.
+- Do NOT diagnose missing images from a fullPage screenshot alone, and do not start "fixing"
+  asset paths off that evidence. Confirm the actual state first, cheapest check first:
+  `curl -o /dev/null -w "%{http_code} %{size_download}"` the asset URL, then in-page assert
+  `naturalWidth > 0`.
+- To capture correctly, force-load and await decode before shooting:
+  ```js
+  const imgs = [...document.querySelectorAll("img")];
+  imgs.forEach((i) => (i.loading = "eager"));
+  await Promise.all(
+    imgs.map((i) =>
+      i.complete
+        ? null
+        : new Promise((r) => {
+            i.onload = r;
+            i.onerror = r;
+          }),
+    ),
+  );
+  return imgs
+    .filter((i) => !i.complete || i.naturalWidth === 0)
+    .map((i) => i.src); // [] == all good
+  ```
+- The same evaluate pass is the right place to collect layout evidence that eyeballing a
+  screenshot gets wrong: compare `getBoundingClientRect()` tops/heights per grid row instead of
+  judging alignment visually. Apparent "misalignment" in a card grid is usually just text
+  wrapping to a second line (cards not equal-height), which is a component-wide pre-existing
+  trait — measure before treating it as a regression you introduced.
+- If the first `browser_take_screenshot` after a heavy force-load times out on "waiting for
+  fonts", simply re-issue it; the second call succeeds against the now-warm page.
 
 ## Screenshot-Driven Multi-Surface UI Fixes
 
@@ -454,6 +500,17 @@ description: "Cross-project failure patterns and recovery strategies (150+ docum
 - Native Node modules (for example `better-sqlite3`) can fail to load reliably when backend logic is embedded in packaged Electron runtime contexts; for desktop reliability, run backend as an external Node worker and gate renderer startup on explicit readiness checks.
 - If desktop backend runs out-of-process, keep a network realtime channel (for example websocket) active even when an in-app bridge exists; bridge-only subscriptions can miss external-worker updates.
 - Exclude prior release output folders from Electron packaging inputs (for example `!release-dist/**`, `!release-dist-*/**`) to prevent recursive artifact inclusion, package bloat, and disk-space failures such as `ENOSPC`.
+
+## Playwright `page.evaluate()` Under tsx: `__name is not defined`
+
+- Passing a TS function reference (arrow or named) containing **nested named function declarations**
+  to `page.evaluate()` while running the script via `tsx` throws `ReferenceError: __name is not defined`
+  inside the browser context. Cause: tsx/esbuild wraps named functions in a `__name(fn, "name")` helper
+  for stack-trace fidelity at compile time; Playwright serializes the evaluate callback via `.toString()`
+  and ships that compiled wrapper reference into the browser sandbox, where `__name` doesn't exist.
+- Fix: pass browser-side evaluate scripts as a plain JS string, or restrict the passed function to
+  arrow functions with zero nested named function declarations, whenever the calling script itself runs
+  under `tsx`.
 
 ## npm Script Argument Forwarding + Playwright List Mode
 
@@ -926,3 +983,46 @@ For read-heavy public content backed by a database, "query on every render" does
 - `error.tsx`'s `reset()` only re-renders — it does not flush stale chunk references.
 - Fix: detect chunk errors in `error.tsx` (`error.name === "ChunkLoadError"` or message matches `/Module factory is not available/i`). On first detection, set `sessionStorage.setItem('__chunk_reload', '1')` then `window.location.reload()`. Guard: if the key is already set, clear it and fall through to normal error UI + Sentry capture to prevent infinite reload loops.
 - Use `sessionStorage` (not `localStorage`): survives the single reload but clears on tab close, so the guard never blocks a future session.
+
+## pnpm-workspace.yaml `allowBuilds` Placeholder Value Recurs Even With A Warning Comment Present
+
+- Adding a new dependency that pulls in a native/postinstall-script package can make pnpm auto-insert a literal placeholder string (e.g. `"set this to true or false"`) into `pnpm-workspace.yaml`'s `allowBuilds` map instead of a real boolean — this breaks `pnpm install` outright with a cryptic `ERR_PNPM_IGNORED_BUILDS`-adjacent error, not an obvious "bad config" message.
+- An inline comment in the file warning about this exact trap from a prior incident did **not** prevent recurrence when a _different_ new dependency triggered it later — a comment is not a gate.
+- Fix/verification habit: after adding any dependency with native bindings or build scripts, run `grep -n "allowBuilds" -A20 pnpm-workspace.yaml` and confirm every value is a literal `true`/`false`, not a string, before running `pnpm install`. Consider scripting this as a pre-install check rather than relying on manual review.
+
+## Bleeding-Edge AI SDK Package: Pin To Current Major, Not The Version First Installed
+
+- Early 0.x releases of fast-moving AI/agent-framework packages (e.g. `@mastra/core` at its Jan-2026 launch, `0.8.3`) can target an older model-provider interface generation (e.g. AI SDK's `LanguageModelV1`) while current-era provider packages (e.g. `ai-sdk-provider-claude-code`) target a newer one (`LanguageModelV4`/AI SDK v5+). Installing "whatever version" or an old lockfile entry silently produces a type/interface mismatch between the framework and the provider, not an install failure.
+- Fix: when wiring a fast-moving AI framework to a model-provider adapter, explicitly pin the framework to its current major/minor (check its own release notes/changelog for the AI SDK interface generation it targets) rather than accepting whatever a stale lockfile or first `pnpm add` pulls in.
+- Related config-shape trap: `Agent` constructor configs in these frameworks may require both an `id` and a `name` field even when the API/docs make `name` look sufficient — a missing required field here fails at construction time, not at a call site, so check the constructor's actual required-fields list rather than assuming the one field you've seen used.
+
+## TypeScript Heterogeneous Generic Registry: Annotate Per-Entry, Not On The Array
+
+- Building a registry/catalog (report definitions, plugin manifests, form-field configs, etc.) where each entry is internally consistent under its own generic `Row` type (its column-renderer and data-loader functions agree with each other), but the registry itself needs to hold ALL entries together, hits a real TypeScript limitation: an array cannot be typed as "list of differently-parameterized generics" directly.
+- Symptom: adding an explicit `: SomeGeneric<Row>[]`-shaped annotation on the whole array widens every literal to the unparameterized/`unknown` form BEFORE that literal's own inner functions get checked — so each entry's column/render functions get typed as accepting `unknown` instead of their own specific row shape, producing real type errors inside otherwise-correct entries.
+- Fix: define a small identity-erasure helper, e.g. `function define<Row>(def: SomeGeneric<Row>): SomeGeneric<unknown> { return def as SomeGeneric<unknown> }`. Wrap each entry's construction with `define<SpecificRowType>({...})` so the literal is checked with full contextual typing for its own inner functions, then store only the erased (`SomeGeneric<unknown>`) results in the plain array.
+- Safety condition for the erasure: consuming code must only ever call one entry's own load/columns/render functions together — never mix one entry's row data into another entry's column function. The erasure is sound only under "each entry is used self-consistently," not under any cross-entry mixing.
+
+## Monolith-Page Replacement: Enumerate Existing Coverage Before Building The New Structure
+
+- When replacing a monolithic hand-rolled page/module with a new architecture (e.g. a registry-driven system replacing a single large page), a clean typecheck and passing new unit tests do NOT prove the replacement is complete — they only prove the new code is internally correct.
+- Concretely bit twice in the same replacement: (1) existing e2e specs testing sections of the OLD page can cover behaviors that don't map cleanly onto the new architecture (including homegrown, non-catalog features never meant to be dropped) — found only by grepping the old route path across the e2e test directory, and only done AFTER typecheck/build had already passed clean; (2) a display/formatting helper migrated from the old page to the new one silently handled only a subset of an enum's cases (e.g. 4 of 6 event types), rendering a placeholder for the rest in both the UI and any export derived from the same function — caught only because one existing e2e test happened to assert on a missing case.
+- Fix / sequencing: before starting a monolith-page replacement, (a) grep the e2e/test directory for every existing spec touching the old route/page and enumerate what each one actually covers, and (b) for any "render every case of an enum" function being migrated, diff its case list explicitly against the original function's case list side by side. Do both BEFORE building the new structure, not as a post-hoc scramble after typecheck/tests already pass — a passing build only validates the code you wrote, not the coverage you were supposed to preserve.
+
+## Playwright `waitForURL` Timeout On First Navigation After Cold `next dev` Start
+
+- A specific, subtler variant of "dev server takes a while to start": `page.waitForURL()`'s default timeout (15s) can fire on the FIRST navigation after a fresh `next dev` start when several routes need to compile just-in-time in sequence — even though a page snapshot at the timeout moment proves the navigation (and often the data load) already succeeded. The `load` event, not the URL change, is what's lagging past the timeout; the test isn't actually stuck.
+- Distinguish this from a real regression: check whether the page snapshot at failure time already shows the target URL and expected content — if so, this is compile-time lag, not a broken navigation.
+- Fix: retry with a longer explicit timeout (`page.waitForURL(url, { timeout: 60000 })`) rather than debugging the navigation logic; this is expected on a cold server and typically doesn't recur once routes are warm.
+
+## CSV Export Needs A UTF-8 BOM For Non-ASCII Headers To Render Correctly In Excel On Windows
+
+- Excel on Windows guesses a plain CSV's encoding from OS locale rather than assuming UTF-8. A CSV with non-ASCII headers/values (Vietnamese diacritics, CJK, etc.) and no BOM mojibakes when opened in Excel — exactly the failure mode most likely to hit a non-English-primary audience opening the file on a typical Windows PC.
+- Fix: prefix the emitted CSV content with the UTF-8 BOM (`﻿`) before the header row. Narrow, cheap, and easy to forget on any export feature for a non-English-primary audience.
+
+## Next.js: A Type-Only Import From A `server-only` Module Silently Becomes A Value Import, Breaking The Client Bundle
+
+- A `"use client"` component that imports only TYPES from a shared lib module compiles and typechecks fine even when that module has a transitive `import "server-only"` dependency (e.g. via a helper that also calls `createAdminClient`) — type-only imports are erased at compile time, so `tsc --noEmit` sees nothing wrong.
+- The break happens later, when an unrelated edit adds a genuine VALUE import (a plain function, not just its type) from that same module into the client component. Now the whole module — including its `server-only` dependency — gets dragged into the client bundle. Next.js fails the build/request with `You're importing a component that needs "server-only"`, and because this only shows up in real bundling, `tsc --noEmit` and mocked unit tests both stay green; only an actual dev-server request or e2e run against the page surfaces it (a Playwright test on that route times out or the page 500s).
+- Fix: extract the pure, dependency-free value(s) the client side needs into their own small module with no `server-only` import anywhere in its chain (re-export it from the original server-ish module for existing server call sites, so those don't need to change). Don't try to tree-shake or lazy-import around the boundary — a clean split is the only fix that survives the next value-import someone adds later.
+- Detection: before trusting a client/server module-boundary change as done, run the real e2e suite (or at minimum a dev-server request against the touched route) — this class of bug is invisible to typecheck and to any test that mocks the shared module.

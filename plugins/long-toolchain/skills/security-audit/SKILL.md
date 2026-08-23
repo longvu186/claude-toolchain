@@ -119,6 +119,7 @@ For each workflow file:
 ### Phase 6: Webhook & Integration Audit
 
 - Webhook routes without signature verification (hmac, x-hub-signature, stripe-signature)
+- **Fail-open signature verifiers:** a verifier that no-ops/returns-true when its secret env var is unset ("dev convenience") is a silent auth bypass if that var is ever missing at deploy time. Fix: make the secret required — the process must refuse to start (not skip verification) if it's absent. Never leave an optional-secret bypass path in production code.
 - TLS verification disabled (`verify.*false`, `VERIFY_NONE`, `InsecureSkipVerify`)
 - Overly broad OAuth scopes
 
@@ -130,6 +131,7 @@ For each workflow file:
 - AI API keys hardcoded (not in env vars)
 - `eval()`/`exec()` of LLM output
 - Unbounded LLM calls (cost/resource attacks)
+- **Agent/LLM-facing lookup endpoints accepting an id sourced from chat/agent context (not an authenticated session)**: treat id-only lookup as IDOR by default. Require a second-factor field the caller must independently know (e.g. a phone number alongside a customer id), and return an _identical_ response for "not found" vs "second-factor mismatch" so the endpoint can't be used as an enumeration oracle.
 
 ### Phase 8: AI Skill Supply Chain
 

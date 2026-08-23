@@ -130,6 +130,19 @@ description: "Environment-specific gotchas and workarounds for this user's stack
 - Workaround: write a tiny wrapper script whose own invocation never names the sensitive path — hardcode the path inside the script's source (e.g. `#!/bin/sh\n. "$(dirname "$0")/../.env.local"\nexec "$@"`), then invoke every subsequent command through that wrapper (`./with-local-env.sh supabase ...`). The Bash tool call only ever mentions the wrapper's name, not the secret file's.
 - Useful any time a project intentionally keeps a credential in a local dotenv file outside Infisical (e.g. explicit user instruction to skip Infisical for that project) and needs repeated authenticated CLI calls in the same session.
 
+## Claude Code Auto-Mode Permission Classifier Blocks Outward-Facing Actions, Including Read-Only Ones
+
+- The same `pre-tool-security`-style classifier documented above for `mcp__supabase__apply_migration`
+  also blocks plain outward-facing Bash/CLI actions in auto mode: a production deploy
+  (`vercel deploy --prod`) and even a _read-only_ secret-name listing (`list-secret-keys`) were both
+  blocked in one session, while a low-risk config change (`vercel env add`/`rm` for a non-sensitive
+  public var) went through unprompted.
+- Don't assume "read-only" is a reliable predictor of what the classifier allows — it can still gate a
+  read on an outward-facing/secrets-adjacent tool. Plan sessions so the last mile (prod deploy,
+  confirming a secret exists) is explicitly handed back to the user rather than assumed completed
+  unattended, and name the exact unblock path in the run log when it happens (as with the Supabase case
+  above) rather than silently treating the step as done.
+
 ## Claude Code MCP Server Management
 
 - **stdio-transport MCP servers spawn once per session** — each is a child process on a 1:1 stdin/stdout pipe, so N concurrent sessions = N copies (chrome-devtools-mcp, @playwright/mcp, context7 each ~100-300MB). This is the dominant RAM multiplier on a shared box, on top of the `claude` + Node host per session (~400-600MB each).
@@ -197,6 +210,12 @@ BetterStack it works with the existing token; for Sentry it works but only with 
   ps -C cloudflared -o pid=   # any PID not in the MainPID set above is a true orphan
   ```
 - **A new Tunnel hostname returning a PERSISTENT 404 (hours, not minutes) can be a stale orphan `cloudflared` process, NOT edge caching/propagation lag.** Seen 2026-07-04: an orphan from before an ingress-rule change (started before the rule → serves the catch-all `404`) was still holding tunnel connections after `systemctl restart` (it was **not in systemd's cgroup**, so restarts cycled only the tracked process). Cloudflare load-balances across ALL connections registered to a tunnel, so a fraction of requests hit the orphan's stale config → "one fluke 200, then mostly 404." Diagnosis: use the MainPID-enumeration above to find a cloudflared PID belonging to NO service — that's the orphan. `systemctl is-active` is not enough (only reports the tracked PID). Fix: `kill <orphan_pid>` (ignores SIGTERM while draining — `kill -9` after ~5s). **Tell it apart from real propagation lag by `cf-cache-status`: a `DYNAMIC` 404 is NOT cached** (rules out cache-purge theories), and propagation lag self-resolves within ~15 min whereas an orphan persists. Also worth a quick check but rarely the cause: DNS (`getent hosts` vs a working hostname), edge config (`GET /accounts/{account}/cfd_tunnel/{id}/configurations`), stray Zero Trust Access app (`GET /accounts/{account}/access/apps`).
+- **GENERAL RULE (same class as the cloudflared incident above): never stop a local dev/test server with `pkill -f <name>` on this box.** This VPS hosts long-running production Node services, so a generic pattern matches them too. Near-miss 2026-08-22: `pkill -f "next-server"`, intended to stop a throwaway `next start` on port 3100, also matched PID 1361023 = the protected **`personal-hq.service`** (`next-server (v16.2.9)`) — the `protected-service` guard hook caught it and refused. `pkill -f "npm run start"` is equally unsafe. Kill by PORT, never by process name:
+  ```sh
+  PID=$(ss -lptn 'sport = :3100' | grep -oP 'pid=\K[0-9]+' | head -1)
+  [ -n "$PID" ] && kill "$PID"
+  ```
+  If a protected service genuinely needs cycling, use `systemctl restart <svc>` rather than signalling the PID.
 - **Freeze protection:** earlyoom breaker + SSH/login CPU/IO scheduling armor + cgroup memory caps on code-server guard against OOM freezes from uncapped extension-host processes.
 - **`vps-runaway-guard.service`** (`/usr/local/sbin/vps-runaway-guard.sh`, added 2026-07-02) — companion to earlyoom, closes the gap where earlyoom's hardwired `mem AND swap` trigger never fires while swap is exhausted but RAM still has headroom (that gap caused a full `*.citizendev.io` **524 outage** from a runaway `ugrep`). Does two things: (1) SIGKILLs any `ugrep/grep/rg` running >90s (catastrophic-regex backtracking / orphaned Claude Bash search — a bundled-ugrep-by-abspath call can't be `timeout`-wrapped via PATH), (2) SIGTERM→SIGKILL the largest non-protected RSS when free swap ≤8% AND PSI mem `some avg10` ≥15. Capped 32MB/15% CPU, `OOMScoreAdjust=-900`. **For any 524 on this box, check `uptime`/`free -h` FIRST — it's resource saturation, not the tunnel.** See memory `vps-524-swap-thrash-runaway-grep`.
 - Biggest RAM consumers: code-server + TS language server (~1.4GB), concurrent Claude Code sessions (~400-600MB each), per-session MCP fleets (see MCP Server Management above).

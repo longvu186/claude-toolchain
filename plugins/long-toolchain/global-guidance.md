@@ -38,6 +38,13 @@ at session start). Read the full profile when personalizing approach, scoping, o
   shipped, not just that the local build/typecheck succeeded. A false "resolved" is worse than an
   honest "not done yet."
 - **API reverse-engineering:** keep raw evidence artifacts append-only; add index files, never rewrite captures.
+- **Cloning a paid vendor's UX for migration:** mine the vendor's public, unauthenticated webpack
+  bundle first (route table, permission enums, i18n vocabulary) — often enough on its own, and it
+  carries no risk to a live account. An authenticated crawl of my own tenant is a per-project,
+  per-session ask — session-eviction risk and ToS vary by vendor, so get an explicit go/no-go each
+  time rather than treating an earlier yes as standing authorization. Never redistribute the
+  vendor's actual compiled JS/CSS/asset files as output — extract facts, not files. Details:
+  `webpack-spa-mining` skill.
 - **Knowledge cache (read-first/write-back):** before searching for a run/build/deploy/test command,
   env var, or styling convention, read `memories/repo/commands.md` + `design-system.md` (and the
   `AGENTS.md` Commands block). When a discovered command/convention works, write it back before closing.

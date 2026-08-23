@@ -159,6 +159,23 @@ Produce a validation matrix before or alongside implementation:
 - Do not stop at schema validation if inputs can still break downstream systems.
 - Do not treat a starter boilerplate as proof that a requirement is mandatory.
 
+## Plan-Prose Reconciliation Gate (Before Declaring Done)
+
+Passing tests/typecheck confirms correctness of what was built, not completeness against what was
+promised. A plan can contain specific self-committed action items written inline in narrative prose
+(e.g. "ship with X: add index on col Y", "will wire up Z") that never get tracked as a checklist line —
+these are the easiest commitments to silently drop, because nothing fails when they're skipped: a
+missing index/config/side-effect that isn't exercised by any test at fixture-scale data passes every
+test while being silently skipped. The absence of a test failure is not evidence the item was done.
+
+Before declaring a multi-item plan "done":
+
+1. Reread the plan document(s) literally, not from memory — extract every "will do X" / "ship with Y" /
+   "add Z" sentence, even ones buried in prose rather than a tracked checklist.
+2. For each one, confirm a concrete artifact exists (a file, a migration, a commit, a config entry) —
+   not just that the overall feature works end-to-end.
+3. Anything not found gets called out explicitly as deferred/skipped, not folded silently into "complete."
+
 ## Output Contract
 
 When invoked, provide:

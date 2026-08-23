@@ -471,8 +471,17 @@ async function main() {
   let data;
   try {
     data = JSON.parse((rawInput || "").replace(/^﻿/, "") || "{}");
-  } catch {
-    process.exit(0);
+  } catch (err) {
+    safeWriteAudit({
+      at: new Date().toISOString(),
+      decision: "blocked",
+      scope: "guard-error",
+      reason: `pre-tool-security could not parse hook input: ${err instanceof Error ? err.message : String(err)}`,
+    });
+    return deny(
+      "Security guard could not parse its input and is failing closed. Retry the tool call.",
+      "guard-error",
+    );
   }
 
   const toolName = data.tool_name || "";
@@ -565,4 +574,15 @@ async function main() {
   process.exit(0);
 }
 
-main().catch(() => process.exit(0));
+main().catch((err) => {
+  safeWriteAudit({
+    at: new Date().toISOString(),
+    decision: "blocked",
+    scope: "guard-error",
+    reason: `pre-tool-security crashed: ${err instanceof Error ? err.message : String(err)}`,
+  });
+  return deny(
+    "Security guard hit an internal error and is failing closed. Fix the guard or retry.",
+    "guard-error",
+  );
+});

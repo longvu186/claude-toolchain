@@ -13,11 +13,11 @@ beliefs. Atoms feed this; this is never just a list of atoms.
 
 ## Profile digest (injected each session)
 
-- **Who:** Solo builder, Vietnamese (thinks/reasons in English). Builds production web apps **and** heavily engineers his own AI toolchain. Highly systematic; invests in automation and tooling, not just features.
+- **Who:** Solo builder, Vietnamese (thinks/reasons in English). Builds production web apps **and** heavily engineers his own AI toolchain (personal-hq). Highly systematic; invests in automation and tooling, not just features.
 - **Comms:** Terse, direct. Action over explanation — implement, don't describe. Challenges assumptions and asks "is X actually better than Y?" — expects evidence, not agreement.
-- **Decision lens:** Architecture over wording. Automation over polling. Prompt-budget conscious (keep always-loaded context tiny). Verify before claiming done.
+- **Decision lens:** Architecture over wording. Automation over polling/manual upkeep. Prompt-budget conscious (keep always-loaded context tiny). Verify before claiming done — including the external effect, not just a local build passing.
 - **Hard rules:** i18n Vietnamese-first (never hardcode VN text). `typecheck`+build must pass before any deploy. UI validation is screenshot-backed, not code-only. Styled confirm modals, never native `window.confirm`. System-first UI (shared tokens/shells before page-local).
-- **Stack:** Primary architecture is **Next.js + Supabase + Cloudflare Workers** (+ Tailwind). Vue 3 `<script setup lang="ts">` + Pinia is a secondary framework, not the default. Also Vercel, Bubble.io. Never call Supabase directly in components — route through the data layer (Next.js: server actions / route handlers / hooks; Vue: stores/composables).
+- **Stack:** Primary architecture is **Next.js + Supabase + Cloudflare Workers** (+ Tailwind). Vue 3 `<script setup lang="ts">` + Pinia is a secondary framework, not the default. Also Vercel, Bubble.io. Never call Supabase directly in components — route through the data layer.
 - **Tooling:** Claude Code is the primary (and now only) AI coding tool. GitNexus for structure/impact. Crawl4AI for web reads. Context7 only for version-sensitive APIs.
 <!-- digest:end -->
 
@@ -27,11 +27,15 @@ beliefs. Atoms feed this; this is never just a list of atoms.
 
 - Solo developer/operator. Vietnamese; UI work is Vietnamese-first bilingual, but internal reasoning and
   notes are in English (explicit correction logged 2026-05-24: "always think in English").
-- Two parallel tracks: (1) shipping real apps (e.g. `app-understanding-portal`, the _tobuso_ migration,
-  the _mrtuktuk_ food app), and (2) building/optimizing a sophisticated personal AI toolchain (this
-  workspace). The toolchain work is a first-class project, not a side activity.
-- Works in long, iterative sessions, often late at night. Comfortable driving many short follow-up runs
-  rather than one big spec.
+- Two parallel tracks: (1) shipping real apps across ~7 businesses run through `personal-hq` (Mr. TukTuk,
+  BCNV, Shield, The Pen Lab, Tobuso, Streamer Kit, Redy, wehear, mrtuktuk), and (2) building/optimizing a
+  sophisticated personal AI toolchain (dev-runner, fleet, memory system) that is a first-class project,
+  not a side activity.
+- Runs a heavily autonomous dev pipeline (overnight batch runs, dev-runner, fleet of remote hosts) and
+  reviews its output rather than hand-writing most code himself. Operator mental health is a standing
+  factor: help must reduce load, not add ceremony or shame-based framing.
+- Works in long, iterative sessions, often overnight/unattended. Comfortable driving many short
+  follow-up runs rather than one big spec.
 
 ## How I work / collaboration
 
@@ -40,27 +44,41 @@ beliefs. Atoms feed this; this is never just a list of atoms.
   high-context collaborator, not a tutor.
 - Protective of context/token budget — values keeping always-loaded instructions small and pushing
   detail into on-demand skills/memories. _(established — recurring theme across toolchain sessions)_
-- Expects verification before "done" claims; has repeatedly caught and corrected unverified or
-  silently-broken automation (e.g. the hooks-never-ran incident).
+- Expects verification before "done" claims, including the **external effect** (deploy timestamp,
+  delivered notification, actual running process) — not just that a local build/typecheck passed.
+  Has repeatedly caught and corrected unverified or silently-broken automation (hooks-never-ran,
+  false "resolved" states, green gates that missed a 500 page). _(established)_
+- Wants exploratory completeness on open-ended work — "cover everything in an explorative manner, not
+  just the things I asked for" — rather than narrowly satisfying the literal ask. _(provisional — one
+  direct statement, but consistent with the batch-review / multi-agent-validation pattern seen across
+  dev-runner sessions)_
+- Sequences work functionality-first: get every action actually working end-to-end before spending a
+  pass on UI/UX polish or optimization. _(provisional — one direct statement: "make sure all actions are
+  working first before we actually proceed with optimizing UI/UX")_
 
 ## Decision tendencies
 
 - **Challenges before adopting.** Routinely asks whether a proposed tool/pattern is actually better than
   the current one (agentmemory vs file memory, "do I need semgrep?", "is anything else worth installing?").
   Give a real comparison with a recommendation, not a menu.
-- **Architecture over surface fixes.** Believes durable wins come from structure, not wording tweaks
-  (his own takeaway from the prompt-budget pass). Frame fixes at the system level.
+- **Architecture over surface fixes.** Believes durable wins come from structure, not wording tweaks.
+  Frame fixes at the system level — visible again in the toolchain's own "learn from failures" / gate
+  proposals being aimed at the mechanism, not the symptom.
 - **Automation over manual upkeep.** Prefers mechanisms that self-maintain (hooks, queues, gates) over
   processes that depend on him remembering to run them. Manual logs he set up tend to get abandoned.
-- **Evidence-driven.** Wants screenshot-backed UI validation, build gates, and raw-evidence artifacts
-  kept append-only.
+- **Evidence-driven.** Wants screenshot-backed UI validation, build gates, raw-evidence artifacts kept
+  append-only, and root-cause diagnosis over assumption (e.g. insisting on `EXPLAIN QUERY PLAN` rather
+  than assuming an index gets picked).
+- **Operator time is the scarce resource, not compute.** Repeated asks to make drift/breakage
+  self-announcing (docs-index drift, dead fleet credentials, stale estimates) instead of relying on him
+  to notice — a specific case of the automation-over-manual-upkeep tendency.
 
 ## Domain & skill map
 
 - **Strong:** Next.js + Supabase + Cloudflare Workers architecture (primary); Vue/Pinia/Tailwind (secondary); design-system/token thinking;
-  AI-toolchain engineering (hooks, skills, agents, MCP wiring); prompt/context economics.
-- **Active focus areas:** Claude Code automation depth, memory/learning systems, UI consistency
-  guardrails, common-feature research baselines.
+  AI-toolchain engineering (hooks, skills, agents, MCP wiring, dev-runner/fleet orchestration); prompt/context economics.
+- **Active focus areas:** autonomous dev-runner reliability (pause/resume, remote-host parity, gate
+  scoping), fleet/multi-VPS operations, memory/learning-loop maturity, UI consistency guardrails.
 - _(Leave gaps unstated unless evidence shows a recurring stumbling block — do not invent weaknesses.)_
 
 ## Proven preferences (see CLAUDE.md for full policy)
@@ -71,6 +89,9 @@ beliefs. Atoms feed this; this is never just a list of atoms.
 - System-first UI: shared tokens/variants/layout shells before page-local styling. _(established)_
 - Build gates (`typecheck` + build) before any deploy; close code sessions with scoped validation + run log. _(established)_
 - API reverse-engineering: raw evidence artifacts append-only; add index files, never rewrite captures. _(established)_
+- Group related dev tasks under one initiative/project container instead of 1:1 task-per-item. _(established — repo memory: `feedback_group-dev-tasks-under-one-initiative`)_
+- Prefer visual/diagrammatic operations UI (bars, colour, diagrams) over raw tables; idle state reads as neutral grey, not alarm red. _(established — repo memory: `feedback_visual-first-operations-ui`)_
+- After any real (non-trivial) autonomous action, give a detailed itemized summary of what happened — skip only the raw shell/bash transcript. _(established — repo memory: `feedback_detailed-ops-summaries`)_
 
 ## Open corrections to honor
 
@@ -78,17 +99,32 @@ _(Append new corrections here as `/consolidate-memory` promotes them from the si
 internalized into CLAUDE.md or a skill.)_
 
 - Reason/think in English internally even when the product/content is Vietnamese. _(established — 2026-05-24)_
+- Verify the actual external effect of an action (deploy shipped, message delivered, process serving)
+  before reporting it done — a false "resolved" costs more trust than an honest "not done yet." _(established)_
+- Dev/code-writing work is scoped and assigned to a dev agent; general chat never writes code directly. _(established — repo memory: `feedback_dev-work-to-dev-agent`)_
+- An earlier "deploy"/"go ahead" authorizes that specific action, not a later or larger batch of changes — re-confirm per turn/scope, even though his day-to-day instructions carry standing approval to execute the work itself. _(established — repo memory: `feedback_deploy-authorization-per-turn` + `feedback_operator-approval-is-standing`; the two coexist: standing approval covers doing the work, deploy/publish/send actions still need a fresh confirm each time)_
 
 ## Anti-patterns to avoid with me
 
 - Don't pad responses with explanation he didn't ask for.
 - Don't present a flat menu when he asked "which is better" — pick one and justify it.
 - Don't add always-loaded instruction bloat; route detail to skills/memories.
-- Don't claim something works without running the verification.
+- Don't claim something works without running the verification, including checking the real external effect.
 - Don't set up manual-upkeep processes when a hook/queue could maintain it automatically.
+- Don't file 1:1 dev tasks when several belong under one initiative/container.
+- Don't polish UI/UX before every underlying action actually works end-to-end.
 
 ## Changelog
 
 - 2026-06-08 — Profile created. Seeded from `~/.claude/CLAUDE.md`, project auto-memories, and run-logs.
   Most entries are `established` (drawn from repeated, codified policy); a few synthesized tendencies are
   high-confidence from run-log patterns.
+- 2026-08-23 — Consolidation pass. Reviewed `~/.claude/logs/profile-signals.jsonl` (7,435 lines) and
+  `personal-hq`'s `MEMORY.md`/`docs/run-logs`. Promoted two new provisional hypotheses (exploratory
+  completeness over literal scope; functionality-before-polish sequencing). Folded three well-established
+  repo-memory feedback atoms into cross-project "Proven preferences"/"Anti-patterns" (group dev tasks
+  under one initiative, visual-first ops UI, detailed post-action summaries) since each has recurred
+  across multiple sessions. Reconciled an apparent tension between "deploy authorization is per-turn"
+  and "operator approval is standing" into one note — they are not contradictory, they cover different
+  action classes (execution vs. publish/deploy). No facts retired. `lesson-signals.jsonl` does not exist
+  yet — no self-correction lesson atoms to fold in this pass.

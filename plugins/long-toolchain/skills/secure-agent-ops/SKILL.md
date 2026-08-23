@@ -46,6 +46,14 @@ the attack surface; these are the defenses.
 - The run-logger redacts sensitive keys live. Periodically run `node ~/.claude/security/secret-scan.cjs`
   to sweep durable memory/profile/learning/log surfaces (not transcripts). Strip + rotate anything real.
 - Never write secrets/keys/private URLs into memories, profiles, proposals, or the ledger.
+- **Probing a live authenticated API that can return sensitive real-world data (revenue, PII, business
+  records): never print the raw response body, even "just to check the shape."** Ambient infra you can't
+  fully suppress (hook-based run-loggers, transcript capture) will auto-persist verbatim whatever a
+  `console.log`/bash-tool-result prints — the control point is not printing the value in the first place,
+  not scrubbing after. Two-step pattern instead: (1) write the full raw response to a gitignored file
+  only, (2) inspect it through a shape-only view (recursively replace every leaf value with its `typeof`,
+  or just a row/array count) so you can reason about structure without a real value ever passing through
+  a logged stream.
 - **Raw session-transcript auto-capture is a standing re-leak risk.** If a secret leaked into a tool-call transcript earlier in a session (even one already handled, e.g. rotation skipped by user choice), any `docs/ai/run-logs/.raw/*.jsonl`-style raw-transcript-capture file for that session still holds it verbatim — the run-logger's live redaction (above) doesn't retroactively scrub already-written raw captures. Before committing accumulated session artifacts/run-logs, grep the raw transcript(s) for the secret's fingerprint (e.g. a JWT header prefix — count-only `grep -c`, never print the match) and exclude/redact any hit before staging. Check this whenever a task involves "commit session logs/artifacts," not only once per leak.
 - **Transforming a secret into a new format (e.g. a Docker env-file into another tool's own config
   command) should happen entirely server-side, never round-tripped through the agent's own transcript.**
