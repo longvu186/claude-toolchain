@@ -149,7 +149,11 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 - Dev-runner plans can go stale mid-generation: if a mid-plan clarifying-question timeout fires before the operator's last answer is read, the plan uses outdated assumptions. Bake corrections directly into the task description itself rather than relying on Q&A timing.
 - Static-site SPA fallbacks return HTTP 200 for any unknown path (serving index.html), so status-code-only verification of asset routes is insufficient — a broken image request can 200 with the wrong content-type. Verify content-type, not just status code, when checking asset-serving routes/overlays.
 - An SPA/Pages fallback returns HTTP 200 for any unknown path (serving index.html), so a status-code-only check on an overlaid asset route (image/font/favicon) can pass while the browser actually receives HTML. Verify by content-type, not status code, for any Worker-route-over-static-site overlay.
+- A skill being installed/available for a dev task is not enough for it to actually get used — the task brief must invoke it by name (e.g. 'apply the hallmark-design skill'), or the agent free-hands a generic pass even with the skill present and reachable.
+- Any systemd unit with fast auto-restart and no StartLimitBurst set can crash-loop invisibly for days without ever reaching a 'failed' state — audit restart counters, not just unit status, across all VPS-hosted services regardless of business.
 <!-- hq-auto-lessons:end -->
+
+
 
 
 
