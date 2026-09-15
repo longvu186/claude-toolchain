@@ -151,7 +151,11 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 - An SPA/Pages fallback returns HTTP 200 for any unknown path (serving index.html), so a status-code-only check on an overlaid asset route (image/font/favicon) can pass while the browser actually receives HTML. Verify by content-type, not status code, for any Worker-route-over-static-site overlay.
 - A skill being installed/available for a dev task is not enough for it to actually get used — the task brief must invoke it by name (e.g. 'apply the hallmark-design skill'), or the agent free-hands a generic pass even with the skill present and reachable.
 - Any systemd unit with fast auto-restart and no StartLimitBurst set can crash-loop invisibly for days without ever reaching a 'failed' state — audit restart counters, not just unit status, across all VPS-hosted services regardless of business.
+- When mirroring/migrating a live site and something looks broken (garbage text, malformed markup), curl the live source directly before assuming the crawler/migration tool introduced the bug — it may be a pre-existing defect on the source being faithfully copied.
+- npm ci/install run under NODE_ENV=production silently skips devDependencies — any CLI tool needed at deploy time (e.g. wrangler) must live in dependencies, not devDependencies, or the deploy step fails with '<tool>: not found' despite lockfile listing it.
 <!-- hq-auto-lessons:end -->
+
+
 
 
 
