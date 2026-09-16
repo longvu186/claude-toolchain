@@ -153,7 +153,11 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 - Any systemd unit with fast auto-restart and no StartLimitBurst set can crash-loop invisibly for days without ever reaching a 'failed' state — audit restart counters, not just unit status, across all VPS-hosted services regardless of business.
 - When mirroring/migrating a live site and something looks broken (garbage text, malformed markup), curl the live source directly before assuming the crawler/migration tool introduced the bug — it may be a pre-existing defect on the source being faithfully copied.
 - npm ci/install run under NODE_ENV=production silently skips devDependencies — any CLI tool needed at deploy time (e.g. wrangler) must live in dependencies, not devDependencies, or the deploy step fails with '<tool>: not found' despite lockfile listing it.
+- A dev-runner task stuck in 'blocked' status after repeated usage-exhausted failures doesn't resume via dev_queue/dev_run_now alone — required manually replicating the app's requeue() DB transition (blocked/review/paused→queued) since no MCP tool exposes an unblock action.
+- Supabase service-role client bypasses RLS, so chaining `.select(pk).maybeSingle()` right after an UPDATE to detect 0-rows-matched vs real error is safe with service-role — the same pattern under an anon/user-scoped client would need an explicit RLS-visibility check first.
 <!-- hq-auto-lessons:end -->
+
+
 
 
 
