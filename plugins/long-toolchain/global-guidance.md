@@ -155,7 +155,9 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 - npm ci/install run under NODE_ENV=production silently skips devDependencies — any CLI tool needed at deploy time (e.g. wrangler) must live in dependencies, not devDependencies, or the deploy step fails with '<tool>: not found' despite lockfile listing it.
 - A dev-runner task stuck in 'blocked' status after repeated usage-exhausted failures doesn't resume via dev_queue/dev_run_now alone — required manually replicating the app's requeue() DB transition (blocked/review/paused→queued) since no MCP tool exposes an unblock action.
 - Supabase service-role client bypasses RLS, so chaining `.select(pk).maybeSingle()` right after an UPDATE to detect 0-rows-matched vs real error is safe with service-role — the same pattern under an anon/user-scoped client would need an explicit RLS-visibility check first.
+- Using a raw NUL byte (\x00) as a string-key delimiter (e.g. in a Map key composed from two fields) makes git/file/ripgrep classify the whole file as binary, breaking `git diff`. Use a printable, still-collision-safe delimiter like \x1f instead.
 <!-- hq-auto-lessons:end -->
+
 
 
 
