@@ -25,8 +25,11 @@ beliefs. Atoms feed this; this is never just a list of atoms.
 
 ## Identity & context
 
-- Solo developer/operator. Vietnamese; UI work is Vietnamese-first bilingual, but internal reasoning and
-  notes are in English (explicit correction logged 2026-05-24: "always think in English").
+- Solo developer/operator. Vietnamese; UI work is Vietnamese-first bilingual. Everything he reads —
+  plans, docs, tasks, chat replies — is English; Vietnamese is reserved for content handed to someone
+  else (published posts/captions, survey text, on-set prompts, brand copy). Refined 2026-08-03 from the
+  narrower 2026-05-24 "think in English" rule once it became clear plans/docs/task titles stay English
+  too, not just internal reasoning.
 - Two parallel tracks: (1) shipping real apps across ~7 businesses run through `personal-hq` (Mr. TukTuk,
   BCNV, Shield, The Pen Lab, Tobuso, Streamer Kit, Redy, wehear, mrtuktuk), and (2) building/optimizing a
   sophisticated personal AI toolchain (dev-runner, fleet, memory system) that is a first-class project,
@@ -72,6 +75,19 @@ beliefs. Atoms feed this; this is never just a list of atoms.
 - **Operator time is the scarce resource, not compute.** Repeated asks to make drift/breakage
   self-announcing (docs-index drift, dead fleet credentials, stale estimates) instead of relying on him
   to notice — a specific case of the automation-over-manual-upkeep tendency.
+- **Accepts an override after one evidence-backed challenge.** When live evidence contradicts his
+  stated intent, raise it once with the strongest evidence — that's correct, it catches real risk. If he
+  restates his position, accept it and move on; he has business/product context (e.g. deliberate
+  placeholder data) that isn't derivable from code/DB inspection alone. A second challenge or reframing
+  reads as not listening, even when technically accurate. _(established — 2026-09-14 Tobuso incident,
+  explicit "do not question me anymore"; repo memory: `feedback_accept-operator-override-after-one-check`)_
+- **In Auto Mode, ceremony after a conversationally-approved design is a redundant blocker.** Once he's
+  said "yes, build it" in conversation, proceed straight to implementation — don't insert a separate
+  spec-doc-to-file + second-review + formal handoff gate for something already agreed. Still explore
+  options and get an explicit yes first; this only cuts the paperwork after that yes. Does not apply in
+  explicit Plan Mode or when he's asked for a written artifact. _(established — 2026-07-07: "I didn't
+  initiate you in plan mode, but auto mode. always proceed to build in auto mode."; repo memory:
+  `feedback_auto-mode-skip-gates`)_
 
 ## Domain & skill map
 
@@ -89,16 +105,31 @@ beliefs. Atoms feed this; this is never just a list of atoms.
 - System-first UI: shared tokens/variants/layout shells before page-local styling. _(established)_
 - Build gates (`typecheck` + build) before any deploy; close code sessions with scoped validation + run log. _(established)_
 - API reverse-engineering: raw evidence artifacts append-only; add index files, never rewrite captures. _(established)_
-- Group related dev tasks under one initiative/project container instead of 1:1 task-per-item. _(established — repo memory: `feedback_group-dev-tasks-under-one-initiative`)_
+- Dev/research tasks don't need a parent container — file with no `parentTaskId` unless a genuine
+  regular task owns it; a regular task still keeps sub-tasks. The underlying anti-duplication principle
+  (don't spin up a near-identical container per task) still stands, just not via mandatory grouping.
+  _(established — 2026-08-29 reversal of the 2026-08-16 "always group under one container" rule; repo
+  memory: `feedback_group-dev-tasks-under-one-initiative`, shipped HQ-DEV-204)_
 - Prefer visual/diagrammatic operations UI (bars, colour, diagrams) over raw tables; idle state reads as neutral grey, not alarm red. _(established — repo memory: `feedback_visual-first-operations-ui`)_
 - After any real (non-trivial) autonomous action, give a detailed itemized summary of what happened — skip only the raw shell/bash transcript. _(established — repo memory: `feedback_detailed-ops-summaries`)_
+- "Compact" means tighter **vertical** density (row height, padding, line-height) — never narrower or
+  collapsible unless he explicitly asks. Don't add hide/collapse/pin behavior he didn't request; measure
+  the actual space gained rather than asserting it "now fits." _(established — repo memory:
+  `feedback_compact-means-vertical-density`)_
+- Check what HQ already holds (calendar, DB, task state, git log) before asking him to re-tell
+  something — asking for info the system already has produces a false picture and wastes his time.
+  _(established — repo memory: `feedback_read-hq-data-before-asking`)_
 
 ## Open corrections to honor
 
 _(Append new corrections here as `/consolidate-memory` promotes them from the signal queue. Retire once
 internalized into CLAUDE.md or a skill.)_
 
-- Reason/think in English internally even when the product/content is Vietnamese. _(established — 2026-05-24)_
+- Write everything he reads in English (plans, docs, task titles, chat) — Vietnamese only for content
+  that goes to someone else. Applies to porting research into downstream repos too: translate
+  legal/contract vocabulary rather than copying it verbatim (keep only true identifiers untranslated).
+  _(established — 2026-05-24 origin, refined 2026-08-03/08-04; repo memory:
+  `feedback_questions-english-only`)_
 - Verify the actual external effect of an action (deploy shipped, message delivered, process serving)
   before reporting it done — a false "resolved" costs more trust than an honest "not done yet." _(established)_
 - Dev/code-writing work is scoped and assigned to a dev agent; general chat never writes code directly. _(established — repo memory: `feedback_dev-work-to-dev-agent`)_
@@ -111,8 +142,11 @@ internalized into CLAUDE.md or a skill.)_
 - Don't add always-loaded instruction bloat; route detail to skills/memories.
 - Don't claim something works without running the verification, including checking the real external effect.
 - Don't set up manual-upkeep processes when a hook/queue could maintain it automatically.
-- Don't file 1:1 dev tasks when several belong under one initiative/container.
 - Don't polish UI/UX before every underlying action actually works end-to-end.
+- Don't ask him to re-tell something HQ's own data (calendar/DB/git log) already holds.
+- Don't re-verify or reframe a contradiction a second time once he's explicitly restated his position —
+  one evidence-backed challenge is the right call, a second reads as not listening.
+- Don't add collapse/hide/pin UI behavior when he asked for "compact" — that means vertical density.
 
 ## Changelog
 
@@ -128,3 +162,19 @@ internalized into CLAUDE.md or a skill.)_
   and "operator approval is standing" into one note — they are not contradictory, they cover different
   action classes (execution vs. publish/deploy). No facts retired. `lesson-signals.jsonl` does not exist
   yet — no self-correction lesson atoms to fold in this pass.
+- 2026-09-18 — Consolidation pass. `profile-signals.jsonl` (6,208 lines since the 2026-08-23 archive)
+  turned out to be mostly raw dev-runner self-narration fragments (low signal for genuine operator
+  corrections), so cross-referenced personal-hq's `MEMORY.md` `feedback_*` entries instead — the
+  curated view of the same underlying signal. **Retired one contradicted fact:** "group dev tasks under
+  one initiative container" was reversed 2026-08-29 (HQ-DEV-204 shipped the opposite: dev/research
+  tasks file with no parent by default); replaced with the current rule, anti-duplication half kept.
+  **Promoted four new `established` facts** (≥2 observations or a single unambiguous operator statement
+  treated as durable policy): accept-override-after-one-challenge, auto-mode-skips-ceremony,
+  compact-means-vertical-density, read-HQ-data-before-asking. **Refined** the English/Vietnamese rule —
+  narrower "think in English" superseded by the broader 2026-08-03 "everything I read is English,
+  Vietnamese only for external content" rule, plus the 2026-08-04 legal-vocabulary-translation addendum.
+  **Did not archive/truncate `profile-signals.jsonl` this pass** — no shell/file-copy tool was available
+  in this session to move a 2.6MB file without loading it whole into context (unsafe at 86% context
+  usage); the live file still holds all 6,208 lines. Next consolidation pass (or one with Bash access)
+  should archive lines 1–6208 to `~/.claude/learning/archive/profile-signals-2026-09-18.jsonl` and
+  truncate. No `lesson-signals.jsonl` exists yet.
