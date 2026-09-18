@@ -178,3 +178,13 @@ internalized into CLAUDE.md or a skill.)_
   usage); the live file still holds all 6,208 lines. Next consolidation pass (or one with Bash access)
   should archive lines 1–6208 to `~/.claude/learning/archive/profile-signals-2026-09-18.jsonl` and
   truncate. No `lesson-signals.jsonl` exists yet.
+- 2026-09-19 — Re-ran on request; verified the 2026-09-18 pass's edits are intact (digest, retired fact,
+  four promoted corrections all still present). Read the 6 signal lines added since (6209–6214, now
+  6214 total) — all cross-project technical postmortem notes (git-stash cross-contamination, a
+  `vps-map` port-resolver race), not operator-behavior corrections, so nothing new to promote. Confirmed
+  `profile-signals.jsonl` archiving is still blocked: attempted a full read this pass and it hard-failed
+  (1.33M tokens, over the 25k read ceiling) — this is not a "no Bash available" workaround problem, it's
+  that the file is categorically too large for a Read→Write round-trip regardless of tool access; the
+  eventual fix needs a `mv`/`split`-capable shell session. Reset `~/.claude/logs/_consolidation-state.json`
+  (`lastConsolidation` was still 2026-08-23 with stale 4,423/6,200 counters even though the 2026-09-18
+  content pass had already happened) so the SessionStart nag reflects reality.
