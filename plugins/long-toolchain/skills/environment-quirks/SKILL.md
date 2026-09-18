@@ -143,6 +143,21 @@ description: "Environment-specific gotchas and workarounds for this user's stack
   unattended, and name the exact unblock path in the run log when it happens (as with the Supabase case
   above) rather than silently treating the step as done.
 
+## Playwright MCP — Root Chromium Sandbox (this VPS)
+
+- `mcp__plugin_playwright_playwright__browser_navigate` (and other `browser_*` tools) fail outright
+  when the MCP server's Chromium tries to launch as root without `--no-sandbox`: "Chromium sandboxing
+  failed! ... Running as root without --no-sandbox is not supported." No parameter on
+  `browser_navigate`/`browser_take_screenshot` exposes launch args — this is a launch-time
+  MCP-server-config problem, not something fixable per-call.
+- The real fix (adding `--no-sandbox` to the Playwright MCP server's launch args) is a shared-resource
+  config change — other sessions/tenants on this VPS use the same server — so don't edit it
+  unilaterally. Stop, report the blocker plainly, and ask the user whether to fix the shared config or
+  skip screenshot verification for that task.
+- Until that shared config is fixed, treat local screenshot verification via Playwright MCP tools as
+  blocked on this VPS by default, so a future session doesn't re-debug the same launch failure from
+  scratch.
+
 ## Claude Code MCP Server Management
 
 - **stdio-transport MCP servers spawn once per session** — each is a child process on a 1:1 stdin/stdout pipe, so N concurrent sessions = N copies (chrome-devtools-mcp, @playwright/mcp, context7 each ~100-300MB). This is the dominant RAM multiplier on a shared box, on top of the `claude` + Node host per session (~400-600MB each).
@@ -216,6 +231,17 @@ BetterStack it works with the existing token; for Sentry it works but only with 
   [ -n "$PID" ] && kill "$PID"
   ```
   If a protected service genuinely needs cycling, use `systemctl restart <svc>` rather than signalling the PID.
+- **`vps-map port <n>`'s ownership claim can lag or misattribute — don't trust it (or your own
+  assumption) without verifying live process ancestry.** Observed: `vps-map port 3450` first reported
+  "unknown owner" (correctly free), a session started its own `npm run dev -p 3450` there, and
+  immediately afterward `vps-map port 3450` reported that same port as
+  "PRODUCTION SERVICE — code-server@root.service" — a real but unrelated systemd unit that was not
+  actually listening on that port. Resolve any conflict (claimed or apparent) by walking the PID `ss
+-ltnp` shows LISTENing on the port up through its parent chain
+  (`ps -p <pid> -o pid,ppid,cmd`, repeat on the `ppid`) to confirm what really owns it, then kill only
+  that exact verified PID — never a broad `pkill` pattern (same anti-pattern as the
+  `personal-hq.service` near-miss above; the `protected-service` guard hook is the last line of
+  defense against a pattern that matches wider than intended, not the first check).
 - **Freeze protection:** earlyoom breaker + SSH/login CPU/IO scheduling armor + cgroup memory caps on code-server guard against OOM freezes from uncapped extension-host processes.
 - **`vps-runaway-guard.service`** (`/usr/local/sbin/vps-runaway-guard.sh`, added 2026-07-02) — companion to earlyoom, closes the gap where earlyoom's hardwired `mem AND swap` trigger never fires while swap is exhausted but RAM still has headroom (that gap caused a full `*.citizendev.io` **524 outage** from a runaway `ugrep`). Does two things: (1) SIGKILLs any `ugrep/grep/rg` running >90s (catastrophic-regex backtracking / orphaned Claude Bash search — a bundled-ugrep-by-abspath call can't be `timeout`-wrapped via PATH), (2) SIGTERM→SIGKILL the largest non-protected RSS when free swap ≤8% AND PSI mem `some avg10` ≥15. Capped 32MB/15% CPU, `OOMScoreAdjust=-900`. **For any 524 on this box, check `uptime`/`free -h` FIRST — it's resource saturation, not the tunnel.** See memory `vps-524-swap-thrash-runaway-grep`.
 - Biggest RAM consumers: code-server + TS language server (~1.4GB), concurrent Claude Code sessions (~400-600MB each), per-session MCP fleets (see MCP Server Management above).
