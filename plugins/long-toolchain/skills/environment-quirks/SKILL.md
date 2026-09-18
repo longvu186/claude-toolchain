@@ -143,25 +143,37 @@ description: "Environment-specific gotchas and workarounds for this user's stack
   unattended, and name the exact unblock path in the run log when it happens (as with the Supabase case
   above) rather than silently treating the step as done.
 
-## Playwright MCP — Root Chromium Sandbox (this VPS)
+## Playwright MCP — Root Chromium Sandbox (this VPS) — FIXED 2026-09-18
 
-- `mcp__plugin_playwright_playwright__browser_navigate` (and other `browser_*` tools) fail outright
-  when the MCP server's Chromium tries to launch as root without `--no-sandbox`: "Chromium sandboxing
-  failed! ... Running as root without --no-sandbox is not supported." No parameter on
-  `browser_navigate`/`browser_take_screenshot` exposes launch args — this is a launch-time
-  MCP-server-config problem, not something fixable per-call.
-- The real fix (adding `--no-sandbox` to the Playwright MCP server's launch args) is a shared-resource
-  config change — other sessions/tenants on this VPS use the same server — so don't edit it
-  unilaterally. Stop, report the blocker plainly, and ask the user whether to fix the shared config or
-  skip screenshot verification for that task.
-- Until that shared config is fixed, treat local screenshot verification via Playwright MCP tools as
-  blocked on this VPS by default, so a future session doesn't re-debug the same launch failure from
-  scratch.
+- Symptom (historical): `mcp__plugin_playwright_playwright__browser_navigate` (and other `browser_*`
+  tools) failed outright when the MCP server's Chromium tried to launch as root without
+  `--no-sandbox`: "Chromium sandboxing failed! ... Running as root without --no-sandbox is not
+  supported." No parameter on `browser_navigate`/`browser_take_screenshot` exposes launch args — it
+  was a launch-time MCP-server-config problem, not something fixable per-call.
+- **Fixed at user scope on 2026-09-18** (applies to new sessions across all projects on this
+  account), by explicit user request, using the same "disable plugin variant → re-add via `claude mcp
+add`" pattern already used for context7 (see MCP Server Management below):
+  1. `claude plugin disable playwright` — disabled the plugin-sourced server
+     (`plugin:playwright:playwright` from `playwright@claude-plugins-official`). Confirmed first via
+     `claude plugin details playwright` that the plugin's only component was that one MCP server (0
+     skills/agents/hooks), so disabling it lost nothing else.
+  2. `claude mcp add --scope user playwright -- npx @playwright/mcp@latest --no-sandbox` — registered
+     a replacement using the package's own documented `--no-sandbox` CLI flag.
+     Verified connected via `claude mcp list` / `claude mcp get playwright` ("✔ Connected").
+- **Tool-name prefix changed**: the new server is no longer plugin-namespaced, so tools are
+  `mcp__playwright__browser_navigate` etc., not `mcp__plugin_playwright_playwright__browser_navigate`.
+- **Not hot-reloaded mid-session.** A session whose tool list was established before this change still
+  only sees the old `mcp__plugin_playwright_playwright__*` tools via `ToolSearch` — MCP connections are
+  set up at session start, not live-reloaded when `~/.claude.json` changes. A session reconnect (new
+  session, or possibly `/mcp` — not yet confirmed from inside a running session) is required before the
+  new sandbox-free `mcp__playwright__*` tools are actually callable. If browser tools are missing or
+  still show the old prefix, don't re-debug the sandbox issue — start a fresh session first.
 
 ## Claude Code MCP Server Management
 
 - **stdio-transport MCP servers spawn once per session** — each is a child process on a 1:1 stdin/stdout pipe, so N concurrent sessions = N copies (chrome-devtools-mcp, @playwright/mcp, context7 each ~100-300MB). This is the dominant RAM multiplier on a shared box, on top of the `claude` + Node host per session (~400-600MB each).
 - **To share one server across all sessions, switch it to HTTP transport:** run one long-lived server (or use a hosted endpoint) and point every session at it: `claude mcp add --scope user --transport http <name> <url>`. Decided for context7 → hosted endpoint `https://mcp.context7.com/mcp` (keyless, zero local process); disable the stdio plugin variant first.
+- **Recurring pattern to fix a plugin-bundled MCP server's launch config (flags, transport, etc.): `claude plugin disable <name>` first, then `claude mcp add --scope user <name> -- <command with the needed flags/config>`.** Plugin-sourced servers don't expose their launch args for editing, so replacing the whole server registration is the fix, not patching plugin config in place. Confirmed twice: context7 (stdio → hosted HTTP endpoint) and playwright (added `--no-sandbox`, see above). Before disabling, check `claude plugin details <name>` — only safe to disable outright if the plugin's sole component is that MCP server; if it also bundles skills/agents/hooks you'd lose, re-add those separately instead. This is a shared/user-scope config change — confirm with the user before doing it unilaterally, as with any shared-resource edit on this box.
 - Browser-driving MCPs are poor candidates for sharing (sessions contend for one browser) — better to drop a redundant one than share it. `chrome-devtools-mcp` was dropped entirely as redundant with `@playwright/mcp`.
 - Editing `~/.claude/settings.json` `enabledPlugins` directly is blocked by the self-modification guard — use the `claude plugin`/`claude mcp` CLI instead.
 
