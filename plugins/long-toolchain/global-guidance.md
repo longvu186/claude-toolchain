@@ -158,7 +158,11 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 - Using a raw NUL byte (\x00) as a string-key delimiter (e.g. in a Map key composed from two fields) makes git/file/ripgrep classify the whole file as binary, breaking `git diff`. Use a printable, still-collision-safe delimiter like \x1f instead.
 - drizzle-orm wraps every underlying driver error (e.g. postgres.PostgresError) in its own DrizzleQueryError class, so `instanceof <raw driver error>` checks on caught errors silently never match at runtime. Unwrap the cause first in any project using drizzle-orm + a node postgres driver.
 - Dev-runner worktrees are typically not their own GitNexus-registered index, so impact()/detect_changes() silently fail to run there regardless of business — compensate with full manual diff + grep of every call site of touched symbols, don't skip the check.
+- pnpm's build-script-approval flow (pnpm approve-builds) can leave an unresolved placeholder comment in pnpm-workspace.yaml (e.g. 'esbuild: set this to true or false'); check for and strip it before committing in any pnpm-managed repo — it has already recurred twice in one project.
+- pnpm-workspace.yaml's 'esbuild: set this to true or false' placeholder from pnpm approve-builds keeps recurring as an accidental commit even in unrelated feature branches — now confirmed a 3rd time; a pre-commit diff review should explicitly check this file even when gates are green.
 <!-- hq-auto-lessons:end -->
+
+
 
 
 
