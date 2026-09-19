@@ -160,7 +160,9 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 - Dev-runner worktrees are typically not their own GitNexus-registered index, so impact()/detect_changes() silently fail to run there regardless of business — compensate with full manual diff + grep of every call site of touched symbols, don't skip the check.
 - pnpm's build-script-approval flow (pnpm approve-builds) can leave an unresolved placeholder comment in pnpm-workspace.yaml (e.g. 'esbuild: set this to true or false'); check for and strip it before committing in any pnpm-managed repo — it has already recurred twice in one project.
 - pnpm-workspace.yaml's 'esbuild: set this to true or false' placeholder from pnpm approve-builds keeps recurring as an accidental commit even in unrelated feature branches — now confirmed a 3rd time; a pre-commit diff review should explicitly check this file even when gates are green.
+- `systemctl show -p Environment` dumps a unit's full environment including secret values in plaintext — never run it unfiltered on any unit known to carry secrets; grep for a specific non-secret key, or check behavior via logs/journal instead.
 <!-- hq-auto-lessons:end -->
+
 
 
 

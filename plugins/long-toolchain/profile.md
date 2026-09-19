@@ -19,6 +19,7 @@ beliefs. Atoms feed this; this is never just a list of atoms.
 - **Hard rules:** i18n Vietnamese-first (never hardcode VN text). `typecheck`+build must pass before any deploy. UI validation is screenshot-backed, not code-only. Styled confirm modals, never native `window.confirm`. System-first UI (shared tokens/shells before page-local).
 - **Stack:** Primary architecture is **Next.js + Supabase + Cloudflare Workers** (+ Tailwind). Vue 3 `<script setup lang="ts">` + Pinia is a secondary framework, not the default. Also Vercel, Bubble.io. Never call Supabase directly in components — route through the data layer.
 - **Tooling:** Claude Code is the primary (and now only) AI coding tool. GitNexus for structure/impact. Crawl4AI for web reads. Context7 only for version-sensitive APIs.
+
 <!-- digest:end -->
 
 ---
@@ -188,3 +189,17 @@ internalized into CLAUDE.md or a skill.)_
   eventual fix needs a `mv`/`split`-capable shell session. Reset `~/.claude/logs/_consolidation-state.json`
   (`lastConsolidation` was still 2026-08-23 with stale 4,423/6,200 counters even though the 2026-09-18
   content pass had already happened) so the SessionStart nag reflects reality.
+- 2026-09-20 — Re-ran on request. Read the 26 signal lines added since the prior pass (6215-6240): all
+  are dev-runner/session-internal fragments again - a dev_events index task-spec (HQ-DEV-255, already
+  captured in personal-hq's own project profile), tobuso-migration design notes (doc-templating engine
+  choice, SQL/JSON hybrid storage), a home-router-wifi aside - zero are operator behavioral corrections.
+  Same for the 4 new `_memory-curation-queue.jsonl` entries (personal-hq): all empty preferences/
+  corrections/lessons arrays. **No beliefs promoted or retired this pass** - nothing rose above noise.
+  Confirmed `profile-signals.jsonl` (6,240 lines) still cannot be archived without a shell session:
+  manually chunking a Read-then-Write round-trip at the tool's ~110-lines/25k-token ceiling would take
+  60+ round trips for content that is net-negative signal, not worth doing by hand this way.
+  **Recommendation surfaced, not yet actioned:** the signal-logging hook appears to classify dev-runner
+  internal task-spec/code-citation fragments as `kind:"correction"` - a source-side labeling bug, not a
+  downstream filtering gap; fixing it (stop logging non-operator text as corrections) would do more for
+  signal quality than any amount of consolidation-side archiving. Reset
+  `~/.claude/logs/_consolidation-state.json` (28 corrections / 95 runs since the prior pass, all noise).
