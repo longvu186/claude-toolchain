@@ -89,6 +89,14 @@ beliefs. Atoms feed this; this is never just a list of atoms.
   explicit Plan Mode or when he's asked for a written artifact. _(established — 2026-07-07: "I didn't
   initiate you in plan mode, but auto mode. always proceed to build in auto mode."; repo memory:
   `feedback_auto-mode-skip-gates`)_
+- **A business VPS that already has its own on-host coding agent is a standing dispatch target, not a
+  request for permission.** Once a repo carries its own agent tooling (AGENTS.md/CLAUDE.md, GitNexus,
+  run-log convention), finding a bug/fix there means dispatching the fix over SSH immediately in the
+  same turn — never "should I fix this myself or do you want to." Only pause for something genuinely
+  destructive/ambiguous (irreversible data loss, a prod cutover), not for "who runs the fix" when the
+  answer is already the default. _(established — 2026-08-19/08-20, sharply worded: re-asking after
+  already having established this practice read as not having internalized it; repo memory:
+  `feedback_dispatch-fix-to-remote-host-agent`)_
 
 ## Domain & skill map
 
@@ -148,6 +156,8 @@ internalized into CLAUDE.md or a skill.)_
 - Don't re-verify or reframe a contradiction a second time once he's explicitly restated his position —
   one evidence-backed challenge is the right call, a second reads as not listening.
 - Don't add collapse/hide/pin UI behavior when he asked for "compact" — that means vertical density.
+- Don't ask "should I fix this myself or do you want to" when a repo/host already has its own on-host
+  agent — dispatch there is the standing default, not a decision to re-litigate each time.
 
 ## Changelog
 
@@ -203,3 +213,18 @@ internalized into CLAUDE.md or a skill.)_
   downstream filtering gap; fixing it (stop logging non-operator text as corrections) would do more for
   signal quality than any amount of consolidation-side archiving. Reset
   `~/.claude/logs/_consolidation-state.json` (28 corrections / 95 runs since the prior pass, all noise).
+- 2026-09-21 — Re-ran on request. The counter had climbed to 214 corrections / 153 runs since the last
+  reset despite the prior pass resetting it to 28/95 — confirms sizeable dev-runner activity volume, not
+  a broken counter. Read all 213 new `profile-signals.jsonl` lines (6241-6453): every one is the same
+  class of noise already diagnosed twice — dev-runner task-brief/plan-diff text re-logged verbatim across
+  dozens of `sessionId`s (the runaway-loop-guard plan, the `listEventsForTask` no-LIMIT fix, the chat
+  thread-switch loading-state brief), zero genuine operator behavioral corrections. **Promoted one new
+  `established` fact** from personal-hq's `feedback_dispatch-fix-to-remote-host-agent` memory (not
+  previously folded in): dispatching a fix to a business VPS's own on-host agent is the standing default,
+  not something to re-ask permission for — added to Decision tendencies + Anti-patterns. Left two other
+  candidate repo-memory atoms (`feedback_credential-harvesting-blocked`, `feedback_deterministic-paths-
+  lookup`) unpromoted: the first is a system-classifier mechanism rather than an operator preference, the
+  second duplicates CLAUDE.md's existing "Knowledge cache" policy. No facts retired. Still did not archive
+  `profile-signals.jsonl` (6,453 lines) — same categorical blocker as 2026-09-19/20 (no shell session for
+  a `mv`/`split` round-trip); the signal-logging source-bug recommendation from the prior pass still
+  stands unactioned and remains the higher-leverage fix. Reset `~/.claude/logs/_consolidation-state.json`.
