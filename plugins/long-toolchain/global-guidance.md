@@ -143,8 +143,6 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 <!-- Auto-appended by the nightly knowledge-consolidation job. Rare,
      capped, cross-project lessons only — see docs/run-logs/
      2026-09-12-knowledge-extraction-pipeline.md. -->
-- Dev-runner run logs can carry stale 'blocked' claims (e.g. 'file deletion blocked') across sessions until someone re-verifies; a later agent found the block no longer applied. Re-check blocking claims before treating them as still true.
-- Cloudflare Worker route patterns without a trailing `*` only match the exact path and silently miss the same URL with a query string (e.g. favicon.ico?hash) — use wildcards for asset/static routes, and purge edge cache after fixing since a cached bad response persists even once the route is correct.
 - Contrast/QA checks that only walk DOM-ancestor backgrounds miss text over a sibling overlay/scrim (e.g. photo-tile captions); verify with real rendered pixel sampling, not background-inheritance logic alone — recurring pattern across projects doing dark-photo hero/tile designs.
 - Dev-runner plans can go stale mid-generation: if a mid-plan clarifying-question timeout fires before the operator's last answer is read, the plan uses outdated assumptions. Bake corrections directly into the task description itself rather than relying on Q&A timing.
 - Static-site SPA fallbacks return HTTP 200 for any unknown path (serving index.html), so status-code-only verification of asset routes is insufficient — a broken image request can 200 with the wrong content-type. Verify content-type, not just status code, when checking asset-serving routes/overlays.
@@ -163,7 +161,11 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 - `systemctl show -p Environment` dumps a unit's full environment including secret values in plaintext — never run it unfiltered on any unit known to carry secrets; grep for a specific non-secret key, or check behavior via logs/journal instead.
 - A dev-runner branch marked 'paused' is not evidence work happened — two prior BCNV 'paused' commits had zero tool calls in their run-logs. Check the run-log's tool-call count before trusting a paused/blocked status label, across any project using the dev-runner.
 - AI-context index files (code-index.json, symbol-map.md) drift silently from real code — wrong export names, missing files, stale lastVerified dates. Before using one to write documentation or plan a change, verify claimed exports/paths via grep rather than trusting the index.
+- Testing whether a token/credential actually works by spawning a CLI subprocess with it set in env is unreliable if the subprocess inherits the full environment — an ambient logged-in session can mask a dead/garbage token as "valid". Always test in an isolated env with no ambient credentials.
+- `pkill -f <pattern>` run over SSH can match and kill its own invoking command line (the SSH command itself contains the pattern), terminating the calling session — split kill checks into a self-safe grep/pattern rather than one pkill -f call.
 <!-- hq-auto-lessons:end -->
+
+
 
 
 

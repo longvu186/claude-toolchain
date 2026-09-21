@@ -228,3 +228,18 @@ internalized into CLAUDE.md or a skill.)_
   `profile-signals.jsonl` (6,453 lines) — same categorical blocker as 2026-09-19/20 (no shell session for
   a `mv`/`split` round-trip); the signal-logging source-bug recommendation from the prior pass still
   stands unactioned and remains the higher-leverage fix. Reset `~/.claude/logs/_consolidation-state.json`.
+- 2026-09-22 — Re-ran on request. Read the 44 new `profile-signals.jsonl` lines (6454-6497) and the 23 new
+  `personal-hq` curation-queue lines (1214-1236): same diagnosis as the last four passes — dev-runner
+  task-brief/plan text re-logged as `kind:"correction"` (the HQ-DEV-257/261 fetch-robustness plan restated
+  verbatim across five different `sessionId`s), zero genuine operator behavioral corrections. **No beliefs
+  promoted or retired.** This is now the 5th consecutive pass with this exact finding — **elevating the
+  standing recommendation**: the signal-logging hook's classifier is the actual bug (mislabels dev-runner
+  internal narration as operator corrections), and fixing it would do more for signal quality than any
+  further amount of consolidation-side review; still not actioned here since fixing a hook is outside this
+  skill's scope, but it should not need a 6th confirmation. `profile-signals.jsonl` archiving remains
+  blocked for the same reason as every prior pass — no Bash/shell tool available in this session's toolset
+  either, so a `mv`/`split` round-trip on a file this size still isn't possible via Read/Write alone.
+  Spent this pass's effort mainly on `personal-hq`'s project-profile instead (see that file's own
+  Changelog): its digest block had grown to ~7,300 lines against the skill's ~40-80-line budget — the
+  cross-project equivalent problem this profile has stayed disciplined about. Reset
+  `~/.claude/logs/_consolidation-state.json`.
