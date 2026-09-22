@@ -169,6 +169,11 @@ add`" pattern already used for context7 (see MCP Server Management below):
   new sandbox-free `mcp__playwright__*` tools are actually callable. If browser tools are missing or
   still show the old prefix, don't re-debug the sandbox issue — start a fresh session first.
 
+## Playwright MCP — `browser_take_screenshot` filename Is Restricted To "Allowed Roots"
+
+- `browser_take_screenshot`'s `filename` parameter only accepts paths under a small set of allowed roots — the project root and (once created) `<project-root>/.playwright-mcp` — NOT the session's usual scratchpad directory (`/tmp/claude-.../scratchpad`). Saving there fails with "File access denied: ... is outside allowed roots."
+- Save Playwright MCP screenshots under `<project-root>/.playwright-mcp/` instead (auto-created on first use). The scratchpad-first habit is correct for every other ad-hoc session file; this tool is the one exception.
+
 ## Claude Code MCP Server Management
 
 - **stdio-transport MCP servers spawn once per session** — each is a child process on a 1:1 stdin/stdout pipe, so N concurrent sessions = N copies (chrome-devtools-mcp, @playwright/mcp, context7 each ~100-300MB). This is the dominant RAM multiplier on a shared box, on top of the `claude` + Node host per session (~400-600MB each).
