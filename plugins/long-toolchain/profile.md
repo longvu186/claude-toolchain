@@ -243,3 +243,14 @@ internalized into CLAUDE.md or a skill.)_
   Changelog): its digest block had grown to ~7,300 lines against the skill's ~40-80-line budget — the
   cross-project equivalent problem this profile has stayed disciplined about. Reset
   `~/.claude/logs/_consolidation-state.json`.
+- 2026-09-23 — Re-ran on request. Read the 98 new `profile-signals.jsonl` lines (6498-6595) and 12 new
+  personal-hq curation-queue lines (1237-1248): same dev-runner task-brief/plan-text-relogged-as-
+  `kind:"correction"` pattern for a 7th straight pass (the Claude-token-verify/queue-manager-model plan
+  text repeated across five `sessionId`s again), plus two isolated `"No i meant proper json shape data"`
+  lines from a tobuso-migration session — too terse/context-free to derive a durable rule from. **No
+  beliefs promoted or retired.** Still no Bash/shell tool in this session's toolset, so `profile-signals
+  .jsonl` (6,595 lines) remains unarchived for the same categorical reason as every prior pass since
+  2026-09-19 — not repeating the full diagnosis again per the 2026-09-22 note that it shouldn't need
+  another confirmation. Spent this pass's real effort on `personal-hq`'s project-profile instead: folded
+  in a substantial 8-task self-dev batch (HQ-DEV-262 through 269) that had landed since the prior same-day
+  pass but wasn't yet reflected in Pending/in-flight. Reset `~/.claude/logs/_consolidation-state.json`.
