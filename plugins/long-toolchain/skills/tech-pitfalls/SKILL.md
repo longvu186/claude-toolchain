@@ -27,6 +27,44 @@ description: "Cross-project failure patterns and recovery strategies (150+ docum
 - `git commit -m "..."` with **no pathspec commits whatever the index currently holds**, not just the paths you just `git add`ed. Excluding a file from `git add` (e.g. `git add docs ':!path/to/risky-file'`) does nothing to protect you if that file was _already staged_ from before the session — it rides along into the commit regardless, because the exclusion pathspec only affected `add`, and `commit` re-reads the whole index. Fix: when a backlog commit must exclude a specific path, pass the **same explicit pathspec to `git commit` too** (`git commit -m "..." -- <paths>`), not only to `git add`. Before committing any large uncommitted backlog, run `git status`/`git diff --cached --stat` immediately before the commit (not just before the `add`) to confirm the index matches intent.
 - If a bad commit needs undoing with `git reset --soft <target>`, verify `<target>` against **both** the intended undo-scope and `origin/<branch>` — picking a commit just because it "matches origin" isn't enough if there were also legitimate local commits further back that predate the mistake. Explicitly enumerate the range being undone first: `git log --oneline <target>..HEAD`, confirm it's exactly the commits you mean to undo, before running the reset. A soft reset preserves the working tree, so recovery from a wrong target is possible (`git diff <target> -- . ':!<known-excluded-paths>'` should come back empty/explainable) — but verify tree identity and `git rev-list --count HEAD..origin/<branch>` (confirms nothing was ever pushed) before recommitting, don't assume.
 
+## Client-Side Array Filter/Sort Desyncs A Parallel Index/ID Reference
+
+- Symptom: a form/mutation sends an array plus a separate positional index or id that points INTO
+  that array (e.g. options list + `correctIndex`, rows list + `selectedId`). If any client-side
+  transform (`filter`, `sort`, `dedupe`, reorder) runs on the array before submit but the index/id
+  isn't remapped through the same transform, the index silently points at the wrong element after
+  submission — sometimes rejected by a downstream validity check, sometimes silently accepted with
+  the wrong element treated as "the one referenced." Confirmed instance: a donate form filtered
+  blank options out of an array with `.filter(nonEmpty)` but left `correctIndex` (a positional index)
+  unchanged; a blank in a non-last slot shifted every later element, desyncing the index. One
+  variant rejected a valid-looking form with a generic validation error; the other variant was
+  _accepted_, silently revealing the wrong option as correct — worse than a rejection, because it
+  looked like success.
+- Why it survives typecheck/lint/build: the types are still correct (`number` stays `number`) — only
+  the semantics of what the index refers to break. This is not caught by a type system; it needs
+  either a case-matrix row (see `test-case-matrix` skill) or a human reviewer.
+- Fix pattern: prefer NOT transforming the array client-side at all — let server-side per-element
+  validation reject the specific bad element with an error the client already knows how to render.
+  If client-side transform is unavoidable, remap the index/id through the exact same transform in
+  the same step, never as a separate pass.
+- Detection heuristic when reviewing/auditing: grep for any `.filter(`/`.sort(`/dedupe call on an
+  array that's submitted alongside a same-request index/id field: if the index/id isn't recomputed
+  in the same code path, it's a latent desync bug.
+
+## UI Copy As A Testable Claim
+
+- A confirmation dialog, tooltip, or status message that says "you can do X later" (or any other
+  promised future action) is an implicit UI requirement, not just copy — treat it as a claim to
+  verify, not a string to translate. Confirmed instance: a "can be reclaimed later" confirmation
+  matched a backend state transition that genuinely existed (`skipped → active` re-accept), but no
+  button anywhere in the UI actually triggered it — the backend capability existed with zero
+  reachable control.
+- This is a different failure class from "backend validates X, frontend doesn't map the error": here
+  the UI's own words promise a capability the UI itself can't deliver.
+- Cheap audit habit: whenever a dialog/confirmation string promises a future action, grep the same
+  feature's UI for a control that actually calls that action's endpoint/handler before shipping the
+  copy. Costs one grep; catches a class of bug that passes every automated gate.
+
 ## Local Copy / Domain Constant Sync Gap
 
 - When a `"use client"` component cannot import a `as const` domain array (for example to avoid bundling domain logic into the client chunk), a local numeric/string array copy may exist. These are synced by convention, not by import, and TypeScript will not catch divergence.

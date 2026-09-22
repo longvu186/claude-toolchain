@@ -49,6 +49,18 @@ Table shape:
   forgotten; a stated N/A reads as considered.
 - This is a planning artifact, not documentation for its own sake — every row should map to a test
   written during the TDD loop that follows. A matrix with no corresponding tests is not real coverage.
+- **Array + parallel index/id reference:** if a mutation submits an array alongside a separate
+  index/id that points INTO that same array (e.g. a list of options plus a `correctIndex`, a list of
+  rows plus a `selectedId`), add an explicit Boundary row for "client-side transform of the array
+  before submit (filter/sort/dedupe/reorder) must not desync the index/id." Confirmed miss: a donate
+  form filtered blank options out of the array client-side but left the positional `correctIndex`
+  unchanged — a blank in a non-last slot shifted every later element, so the index silently pointed
+  at the wrong (or an out-of-bounds) option. Types stayed correct (`number` is still `number`), so
+  typecheck/lint/build all passed clean; only a human reviewer caught it. This case is easy to omit
+  because it isn't "missing input validation" in the usual sense — the array and the index are each
+  individually valid, only their pairing breaks. Safer fix pattern: don't transform the array
+  client-side at all; let server-side per-slot validation reject the bad slot with an error the
+  client already renders.
 - For entity lifecycle work (deactivate/archive/restore/delete), pair this with `quality-manager`'s
   Lifecycle Regression Minimum Set: this matrix is the pre-code planning step, that set is the
   release-time regression floor.
