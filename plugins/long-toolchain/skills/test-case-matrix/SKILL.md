@@ -27,19 +27,19 @@ matrix.**
 
 One row per case, covering all five categories for each mutation under design:
 
-| Category | Covers |
-|---|---|
-| Happy path | valid input, authorized actor, expected state transition |
-| Negative | invalid input, missing required fields, malformed types, rejected business rules |
-| Boundary | empty/zero/max-length/off-by-one, first/last item, null vs. empty string vs. undefined |
-| Permission | each role x allowed/denied, unauthenticated, cross-tenant/cross-owner access |
-| Concurrency | double-submit, race on the same row, stale read-then-write, partial failure/rollback |
+| Category    | Covers                                                                                 |
+| ----------- | -------------------------------------------------------------------------------------- |
+| Happy path  | valid input, authorized actor, expected state transition                               |
+| Negative    | invalid input, missing required fields, malformed types, rejected business rules       |
+| Boundary    | empty/zero/max-length/off-by-one, first/last item, null vs. empty string vs. undefined |
+| Permission  | each role x allowed/denied, unauthenticated, cross-tenant/cross-owner access           |
+| Concurrency | double-submit, race on the same row, stale read-then-write, partial failure/rollback   |
 
 Table shape:
 
-| # | Category | Case | Expected outcome |
-|---|---|---|---|
-| 1 | Happy | ... | ... |
+| #   | Category | Case | Expected outcome |
+| --- | -------- | ---- | ---------------- |
+| 1   | Happy    | ...  | ...              |
 
 ## Rules
 
@@ -52,3 +52,23 @@ Table shape:
 - For entity lifecycle work (deactivate/archive/restore/delete), pair this with `quality-manager`'s
   Lifecycle Regression Minimum Set: this matrix is the pre-code planning step, that set is the
   release-time regression floor.
+
+## Testing the Concurrency row in Next.js (App Router) route handlers
+
+A sequential `await` test (fire request A, wait, fire request B) passes even when the row lock is
+missing — it never exercises the actual race. A genuine parallel-fire test needs two truly
+simultaneous calls, but a Next.js route handler that calls `next/headers` (`cookies()`, and anything
+built on it like `getCurrentUser()`) only resolves inside a real Next.js request context — it cannot
+be invoked directly from a Node/Playwright test script, so testing "through HTTP" with two concurrent
+`fetch()` calls is the only in-context option and is often flaky/slow for lock-timing assertions.
+
+Pattern: **extract the transaction body into a plain async function before writing the test**,
+`(db: Db, params) => Promise<Result>`, with no `next/headers` calls inside it. Reduce the route
+handler to: auth/session check (stays in the route, using `next/headers`) → call the extracted
+function → map the result to an HTTP response. The test then opens two separate DB connections and
+fires the extracted function via `Promise.all`, asserting the row lock (`SELECT ... FOR UPDATE` or
+equivalent) actually serializes the two calls instead of letting both read a stale pre-lock state.
+
+Do this extraction _before_ writing the concurrency test, not after a sequential test already passes
+— retrofitting it later tends to leave the sequential test in place as if it were sufficient
+evidence.
