@@ -254,3 +254,19 @@ internalized into CLAUDE.md or a skill.)_
   another confirmation. Spent this pass's real effort on `personal-hq`'s project-profile instead: folded
   in a substantial 8-task self-dev batch (HQ-DEV-262 through 269) that had landed since the prior same-day
   pass but wasn't yet reflected in Pending/in-flight. Reset `~/.claude/logs/_consolidation-state.json`.
+- 2026-09-24 — Re-ran on request. Read the 46 new `profile-signals.jsonl` lines (6596-6641): same
+  dev-runner-internal-fragment-relogged-as-`kind:"correction"` pattern for an 8th straight pass now
+  (tobuso-migration research-plan text, mrtuktuk-food-app diagnostic snippets, and — new this pass — raw
+  unified-diff `+`/`-` lines and code comments from four different dev-runner worktree sessions under
+  `.hq-dev-worktrees/`), zero genuine operator behavioral corrections. **No beliefs promoted or retired.**
+  Not repeating the full diagnosis again per the 2026-09-22 note; the signal-logging classifier fix is
+  still the higher-leverage move and remains unactioned (outside this skill's scope). No Bash/shell tool
+  in this session's toolset either, so `profile-signals.jsonl` (6,641 lines) remains unarchived — same
+  categorical blocker as every pass since 2026-09-19. `lesson-signals.jsonl` still does not exist. Checked
+  personal-hq's `MEMORY.md` feedback_* index for anything not yet folded in: nothing new since the
+  2026-09-18 sweep — all current entries are already reflected in Proven preferences/Anti-patterns/Open
+  corrections. This pass's real work went into `personal-hq`'s project-profile instead (see that file's
+  own Changelog): folded in the `claude-cli-update.ts` scheduled auto-update mechanism and the
+  bare-model-alias invariant it fixes (a genuine 2026-09-23 production incident — a same-day Opus release
+  400'd a business chat on a lagging SDK build), and updated the deploy pointer to `23316cc0`. Reset
+  `~/.claude/logs/_consolidation-state.json`.

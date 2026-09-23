@@ -143,8 +143,6 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 <!-- Auto-appended by the nightly knowledge-consolidation job. Rare,
      capped, cross-project lessons only — see docs/run-logs/
      2026-09-12-knowledge-extraction-pipeline.md. -->
-- Static-site SPA fallbacks return HTTP 200 for any unknown path (serving index.html), so status-code-only verification of asset routes is insufficient — a broken image request can 200 with the wrong content-type. Verify content-type, not just status code, when checking asset-serving routes/overlays.
-- An SPA/Pages fallback returns HTTP 200 for any unknown path (serving index.html), so a status-code-only check on an overlaid asset route (image/font/favicon) can pass while the browser actually receives HTML. Verify by content-type, not status code, for any Worker-route-over-static-site overlay.
 - A skill being installed/available for a dev task is not enough for it to actually get used — the task brief must invoke it by name (e.g. 'apply the hallmark-design skill'), or the agent free-hands a generic pass even with the skill present and reachable.
 - Any systemd unit with fast auto-restart and no StartLimitBurst set can crash-loop invisibly for days without ever reaching a 'failed' state — audit restart counters, not just unit status, across all VPS-hosted services regardless of business.
 - When mirroring/migrating a live site and something looks broken (garbage text, malformed markup), curl the live source directly before assuming the crawler/migration tool introduced the bug — it may be a pre-existing defect on the source being faithfully copied.
@@ -163,7 +161,11 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 - `pkill -f <pattern>` run over SSH can match and kill its own invoking command line (the SSH command itself contains the pattern), terminating the calling session — split kill checks into a self-safe grep/pattern rather than one pkill -f call.
 - gitnexus detect_changes can report risk_level:critical for a pure JSX/text/array-literal diff when the touched component (e.g. a big screen/page component) has a large pre-existing call graph — the label reflects graph size, not actual change risk. Verify diff hunks before trusting a critical label.
 - Postgres sorts NULL first in DESC ordering by default — an unset nullable timestamp column (e.g. an endedAt) can silently jump pre-completion rows to the top of a history list sorted DESC.
+- Next.js 16's dev server exposes a built-in /_next/mcp endpoint (next-devtools-mcp) with live compile/runtime errors, route list, and Server Action IDs — replaces manually grepping .next chunks for Server Action IDs in any Next 16 repo, not just one business.
+- For any third-party agent skill pack (react-best-practices, shadcn, supabase, trailofbits, etc.): pin to a specific commit and vendor it into the repo, never auto-update — skill packs can ship scripts, so auto-update is a supply-chain risk across every project that installs one.
 <!-- hq-auto-lessons:end -->
+
+
 
 
 
