@@ -16,6 +16,7 @@ beliefs. Atoms feed this; this is never just a list of atoms.
 - **Who:** Solo builder, Vietnamese (thinks/reasons in English). Builds production web apps **and** heavily engineers his own AI toolchain (personal-hq). Highly systematic; invests in automation and tooling, not just features.
 - **Comms:** Terse, direct. Action over explanation — implement, don't describe. Challenges assumptions and asks "is X actually better than Y?" — expects evidence, not agreement.
 - **Decision lens:** Architecture over wording. Automation over polling/manual upkeep. Prompt-budget conscious (keep always-loaded context tiny). Verify before claiming done — including the external effect, not just a local build passing.
+- **Before asking him anything:** sweep what the system already holds (HQ data, git log, memories, closed tasks, past sessions). Most "open questions" are already answered somewhere.
 - **Hard rules:** i18n Vietnamese-first (never hardcode VN text). `typecheck`+build must pass before any deploy. UI validation is screenshot-backed, not code-only. Styled confirm modals, never native `window.confirm`. System-first UI (shared tokens/shells before page-local).
 - **Stack:** Primary architecture is **Next.js + Supabase + Cloudflare Workers** (+ Tailwind). Vue 3 `<script setup lang="ts">` + Pinia is a secondary framework, not the default. Also Vercel, Bubble.io. Never call Supabase directly in components — route through the data layer.
 - **Tooling:** Claude Code is the primary (and now only) AI coding tool. GitNexus for structure/impact. Crawl4AI for web reads. Context7 only for version-sensitive APIs.
@@ -40,6 +41,8 @@ beliefs. Atoms feed this; this is never just a list of atoms.
   factor: help must reduce load, not add ceremony or shame-based framing.
 - Works in long, iterative sessions, often overnight/unattended. Comfortable driving many short
   follow-up runs rather than one big spec.
+- Some projects (e.g. Tobuso) have an external client (Andrew) whose rulings are authoritative; he acts
+  as the intermediary and doesn't want the client asked things the record already answers.
 
 ## How I work / collaboration
 
@@ -51,7 +54,8 @@ beliefs. Atoms feed this; this is never just a list of atoms.
 - Expects verification before "done" claims, including the **external effect** (deploy timestamp,
   delivered notification, actual running process) — not just that a local build/typecheck passed.
   Has repeatedly caught and corrected unverified or silently-broken automation (hooks-never-ran,
-  false "resolved" states, green gates that missed a 500 page). _(established)_
+  false "resolved" states, green gates that missed a 500 page, a boundary lint that was green because it
+  matched nothing). _(established)_
 - Wants exploratory completeness on open-ended work — "cover everything in an explorative manner, not
   just the things I asked for" — rather than narrowly satisfying the literal ask. _(provisional — one
   direct statement, but consistent with the batch-review / multi-agent-validation pattern seen across
@@ -72,7 +76,9 @@ beliefs. Atoms feed this; this is never just a list of atoms.
   processes that depend on him remembering to run them. Manual logs he set up tend to get abandoned.
 - **Evidence-driven.** Wants screenshot-backed UI validation, build gates, raw-evidence artifacts kept
   append-only, and root-cause diagnosis over assumption (e.g. insisting on `EXPLAIN QUERY PLAN` rather
-  than assuming an index gets picked).
+  than assuming an index gets picked). Estimates must be measured, not grepped — a size estimate that
+  inflated a refactor (62 "references" vs 38 real statements) and got it wrongly deferred is the kind of
+  thing he catches. _(established)_
 - **Operator time is the scarce resource, not compute.** Repeated asks to make drift/breakage
   self-announcing (docs-index drift, dead fleet credentials, stale estimates) instead of relying on him
   to notice — a specific case of the automation-over-manual-upkeep tendency.
@@ -89,21 +95,27 @@ beliefs. Atoms feed this; this is never just a list of atoms.
   explicit Plan Mode or when he's asked for a written artifact. _(established — 2026-07-07: "I didn't
   initiate you in plan mode, but auto mode. always proceed to build in auto mode."; repo memory:
   `feedback_auto-mode-skip-gates`)_
-- **A business VPS that already has its own on-host coding agent is a standing dispatch target, not a
-  request for permission.** Once a repo carries its own agent tooling (AGENTS.md/CLAUDE.md, GitNexus,
-  run-log convention), finding a bug/fix there means dispatching the fix over SSH immediately in the
-  same turn — never "should I fix this myself or do you want to." Only pause for something genuinely
-  destructive/ambiguous (irreversible data loss, a prod cutover), not for "who runs the fix" when the
-  answer is already the default. _(established — 2026-08-19/08-20, sharply worded: re-asking after
-  already having established this practice read as not having internalized it; repo memory:
-  `feedback_dispatch-fix-to-remote-host-agent`)_
+- **Routine operational recoveries are standing defaults, not permission requests.** Two established
+  instances: (1) a business VPS that already has its own on-host coding agent is a standing dispatch
+  target — dispatch the fix over SSH in the same turn, never "should I fix this myself or do you want
+  to" _(2026-08-19/08-20; repo memory `feedback_dispatch-fix-to-remote-host-agent`)_; (2) a Claude 401 on
+  a fleet host means re-pin the longvu186 credential and retry without asking — "always do that… we have
+  always done that" _(2026-09-21; tobuso memory `feedback-copy-longvu186-auth-to-fleet-hosts`)_. Only
+  pause for something genuinely destructive/ambiguous (irreversible data loss, a prod cutover, minting a
+  brand-new secret or access grant). _(established)_
+- **Domain modelling ≠ database design.** A DDD domain model is feature/business-focused and must not be
+  critiqued for diverging from the schema; app-wide services (audit, notification, auth, lexicon) sit in
+  a separate layer with deliberately zero edges to domain aggregates. _(provisional — one verbatim,
+  emphatic statement, 2026-08-27; tobuso memory `feedback-domain-model-not-database-design`)_
 
 ## Domain & skill map
 
 - **Strong:** Next.js + Supabase + Cloudflare Workers architecture (primary); Vue/Pinia/Tailwind (secondary); design-system/token thinking;
-  AI-toolchain engineering (hooks, skills, agents, MCP wiring, dev-runner/fleet orchestration); prompt/context economics.
+  DDD / modular-monolith domain modelling; AI-toolchain engineering (hooks, skills, agents, MCP wiring,
+  dev-runner/fleet orchestration); prompt/context economics.
 - **Active focus areas:** autonomous dev-runner reliability (pause/resume, remote-host parity, gate
-  scoping), fleet/multi-VPS operations, memory/learning-loop maturity, UI consistency guardrails.
+  scoping), fleet/multi-VPS operations, memory/learning-loop maturity, UI consistency guardrails,
+  edge-to-DB latency (Worker placement vs DB region).
 - _(Leave gaps unstated unless evidence shows a recurring stumbling block — do not invent weaknesses.)_
 
 ## Proven preferences (see CLAUDE.md for full policy)
@@ -125,9 +137,12 @@ beliefs. Atoms feed this; this is never just a list of atoms.
   collapsible unless he explicitly asks. Don't add hide/collapse/pin behavior he didn't request; measure
   the actual space gained rather than asserting it "now fits." _(established — repo memory:
   `feedback_compact-means-vertical-density`)_
-- Check what HQ already holds (calendar, DB, task state, git log) before asking him to re-tell
-  something — asking for info the system already has produces a false picture and wastes his time.
-  _(established — repo memory: `feedback_read-hq-data-before-asking`)_
+- Sweep existing stores before asking him **or his client** anything — HQ data (calendar, DB, task
+  state, git log), memories, closed control-plane task comments, prior session transcripts. Asking for
+  info the system already has wastes his time and makes the project look disorganised to the client.
+  _(established — now observed in two projects: personal-hq `feedback_read-hq-data-before-asking`;
+  tobuso `feedback-sweep-stores-before-asking-client`, 2026-09-19, where 7 of 8 "schema-blocking"
+  client questions were already answered in the record)_
 
 ## Open corrections to honor
 
@@ -140,9 +155,16 @@ internalized into CLAUDE.md or a skill.)_
   _(established — 2026-05-24 origin, refined 2026-08-03/08-04; repo memory:
   `feedback_questions-english-only`)_
 - Verify the actual external effect of an action (deploy shipped, message delivered, process serving)
-  before reporting it done — a false "resolved" costs more trust than an honest "not done yet." _(established)_
+  before reporting it done — a false "resolved" costs more trust than an honest "not done yet." Extends
+  to guardrails (positive-control a lint/policy check on a deliberate violation before trusting green)
+  and to "blocked" reports (a subagent's "hard-blocked" is not evidence — probe it yourself before
+  relaying it). _(established)_
 - Dev/code-writing work is scoped and assigned to a dev agent; general chat never writes code directly. _(established — repo memory: `feedback_dev-work-to-dev-agent`)_
 - An earlier "deploy"/"go ahead" authorizes that specific action, not a later or larger batch of changes — re-confirm per turn/scope, even though his day-to-day instructions carry standing approval to execute the work itself. _(established — repo memory: `feedback_deploy-authorization-per-turn` + `feedback_operator-approval-is-standing`; the two coexist: standing approval covers doing the work, deploy/publish/send actions still need a fresh confirm each time)_
+- A delete authorization covers the intent, not every row a query happens to match: enumerate the
+  candidate set first and preserve rows that are evidence for an open question. _(provisional — one
+  2026-09-20 Tobuso instance where 12 of 17 "stale" links were the sole evidence for an open client
+  question; tobuso memory `feedback-authorization-to-delete-is-not-blanket`)_
 
 ## Anti-patterns to avoid with me
 
@@ -152,121 +174,59 @@ internalized into CLAUDE.md or a skill.)_
 - Don't claim something works without running the verification, including checking the real external effect.
 - Don't set up manual-upkeep processes when a hook/queue could maintain it automatically.
 - Don't polish UI/UX before every underlying action actually works end-to-end.
-- Don't ask him to re-tell something HQ's own data (calendar/DB/git log) already holds.
+- Don't ask him (or his client) something the existing record already holds.
 - Don't re-verify or reframe a contradiction a second time once he's explicitly restated his position —
   one evidence-backed challenge is the right call, a second reads as not listening.
 - Don't add collapse/hide/pin UI behavior when he asked for "compact" — that means vertical density.
-- Don't ask "should I fix this myself or do you want to" when a repo/host already has its own on-host
-  agent — dispatch there is the standing default, not a decision to re-litigate each time.
+- Don't ask permission for a routine recovery that is already a standing default (dispatch to an
+  on-host agent, re-pin fleet auth) — just do it and report.
+- Don't size or defer work on a grep count — measure real call sites before calling something "too big."
+- Don't relay a subagent's "blocked" verdict without probing it yourself.
 
 ## Changelog
 
 - 2026-06-08 — Profile created. Seeded from `~/.claude/CLAUDE.md`, project auto-memories, and run-logs.
   Most entries are `established` (drawn from repeated, codified policy); a few synthesized tendencies are
   high-confidence from run-log patterns.
-- 2026-08-23 — Consolidation pass. Reviewed `~/.claude/logs/profile-signals.jsonl` (7,435 lines) and
-  `personal-hq`'s `MEMORY.md`/`docs/run-logs`. Promoted two new provisional hypotheses (exploratory
-  completeness over literal scope; functionality-before-polish sequencing). Folded three well-established
-  repo-memory feedback atoms into cross-project "Proven preferences"/"Anti-patterns" (group dev tasks
-  under one initiative, visual-first ops UI, detailed post-action summaries) since each has recurred
-  across multiple sessions. Reconciled an apparent tension between "deploy authorization is per-turn"
-  and "operator approval is standing" into one note — they are not contradictory, they cover different
-  action classes (execution vs. publish/deploy). No facts retired. `lesson-signals.jsonl` does not exist
-  yet — no self-correction lesson atoms to fold in this pass.
-- 2026-09-18 — Consolidation pass. `profile-signals.jsonl` (6,208 lines since the 2026-08-23 archive)
-  turned out to be mostly raw dev-runner self-narration fragments (low signal for genuine operator
-  corrections), so cross-referenced personal-hq's `MEMORY.md` `feedback_*` entries instead — the
-  curated view of the same underlying signal. **Retired one contradicted fact:** "group dev tasks under
-  one initiative container" was reversed 2026-08-29 (HQ-DEV-204 shipped the opposite: dev/research
-  tasks file with no parent by default); replaced with the current rule, anti-duplication half kept.
-  **Promoted four new `established` facts** (≥2 observations or a single unambiguous operator statement
-  treated as durable policy): accept-override-after-one-challenge, auto-mode-skips-ceremony,
-  compact-means-vertical-density, read-HQ-data-before-asking. **Refined** the English/Vietnamese rule —
-  narrower "think in English" superseded by the broader 2026-08-03 "everything I read is English,
-  Vietnamese only for external content" rule, plus the 2026-08-04 legal-vocabulary-translation addendum.
-  **Did not archive/truncate `profile-signals.jsonl` this pass** — no shell/file-copy tool was available
-  in this session to move a 2.6MB file without loading it whole into context (unsafe at 86% context
-  usage); the live file still holds all 6,208 lines. Next consolidation pass (or one with Bash access)
-  should archive lines 1–6208 to `~/.claude/learning/archive/profile-signals-2026-09-18.jsonl` and
-  truncate. No `lesson-signals.jsonl` exists yet.
-- 2026-09-19 — Re-ran on request; verified the 2026-09-18 pass's edits are intact (digest, retired fact,
-  four promoted corrections all still present). Read the 6 signal lines added since (6209–6214, now
-  6214 total) — all cross-project technical postmortem notes (git-stash cross-contamination, a
-  `vps-map` port-resolver race), not operator-behavior corrections, so nothing new to promote. Confirmed
-  `profile-signals.jsonl` archiving is still blocked: attempted a full read this pass and it hard-failed
-  (1.33M tokens, over the 25k read ceiling) — this is not a "no Bash available" workaround problem, it's
-  that the file is categorically too large for a Read→Write round-trip regardless of tool access; the
-  eventual fix needs a `mv`/`split`-capable shell session. Reset `~/.claude/logs/_consolidation-state.json`
-  (`lastConsolidation` was still 2026-08-23 with stale 4,423/6,200 counters even though the 2026-09-18
-  content pass had already happened) so the SessionStart nag reflects reality.
-- 2026-09-20 — Re-ran on request. Read the 26 signal lines added since the prior pass (6215-6240): all
-  are dev-runner/session-internal fragments again - a dev_events index task-spec (HQ-DEV-255, already
-  captured in personal-hq's own project profile), tobuso-migration design notes (doc-templating engine
-  choice, SQL/JSON hybrid storage), a home-router-wifi aside - zero are operator behavioral corrections.
-  Same for the 4 new `_memory-curation-queue.jsonl` entries (personal-hq): all empty preferences/
-  corrections/lessons arrays. **No beliefs promoted or retired this pass** - nothing rose above noise.
-  Confirmed `profile-signals.jsonl` (6,240 lines) still cannot be archived without a shell session:
-  manually chunking a Read-then-Write round-trip at the tool's ~110-lines/25k-token ceiling would take
-  60+ round trips for content that is net-negative signal, not worth doing by hand this way.
-  **Recommendation surfaced, not yet actioned:** the signal-logging hook appears to classify dev-runner
-  internal task-spec/code-citation fragments as `kind:"correction"` - a source-side labeling bug, not a
-  downstream filtering gap; fixing it (stop logging non-operator text as corrections) would do more for
-  signal quality than any amount of consolidation-side archiving. Reset
-  `~/.claude/logs/_consolidation-state.json` (28 corrections / 95 runs since the prior pass, all noise).
-- 2026-09-21 — Re-ran on request. The counter had climbed to 214 corrections / 153 runs since the last
-  reset despite the prior pass resetting it to 28/95 — confirms sizeable dev-runner activity volume, not
-  a broken counter. Read all 213 new `profile-signals.jsonl` lines (6241-6453): every one is the same
-  class of noise already diagnosed twice — dev-runner task-brief/plan-diff text re-logged verbatim across
-  dozens of `sessionId`s (the runaway-loop-guard plan, the `listEventsForTask` no-LIMIT fix, the chat
-  thread-switch loading-state brief), zero genuine operator behavioral corrections. **Promoted one new
-  `established` fact** from personal-hq's `feedback_dispatch-fix-to-remote-host-agent` memory (not
-  previously folded in): dispatching a fix to a business VPS's own on-host agent is the standing default,
-  not something to re-ask permission for — added to Decision tendencies + Anti-patterns. Left two other
-  candidate repo-memory atoms (`feedback_credential-harvesting-blocked`, `feedback_deterministic-paths-
-  lookup`) unpromoted: the first is a system-classifier mechanism rather than an operator preference, the
-  second duplicates CLAUDE.md's existing "Knowledge cache" policy. No facts retired. Still did not archive
-  `profile-signals.jsonl` (6,453 lines) — same categorical blocker as 2026-09-19/20 (no shell session for
-  a `mv`/`split` round-trip); the signal-logging source-bug recommendation from the prior pass still
-  stands unactioned and remains the higher-leverage fix. Reset `~/.claude/logs/_consolidation-state.json`.
-- 2026-09-22 — Re-ran on request. Read the 44 new `profile-signals.jsonl` lines (6454-6497) and the 23 new
-  `personal-hq` curation-queue lines (1214-1236): same diagnosis as the last four passes — dev-runner
-  task-brief/plan text re-logged as `kind:"correction"` (the HQ-DEV-257/261 fetch-robustness plan restated
-  verbatim across five different `sessionId`s), zero genuine operator behavioral corrections. **No beliefs
-  promoted or retired.** This is now the 5th consecutive pass with this exact finding — **elevating the
-  standing recommendation**: the signal-logging hook's classifier is the actual bug (mislabels dev-runner
-  internal narration as operator corrections), and fixing it would do more for signal quality than any
-  further amount of consolidation-side review; still not actioned here since fixing a hook is outside this
-  skill's scope, but it should not need a 6th confirmation. `profile-signals.jsonl` archiving remains
-  blocked for the same reason as every prior pass — no Bash/shell tool available in this session's toolset
-  either, so a `mv`/`split` round-trip on a file this size still isn't possible via Read/Write alone.
-  Spent this pass's effort mainly on `personal-hq`'s project-profile instead (see that file's own
-  Changelog): its digest block had grown to ~7,300 lines against the skill's ~40-80-line budget — the
-  cross-project equivalent problem this profile has stayed disciplined about. Reset
-  `~/.claude/logs/_consolidation-state.json`.
-- 2026-09-23 — Re-ran on request. Read the 98 new `profile-signals.jsonl` lines (6498-6595) and 12 new
-  personal-hq curation-queue lines (1237-1248): same dev-runner task-brief/plan-text-relogged-as-
-  `kind:"correction"` pattern for a 7th straight pass (the Claude-token-verify/queue-manager-model plan
-  text repeated across five `sessionId`s again), plus two isolated `"No i meant proper json shape data"`
-  lines from a tobuso-migration session — too terse/context-free to derive a durable rule from. **No
-  beliefs promoted or retired.** Still no Bash/shell tool in this session's toolset, so `profile-signals
-  .jsonl` (6,595 lines) remains unarchived for the same categorical reason as every prior pass since
-  2026-09-19 — not repeating the full diagnosis again per the 2026-09-22 note that it shouldn't need
-  another confirmation. Spent this pass's real effort on `personal-hq`'s project-profile instead: folded
-  in a substantial 8-task self-dev batch (HQ-DEV-262 through 269) that had landed since the prior same-day
-  pass but wasn't yet reflected in Pending/in-flight. Reset `~/.claude/logs/_consolidation-state.json`.
-- 2026-09-24 — Re-ran on request. Read the 46 new `profile-signals.jsonl` lines (6596-6641): same
-  dev-runner-internal-fragment-relogged-as-`kind:"correction"` pattern for an 8th straight pass now
-  (tobuso-migration research-plan text, mrtuktuk-food-app diagnostic snippets, and — new this pass — raw
-  unified-diff `+`/`-` lines and code comments from four different dev-runner worktree sessions under
-  `.hq-dev-worktrees/`), zero genuine operator behavioral corrections. **No beliefs promoted or retired.**
-  Not repeating the full diagnosis again per the 2026-09-22 note; the signal-logging classifier fix is
-  still the higher-leverage move and remains unactioned (outside this skill's scope). No Bash/shell tool
-  in this session's toolset either, so `profile-signals.jsonl` (6,641 lines) remains unarchived — same
-  categorical blocker as every pass since 2026-09-19. `lesson-signals.jsonl` still does not exist. Checked
-  personal-hq's `MEMORY.md` feedback_* index for anything not yet folded in: nothing new since the
-  2026-09-18 sweep — all current entries are already reflected in Proven preferences/Anti-patterns/Open
-  corrections. This pass's real work went into `personal-hq`'s project-profile instead (see that file's
-  own Changelog): folded in the `claude-cli-update.ts` scheduled auto-update mechanism and the
-  bare-model-alias invariant it fixes (a genuine 2026-09-23 production incident — a same-day Opus release
-  400'd a business chat on a lagging SDK build), and updated the deploy pointer to `23316cc0`. Reset
+- 2026-08-23 — Consolidation pass. Reviewed `profile-signals.jsonl` (7,435 lines) and personal-hq's
+  `MEMORY.md`/run-logs. Added two provisional hypotheses (exploratory completeness; functionality-before-
+  polish). Folded three repo-memory feedback atoms into cross-project preferences (group dev tasks,
+  visual-first ops UI, detailed post-action summaries). Reconciled per-turn deploy authorization vs.
+  standing approval (different action classes). No facts retired.
+- 2026-09-18 — Consolidation pass via personal-hq `feedback_*` memories (signals file was mostly
+  dev-runner self-narration). **Retired** "group dev tasks under one initiative container" (reversed
+  2026-08-29, HQ-DEV-204). **Promoted** four established facts: accept-override-after-one-challenge,
+  auto-mode-skips-ceremony, compact-means-vertical-density, read-HQ-data-before-asking. Refined the
+  English/Vietnamese rule.
+- 2026-09-19 → 2026-09-23 (six passes, condensed here) — Every pass found new `profile-signals.jsonl`
+  lines to be dev-runner/agent narration mislabelled `kind:"correction"` (plan text re-logged across many
+  `sessionId`s), zero genuine operator corrections. Only promotion in that span: dispatch-fix-to-remote-
+  host-agent (2026-09-21). Standing recommendation, repeated since 2026-09-20: **fix the signal-logging
+  hook's classifier at source** — it is the real signal-quality bug. Archiving of `profile-signals.jsonl`
+  was blocked each pass (no shell tool / file too large for Read→Write).
+- 2026-09-23 (second pass, unattended draft) — Read the 14 new signal lines (6596–6609): all tobuso
+  nav-latency audit narration (parallelise `user_type` round-trip, collapse `"use cache"` entries,
+  share-structure wave) — noise again, 8th straight pass. Real input this pass was tobuso-migration's
+  per-project `feedback-*` memories, not previously folded in. **Promoted to established:** sweep-stores-
+  before-asking (now 2 projects; generalised to include the client; added to digest); standing-default
+  recoveries (merged dispatch-to-on-host-agent with the new copy-fleet-auth instruction). **Extended**
+  the verify-external-effect correction with guardrail positive-controls and subagent "blocked" claims;
+  added measured-not-grepped estimates under Evidence-driven. **New provisional:** domain model ≠
+  database design; delete authorization isn't blanket. **Skipped:** credential/access-grant gating
+  (classifier mechanism, not a preference — only reflected as the "pause" carve-out), tailscale/SQL/infra
+  lessons (project-technical, belong in repo memory/tech-pitfalls). Condensed the six repetitive
+  2026-09-19→23 changelog entries into one. No facts retired. No `lesson-signals.jsonl` exists.
+- 2026-09-25 — Re-ran on request (nightly). This pass's real work was applying the draft above: it sat
+  unconsumed in `~/.claude/profile.md.draft` (generated 2026-09-23T08:45 by the headless auto-consolidate
+  worker) through the entire 2026-09-24 nightly pass, which worked from the live file instead of checking
+  for a pending draft. Read the new `profile-signals.jsonl` lines since (6610–6726, +117) and the
+  personal-hq curation queue (1249–1266): same dev-runner-narration-mislabelled-as-correction pattern,
+  9th/10th straight pass with zero new operator corrections from that source — no further promotions.
+  Could not physically delete/move `~/.claude/profile.md.draft`, `~/.claude/logs/_consolidation-draft-
+ready.json`, or archive the report — this session's toolset has no Bash/file-delete tool, only
+  Read/Write/Edit, so a true `/apply-consolidation`-style cleanup isn't possible from here; wrote a copy
+  of the report to `~/.claude/learning/archive/consolidation-2026-09-23.md` and left the originals in
+  place with this changelog entry as the record that they've been consumed (do not re-apply them again).
+  `profile-signals.jsonl` (6,726 lines) archiving remains blocked for the same categorical reason as
+  every pass since 2026-09-19. `lesson-signals.jsonl` still does not exist. Reset
   `~/.claude/logs/_consolidation-state.json`.
