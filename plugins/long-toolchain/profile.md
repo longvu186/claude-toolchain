@@ -230,3 +230,20 @@ ready.json`, or archive the report — this session's toolset has no Bash/file-d
   `profile-signals.jsonl` (6,726 lines) archiving remains blocked for the same categorical reason as
   every pass since 2026-09-19. `lesson-signals.jsonl` still does not exist. Reset
   `~/.claude/logs/_consolidation-state.json`.
+- 2026-09-25 (second same-day pass, 23:57 nightly run) — Reviewed new `profile-signals.jsonl` lines
+  6727–6870 (+144) and curation-queue lines 1267–1278 (+12): identical dev-runner/plan-narration
+  mislabelled `kind:"correction"` (repeated boilerplate — "convention; only touch this if…", the
+  HQ-DEV-278 changelog blurb — re-logged across a dozen `sessionId`s). 12th straight pass, zero genuine
+  operator corrections from that source. Also checked streaming-kit/redy-app/tobuso-migration
+  `memory/MEMORY.md` for cross-project-worthy atoms not yet folded in: none found — every new entry
+  there is project-technical (schema/deploy/bug specifics), correctly scoped to repo memory rather than
+  this profile. No facts promoted, retired, or contradicted. `profile-signals.jsonl` (6,870 lines)
+  archiving is still blocked — this session's toolset is Read/Write/Edit only (no Bash/file-move), and a
+  full archive now means reading+rewriting an ~11-pass, near-100%-noise file, which costs far more than
+  it returns. Standing recommendation, now concrete: either give the nightly consolidation job Bash so
+  it can `tail -n`/truncate the signal file cheaply, or fix the signal-logging hook's classifier at the
+  source so plan/test-output text stops being tagged `kind:"correction"` in the first place — the second
+  is the higher-leverage fix since it stops the noise from accumulating at all, not just from being
+  re-read. Reset `_consolidation-state.json`; recorded line 6870 (signals) / 1278 (curation queue) in
+  this entry as the practical watermark for the next pass, since physical archiving isn't possible from
+  here.

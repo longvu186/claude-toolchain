@@ -143,8 +143,6 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 <!-- Auto-appended by the nightly knowledge-consolidation job. Rare,
      capped, cross-project lessons only — see docs/run-logs/
      2026-09-12-knowledge-extraction-pipeline.md. -->
-- When mirroring/migrating a live site and something looks broken (garbage text, malformed markup), curl the live source directly before assuming the crawler/migration tool introduced the bug — it may be a pre-existing defect on the source being faithfully copied.
-- npm ci/install run under NODE_ENV=production silently skips devDependencies — any CLI tool needed at deploy time (e.g. wrangler) must live in dependencies, not devDependencies, or the deploy step fails with '<tool>: not found' despite lockfile listing it.
 - A dev-runner task stuck in 'blocked' status after repeated usage-exhausted failures doesn't resume via dev_queue/dev_run_now alone — required manually replicating the app's requeue() DB transition (blocked/review/paused→queued) since no MCP tool exposes an unblock action.
 - Supabase service-role client bypasses RLS, so chaining `.select(pk).maybeSingle()` right after an UPDATE to detect 0-rows-matched vs real error is safe with service-role — the same pattern under an anon/user-scoped client would need an explicit RLS-visibility check first.
 - Using a raw NUL byte (\x00) as a string-key delimiter (e.g. in a Map key composed from two fields) makes git/file/ripgrep classify the whole file as binary, breaking `git diff`. Use a printable, still-collision-safe delimiter like \x1f instead.
@@ -163,7 +161,11 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 - For any third-party agent skill pack (react-best-practices, shadcn, supabase, trailofbits, etc.): pin to a specific commit and vendor it into the repo, never auto-update — skill packs can ship scripts, so auto-update is a supply-chain risk across every project that installs one.
 - Operator prefers validating dev-runner changes against the cloud/production DB directly rather than spinning up local Docker/Supabase test infra — ask before starting any local service; this has now been stated explicitly on at least two projects.
 - For money/session-mutation RPCs in Supabase (any project handling payments): check idempotency key BEFORE the status check, and clamp requested amounts server-side to the remaining balance — status-first ordering lets a racing/duplicate request double-capture payment before idempotency is checked.
+- A dev-runner account hitting 'You've hit your session limit' is not classified as usage-exhausted by the runner, so it burns retries instead of pausing until reset — check this classifier in any project using the same dev-runner.
+- In Postgres, `ALTER TYPE ... ADD VALUE` must commit before any RLS policy referencing that new enum value runs — split enum additions and dependent policies into separate migrations/transactions to avoid a broken deploy, in any project using enum-gated RLS.
 <!-- hq-auto-lessons:end -->
+
+
 
 
 
