@@ -247,3 +247,23 @@ ready.json`, or archive the report — this session's toolset has no Bash/file-d
   re-read. Reset `_consolidation-state.json`; recorded line 6870 (signals) / 1278 (curation queue) in
   this entry as the practical watermark for the next pass, since physical archiving isn't possible from
   here.
+- 2026-09-26 (nightly) — Reviewed new `profile-signals.jsonl` lines 6871–6905 (+35) and curation-queue
+  lines 1279–1287 (+9): same dev-runner-narration-mislabelled-`kind:"correction"` pattern (the recurring
+  "convention; only touch this if…" and HQ-DEV-287 changelog boilerplate) plus a handful of lines from a
+  tobuso-migration UI review (browser-native validation tooltips, format-hint copy, Continue-vs-Save data
+  loss) — real findings, but project-technical code review output, not an operator correction of my
+  behavior; belongs in tobuso's own memory, not this profile. 14th straight pass, zero genuine operator
+  corrections from the signal file. Cross-checked bcnv/redy/streaming-kit/tobuso-migration `MEMORY.md`
+  for cross-project-worthy atoms: the one new candidate (anon-callable Supabase RPC rate-limit key must
+  be server-derived, not caller-supplied) is already codified at the `~/.claude/CLAUDE.md` policy level,
+  so no duplicate profile promotion needed. No facts promoted, retired, or contradicted this pass.
+  `profile-signals.jsonl` (6,905 lines) archiving is still blocked: this session's toolset is Read/Write/
+  Edit/Glob/Grep only (no Bash/file-move), and the file is ~2.8MB — a full archive would mean paging
+  through it in ~12 sub-256KB Read chunks and re-writing every byte through Write/Edit, i.e. spending
+  roughly the whole file's size twice in tokens to relocate content that is documented, 14 passes running,
+  as ~100% noise. Not doing that trade this pass either. The two fixes that would actually resolve this
+  (grant the consolidation job a Bash/truncate tool, or fix the signal-logging hook's classifier so plan/
+  test-output text stops being tagged `kind:"correction"`) remain unactioned after 8+ passes recommending
+  them — this is now a standing follow-up worth raising directly with the user rather than re-noting
+  silently in a 15th changelog entry. Reset `_consolidation-state.json`; watermark for the next pass is
+  line 6905 (signals) / 1287 (curation queue).

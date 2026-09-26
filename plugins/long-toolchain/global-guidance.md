@@ -143,8 +143,6 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 <!-- Auto-appended by the nightly knowledge-consolidation job. Rare,
      capped, cross-project lessons only — see docs/run-logs/
      2026-09-12-knowledge-extraction-pipeline.md. -->
-- drizzle-orm wraps every underlying driver error (e.g. postgres.PostgresError) in its own DrizzleQueryError class, so `instanceof <raw driver error>` checks on caught errors silently never match at runtime. Unwrap the cause first in any project using drizzle-orm + a node postgres driver.
-- Dev-runner worktrees are typically not their own GitNexus-registered index, so impact()/detect_changes() silently fail to run there regardless of business — compensate with full manual diff + grep of every call site of touched symbols, don't skip the check.
 - pnpm's build-script-approval flow (pnpm approve-builds) can leave an unresolved placeholder comment in pnpm-workspace.yaml (e.g. 'esbuild: set this to true or false'); check for and strip it before committing in any pnpm-managed repo — it has already recurred twice in one project.
 - pnpm-workspace.yaml's 'esbuild: set this to true or false' placeholder from pnpm approve-builds keeps recurring as an accidental commit even in unrelated feature branches — now confirmed a 3rd time; a pre-commit diff review should explicitly check this file even when gates are green.
 - `systemctl show -p Environment` dumps a unit's full environment including secret values in plaintext — never run it unfiltered on any unit known to carry secrets; grep for a specific non-secret key, or check behavior via logs/journal instead.
@@ -163,7 +161,11 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 - pnpm-workspace.yaml's 'esbuild: set this to true or false' placeholder from pnpm approve-builds recurred yet again (now 4th confirmed instance across sessions) as an accidental unrelated diff — always diff-review this file before committing in any pnpm-managed repo.
 - Dev-runner UI-feature tasks silently skip live browser verification when the only reachable port is the live prod service and no dedicated preview port was assigned to the task — assign a distinct port to every UI-touching dev task across any business using this dev-runner.
 - To copy a secret between two repos sharing one Infisical workspace but different per-repo paths, fetch into a shell variable with `infisical secrets get` and set it at the target path — never let the value hit stdout/output; verify after with `list-secret-keys` (names only) on both sides.
+- Before exposing an anon-callable Supabase RPC to the public internet, verify any rate-limit/throttle key it trusts (e.g. an IP hash) is server-derived and signed, not caller-supplied — the anon key + project URL are public, so a client can rotate a supplied value to bypass the limit entirely.
+- Turbopack's dev server refuses a symlinked node_modules — a git worktree that symlinks to the main checkout's node_modules will fail to start; give the worktree a real pnpm hard-linked install instead. Applies to any repo run from a worktree with Turbopack, not just one project.
 <!-- hq-auto-lessons:end -->
+
+
 
 
 
