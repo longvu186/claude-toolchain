@@ -143,8 +143,6 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 <!-- Auto-appended by the nightly knowledge-consolidation job. Rare,
      capped, cross-project lessons only — see docs/run-logs/
      2026-09-12-knowledge-extraction-pipeline.md. -->
-- A dev-runner task stuck in 'blocked' status after repeated usage-exhausted failures doesn't resume via dev_queue/dev_run_now alone — required manually replicating the app's requeue() DB transition (blocked/review/paused→queued) since no MCP tool exposes an unblock action.
-- Supabase service-role client bypasses RLS, so chaining `.select(pk).maybeSingle()` right after an UPDATE to detect 0-rows-matched vs real error is safe with service-role — the same pattern under an anon/user-scoped client would need an explicit RLS-visibility check first.
 - Using a raw NUL byte (\x00) as a string-key delimiter (e.g. in a Map key composed from two fields) makes git/file/ripgrep classify the whole file as binary, breaking `git diff`. Use a printable, still-collision-safe delimiter like \x1f instead.
 - drizzle-orm wraps every underlying driver error (e.g. postgres.PostgresError) in its own DrizzleQueryError class, so `instanceof <raw driver error>` checks on caught errors silently never match at runtime. Unwrap the cause first in any project using drizzle-orm + a node postgres driver.
 - Dev-runner worktrees are typically not their own GitNexus-registered index, so impact()/detect_changes() silently fail to run there regardless of business — compensate with full manual diff + grep of every call site of touched symbols, don't skip the check.
@@ -163,7 +161,11 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 - For money/session-mutation RPCs in Supabase (any project handling payments): check idempotency key BEFORE the status check, and clamp requested amounts server-side to the remaining balance — status-first ordering lets a racing/duplicate request double-capture payment before idempotency is checked.
 - A dev-runner account hitting 'You've hit your session limit' is not classified as usage-exhausted by the runner, so it burns retries instead of pausing until reset — check this classifier in any project using the same dev-runner.
 - In Postgres, `ALTER TYPE ... ADD VALUE` must commit before any RLS policy referencing that new enum value runs — split enum additions and dependent policies into separate migrations/transactions to avoid a broken deploy, in any project using enum-gated RLS.
+- pnpm-workspace.yaml's 'esbuild: set this to true or false' placeholder from pnpm approve-builds recurred yet again (now 4th confirmed instance across sessions) as an accidental unrelated diff — always diff-review this file before committing in any pnpm-managed repo.
+- Dev-runner UI-feature tasks silently skip live browser verification when the only reachable port is the live prod service and no dedicated preview port was assigned to the task — assign a distinct port to every UI-touching dev task across any business using this dev-runner.
 <!-- hq-auto-lessons:end -->
+
+
 
 
 
