@@ -267,3 +267,15 @@ ready.json`, or archive the report — this session's toolset has no Bash/file-d
   them — this is now a standing follow-up worth raising directly with the user rather than re-noting
   silently in a 15th changelog entry. Reset `_consolidation-state.json`; watermark for the next pass is
   line 6905 (signals) / 1287 (curation queue).
+- 2026-09-27 (same-day re-run, 23:57) — Zero new evidence since the prior pass six hours earlier:
+  `profile-signals.jsonl` is unchanged at 6,905 lines (no new rows past the recorded watermark), and
+  personal-hq's curation queue gained exactly two entries (1288-1289) — the prior pass's own log line and
+  an unrelated creative task (a 5s motion-graphics showreel) that produced no preferences/corrections/
+  lessons. 15th straight pass with no genuine operator correction from `profile-signals.jsonl`. No
+  cross-project `MEMORY.md` atoms found beyond what the 2026-09-26 pass already folded in or correctly
+  scoped as project-technical. No facts promoted, retired, or contradicted. Archiving of
+  `profile-signals.jsonl` remains blocked for the same toolset reason as every pass since 2026-09-19; the
+  two standing fixes (Bash/truncate access for this job, or fixing the signal-logging hook's
+  `kind:"correction"` misclassification at source) are unactioned after 9+ passes recommending them -
+  raising this to the user directly now rather than re-noting it a 16th time. Watermark unchanged: line
+  6905 (signals) / 1289 (curation queue).
