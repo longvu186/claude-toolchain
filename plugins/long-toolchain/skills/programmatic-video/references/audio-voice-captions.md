@@ -64,12 +64,17 @@ For Vietnamese, always NFC-normalise before matching timestamps to script tokens
 
 ## Loudness and mix
 
-- **Delivery targets:**
-  - Online: **−14 LUFS integrated, true peak ≤ −1 dBTP**.
-  - Dialogue-led explainer: −16 LUFS is also fine.
-  - Broadcast: −23 (EBU R128).
+- **One policy:**
+  - **−14 LUFS integrated, true peak ≤ −1 dBTP, measured on the delivered (AAC) file** for every online deliverable.
+  - Optional −16 LUFS for dialogue-only course or LMS video.
+  - Broadcast is −23 (EBU R128), never used for web.
   - Only YouTube's normalisation is documented: it turns loud masters down and never up.
-- **Two-pass, linear loudnorm, and always `-ar 48000`** (loudnorm resamples to 192 kHz internally):
+  - `scripts/loudnorm.sh <in> <out> [I] [TP] [LRA]` accepts other targets. For video inputs it re-measures after the
+    AAC encode and lowers the ceiling until the delivered file passes (exits non-zero if it can't).
+- Measured on this VPS: a WAV normalised to −1 dBFS *sample* peak delivered **+3.3 dBTP / −10.7 LUFS** after AAC. A
+  dense synth mix got ~1 dB of AAC overshoot. So never gate on the WAV.
+- **Two-pass, linear loudnorm, and always `-ar 48000`** (loudnorm resamples to 192 kHz internally). This is what the
+  script automates:
   ```bash
   ffmpeg -i mix.wav -af loudnorm=I=-14:TP=-1:LRA=11:print_format=json -f null - 2> ln.txt   # read measured_* from JSON
   ffmpeg -i mix.wav -af loudnorm=I=-14:TP=-1:LRA=11:measured_I=X:measured_TP=X:measured_LRA=X:measured_thresh=X:offset=X:linear=true -ar 48000 mix_n.wav

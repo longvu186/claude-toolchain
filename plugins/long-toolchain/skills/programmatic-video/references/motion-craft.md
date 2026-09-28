@@ -38,6 +38,8 @@ The strongest single source of craft rules is HyperFrames' `motion-doctrine` (Ap
       Override them deliberately.
 13. **Specify springs by ζ and k.** Convert with c = 2ζ√(k·m). Overshoot = e^(−ζπ/√(1−ζ²)).
 14. **Reading time.** `hold_s = max(0.833, chars/15, words/2.7)`, counted from the moment the text is fully readable.
+    **Vietnamese: use `chars/13`, and count *syllables* as words** (Vietnamese writes space-separated syllables), so
+    24 chars / 6 syllables → max(1.85, 2.2) = **2.2 s**.
     Captions: ≤ 20 cps in English, **≤ 17 cps in Vietnamese**, 0.83–7 s per cue, ≤ 42 chars per line, ≤ 2 lines.
 15. **Beat grid.** Frames per beat = fps·60/BPM. Compute each cut from absolute time, `round(n·60/BPM·fps)`, never by
     adding up rounded intervals. Scene changes go on bars (every 4 beats), accents on beats or 8th notes. 120 BPM

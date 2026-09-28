@@ -12,7 +12,7 @@ and never invent UI the product doesn't have.
 
 | Type | Length | Frame | Sound | Notes |
 |---|---|---|---|---|
-| Landing hero loop | 8–20 s | 16:9 (or product-shaped), ≤ ~4 MB | **None; strip the track** (`-an`) | Starts mid-action, no logo intro, seamless loop. The poster = strongest frame (it counts toward LCP). `autoplay muted loop playsinline` |
+| Landing hero loop | 8–20 s | 16:9 (or product-shaped), ≤ ~4 MB | **None; strip the track** (`-an`) | Starts mid-action, no logo intro, seamless loop. The poster = strongest frame (it counts toward LCP). `autoplay muted loop playsinline`. If the brief asks for a voiceover "for the landing page", ship **both**: the silent autoplay loop, plus a click-to-play voiced cut with captions |
 | Launch video (PH / X / LinkedIn) | 30–60 s | 16:9 master + 1:1/4:5 + 9:16 cutdowns | Music-led, optional voiceover | One promise, demonstrated. Product Hunt takes a YouTube URL |
 | Feature walkthrough | 60–180 s | 16:9 | Voiceover + ducked bed | One job-to-be-done per video; chapters |
 | Changelog clip | 5–20 s | Product-shaped | Silent | One interaction, loops |
@@ -28,18 +28,31 @@ and never invent UI the product doesn't have.
 | Payoff (the number that moved, before/after) | 22–26 s | 45–53 s |
 | CTA end card (logo, URL, one verb) | 26–30 s | 53–60 s |
 
-## Capture options (pick one)
+## Capture: decision rule
 
-1. **Default: `page.screencast` (Playwright ≥ 1.59).**
-   - Viewport 1440×900 at `deviceScaleFactor: 2`, capture size 2880×1800, `quality: 90–100`.
-   - Re-encode to an intermediate at CRF ≤ 16.
-   - The `fps` option (frame-locking) was merged 2026-09-17 but ships only after 1.63.
-2. **Frame-perfect.** `chrome-headless-shell` + virtual time + `HeadlessExperimental.beginFrame` (puppeteer-capture,
-   or the Replit shim approach). Mock the network or keep the data local, because server timers behave oddly under
-   virtual time. `<video>` needs its own decode path.
-3. **Most robust for agents.** Per-step 2× screenshots, with transitions synthesised in the compositor. You lose the
-   app's own micro-animations.
-4. **Never ship `recordVideo`.** It is hardcoded VP8 at 1 Mbit/s realtime, 25 fps, scaled to fit 800×800.
+The composition layer (camera, cursor, text) is always deterministic because it is rendered from frames. Only the
+**capture** of the real app varies:
+
+| Does the app's own motion (transitions, charts animating, typing echo) matter on screen? | Capture with |
+|---|---|
+| **No** (most demos: the story is state A → state B) | **Per-step 2× screenshots** (`page.screenshot` after each action settles, `deviceScaleFactor: 2`). The compositor synthesises zoom, cursor and transitions. Fully deterministic, and the default for agents |
+| **Yes, and a few dropped frames are tolerable** | **`page.screencast`** (Playwright ≥ 1.59): viewport 1440×900 at DPR 2, `size` 2880×1800, `quality: 90–100`, re-encoded to an intermediate at CRF ≤ 16. **Gate:** `bash scripts/qa.sh dupes cap.mp4 <start_s> <end_s>` over each motion segment (take the times from `events.json`). A duplicate-frame ratio above ~1% during motion segments means recapture with the next row. Designed holds also count as duplicates, so judge motion segments, not the whole file. The `fps` frame-lock option ships after 1.63 |
+| **Yes, and it must be frame-perfect** | **Virtual time + `HeadlessExperimental.beginFrame`** in `chrome-headless-shell` (puppeteer-capture, or the Replit shim approach). The installed `chromium_headless_shell-1234` works when passed via `executablePath` (the Playwright revision mismatch only affects the default launch). Mock the network or keep data local, because server timers misbehave under virtual time. `<video>` elements need their own decode path |
+
+**Never ship `recordVideo`.** It is hardcoded VP8 at 1 Mbit/s realtime, 25 fps, scaled to fit 800×800.
+
+**Frame rate:**
+- 60 fps if the capture scrolls or the cursor or camera moves a lot.
+- 30 fps otherwise, and always for LinkedIn and App Store (≤ 30) deliverables.
+- Render the master at 60 and derive 30 fps versions with `-r 30`, not the other way round.
+
+**Running the app for capture:**
+- Use a **production build on its own port** (a separate worktree or copy), never the process already serving
+  :3000.
+- Use the project's own seed/fixture script. If none exists, create the demo tenant through the app's API or a
+  throwaway DB copy.
+- **Never point capture at production data.**
+- Log in once, then reuse the auth with `storageState`.
 
 **Resolution headroom is mandatory.** Capture at ≥ 2× the output scale and re-sample the source for each zoom.
 Upscaling a small capture is the #1 cause of mushy text.
@@ -114,7 +127,7 @@ Deliver:
 - 16:9 1920×1080 master.
 - 1:1 or 4:5 feed version.
 - 9:16 cutdown (15–30 s, **re-laid out**).
-- Silent 8–15 s hero loop (+ poster JPG, + WebM).
+- Silent 8–20 s hero loop (+ poster JPG, + WebM).
 
 In Remotion, `calculateMetadata()` returns width, height and duration per variant. Commit `beat-sheet.json`, the flows
 and the composition so the demo re-renders when the UI changes (the aidemo GitHub Action pattern).

@@ -34,7 +34,9 @@ Then, by hand:
 - [ ] `ffprobe` duration = spec ± 1 frame. fps, resolution (even dimensions), `yuv420p`, BT.709 tags, AAC 48 kHz,
       moov at front.
 - [ ] Audio stream present and not silent (`astats` RMS above the floor, unless the deliverable is silent by design).
-- [ ] No unexpected black or freeze frames.
+- [ ] No **unexpected** black or freeze frames. Designed ones are fine (a loop close to a dark dot, a fade to black,
+      a hold for reading), but name each one in your report with its timestamp so it's clear it was checked and not
+      ignored.
 - [ ] Loudness within ±1 LU of target, true peak ≤ −1 dBTP.
 - [ ] Contact sheet, seams and text crops reviewed, and every defect found was fixed and re-checked.
 - [ ] Captions: cps, line length, cue duration, NFC, and text exactly matching the display script.
@@ -55,6 +57,12 @@ ffmpeg -framerate 60 -i frames/f_%04d.png -i audio.wav \
   -colorspace bt709 -color_primaries bt709 -color_trc bt709 -color_range tv \
   -c:a aac -b:a 256k -ar 48000 -movflags +faststart -shortest out.mp4
 ```
+
+**Frame rate:**
+- **30 fps** by default: social, LinkedIn, explainers, App Store (max 30).
+- **60 fps** for showreels with fast motion and for UI captures that scroll or pan.
+- Render the master at the higher rate, then derive the lower one with `-r 30`.
+- Keep the GOP at fps/2 (`-g 15` at 30, `-g 30` at 60).
 
 | Target | Changes |
 |---|---|

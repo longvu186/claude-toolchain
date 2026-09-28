@@ -5,6 +5,7 @@
 #   bash qa.sh probe|sheet|loudness|defects|wave <video>
 #   bash qa.sh seams <video> <cut_s> [...]    frames at cut-1f / cut / cut+1f
 #   bash qa.sh frame <video> <t_s>            one full-res still
+#   bash qa.sh dupes <video> [start_s end_s]  duplicate/stuck-frame ratio, optionally only over a motion segment (screencast frame-drop gate; >1% during motion = recapture)
 #   bash qa.sh safezone <png>                 overlay 9:16 cross-post safe box (x80-888, y288-1248) + Meta/YouTube margins
 set -uo pipefail
 cmd=${1:?command}; src=${2:?file}; shift 2
@@ -24,12 +25,15 @@ sheet() { # <=4 columns x 480px keeps the sheet under the vision downscale limit
   ffmpeg -loglevel error -y -i "$src" -vf "select='not(mod(n\,$step))',scale=480:-2,tile=4x4:padding=4:color=black" -frames:v 1 -update 1 "$qa/sheet.png" \
     && echo "sheet: $qa/sheet.png (every ${step}th frame)"
 }
-frame() { ffmpeg -loglevel error -y -ss "$1" -i "$src" -frames:v 1 -update 1 "$qa/frame_$1.png" && echo "$qa/frame_$1.png"; }
+frame() { # exact frame nearest to t: seek to its midpoint so ffmpeg doesn't land one frame late
+  local t; t=$(awk -v s="$1" -v f="$(fps)" 'BEGIN{n=int(s*f+0.5); t=(n-0.5)/f; if(t<0)t=0; printf "%.5f", t}')
+  ffmpeg -loglevel error -y -ss "$t" -i "$src" -frames:v 1 -update 1 "$qa/frame_$1.png" && echo "$qa/frame_$1.png"; }
 seams() {
   local f; f=$(fps)
   for c in "$@"; do
     for k in a:-1 b:0 c:1; do
-      local tag=${k%%:*} off=${k##*:} t; t=$(awk -v c="$c" -v o="$off" -v f="$f" 'BEGIN{t=c+o/f; if(t<0)t=0; printf "%.4f", t+0.0001}')
+      # seek to the MIDPOINT before frame N so ffmpeg lands exactly on N (seeking to N/fps+eps lands on N+1)
+      local tag=${k%%:*} off=${k##*:} t; t=$(awk -v c="$c" -v o="$off" -v f="$f" 'BEGIN{n=int(c*f+0.5)+o; t=(n-0.5)/f; if(t<0)t=0; printf "%.5f", t}')
       ffmpeg -loglevel error -y -ss "$t" -i "$src" -frames:v 1 -update 1 -vf scale=640:-2 "$qa/seam_${c}_${tag}.png"
     done
     echo "seam $c: $qa/seam_${c}_{a,b,c}.png (cut-1f, cut, cut+1f)"
@@ -51,6 +55,12 @@ wave() {
   ffmpeg -loglevel error -y -i "$src" -filter_complex "showwavespic=s=1920x240:split_channels=0:colors=#FF4D2E" -frames:v 1 -update 1 "$qa/wave.png" \
     && echo "wave: $qa/wave.png ($(awk -v d="$(dur)" 'BEGIN{printf "%.1f", 1920/d}') px per second)"
 }
+dupes() {
+  local log d k win=(); [ $# -ge 2 ] && win=(-ss "$1" -to "$2")
+  log=$(ffmpeg -hide_banner -nostats "${win[@]}" -i "$src" -vf mpdecimate -loglevel debug -f null - 2>&1 | grep Parsed_mpdecimate)
+  d=$(grep -c ' drop pts:' <<<"$log" || true); k=$(grep -c ' keep pts:' <<<"$log" || true)
+  echo "duplicate frames: $d of $((d+k)) ($(awk -v d="$d" -v t="$((d+k))" 'BEGIN{printf "%.2f", t?100*d/t:0}')%)" | tee "$qa/dupes.txt"
+}
 safezone() { # src is a 1080x1920 PNG
   ffmpeg -loglevel error -y -i "$src" -vf "drawbox=x=80:y=288:w=808:h=960:color=lime@0.9:t=4,drawbox=x=0:y=0:w=1080:h=270:color=red@0.25:t=fill,drawbox=x=0:y=1248:w=1080:h=672:color=red@0.25:t=fill,drawbox=x=888:y=270:w=192:h=978:color=red@0.25:t=fill" \
     "${src%.*}_safezone.png" && echo "${src%.*}_safezone.png (green = cross-post safe box, red = platform UI)"
@@ -58,6 +68,7 @@ safezone() { # src is a 1080x1920 PNG
 case "$cmd" in
   all) probe; echo; sheet; [ $# -gt 0 ] && seams "$@"; loudness; defects; wave ;;
   probe|sheet|loudness|defects|wave) "$cmd" ;;
+  dupes) dupes "$@" ;;
   seams|frame) "$cmd" "$@" ;;
   safezone) safezone ;;
   *) echo "unknown command: $cmd" >&2; exit 2 ;;

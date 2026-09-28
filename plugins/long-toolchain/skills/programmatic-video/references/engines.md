@@ -102,7 +102,7 @@ cost tool-schema tokens. Kinocut is the only guardrailed one (workspace isolatio
 |---|---|---|
 | Seek-per-frame (your own clock, canvas, Remotion, HyperFrames) | Yes | Anything authored |
 | Time virtualisation (shim `Date`/`performance.now`/timers/rAF) + `HeadlessExperimental.beginFrame` | Yes | Arbitrary pages / real apps. **Needs `chrome-headless-shell`, Linux or Windows only** |
-| Real-time screencast (`recordVideo`, `page.screencast`, CDP screencast) | **No** (drops frames under load) | Rough cuts, CI evidence, "video receipts" |
+| Real-time screencast (`page.screencast`, CDP screencast) | **No** (drops frames under load) | Rough cuts, CI evidence. Shippable app capture **only** after the `qa.sh dupes` gate (`product-demo.md`). `recordVideo` is never shippable |
 
 This VPS: Playwright wants `chromium_headless_shell-1243`, but only `-1234` is installed.
 `scripts/render-frames.mjs` resolves the newest installed shell automatically, or reads `CHROME_PATH`.

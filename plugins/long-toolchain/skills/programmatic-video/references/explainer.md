@@ -44,6 +44,10 @@ script.md → spoken.txt (normalised, NFC) → TTS per beat → word timestamps 
 
 1. **Beats.** 5–12 beats, each with narration (display text), visual intent, terms to signal, and inline anchors
    `{{A}}` where a visual must fire.
+   **Fact-check the script against primary sources before any TTS or render.** For technical topics that means the
+   RFC, spec or official docs, or a real capture (e.g. `openssl s_client -msg` for TLS). Record the sources in the
+   manifest, and list what you deliberately simplified. A VLM frame review does not check correctness, and a
+   polished wrong explainer is worse than none.
 2. **Spoken vs display text.** Normalise numbers, dates, currency and acronyms into spoken form. For Vietnamese use
    `vietnormalizer` (MIT). Keep a display↔spoken map, e.g. the caption shows "1.000 đồng" while TTS says "một nghìn
    đồng".
@@ -58,7 +62,8 @@ script.md → spoken.txt (normalised, NFC) → TTS per beat → word timestamps 
    **mid-transition** (collisions often exist only mid-interpolation).
 7. **Render:** Remotion (`calculateMetadata` sets duration from the timeline; each beat is `<Sequence from>` +
    `<Audio>`; anchors become `interpolate(frame,[a,a+15],…)`), or Manim (below), or a Playwright tutorial (below).
-8. **Mix.** Narration only, or music far under it. Two-pass loudnorm to −14 to −16 LUFS, TP ≤ −1.5 dBTP.
+8. **Mix.** Narration only, or music far under it. Use `bash scripts/loudnorm.sh in.mp4 out.mp4` for the default
+   −14 LUFS / −1 dBTP. For a dialogue-only piece whose main home is a course or LMS, `-16 -1` is also acceptable.
 9. **Captions from `timeline.words`**, not from ASR. Emit VTT + SRT sidecars, burn in only for social. Emit YouTube
    chapter lines.
 10. **QA gates** (`qa-and-delivery.md`), plus an ASR round-trip: transcribe the final mix and compute CER against

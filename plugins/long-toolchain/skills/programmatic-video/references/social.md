@@ -23,7 +23,7 @@ Use 30 fps CFR by default, and 60 for fast UI scrolling (Instagram may play at 3
 | Facebook Reels | 1080×1920 | 15–60 s performs best | All uploads become Reels. SRT upload supported |
 | YouTube Shorts | 1080×1920 or 1:1 | **≤ 3 min** | Audio-library songs usable ≤ 90 s. SRT/VTT |
 | YouTube long-form | 1920×1080 / 4K | — | H.264 High, closed GOP = fps/2, 2 B-frames, 8 Mbps (30p) / 12 Mbps (60p), AAC 48 kHz 384k, BT.709. Chapters need `00:00` first, ≥ 3 entries, each ≥ 10 s |
-| LinkedIn | 16:9, 1:1, 4:5, 9:16 | Ads 3 s–30 min | Ads ≤ 500 MB, 30 fps. **SRT upload supported.** Feeds skew sound-off |
+| LinkedIn | 16:9, 1:1, 4:5, 9:16 | Ads 3 s–30 min | Ads ≤ 500 MB, 30 fps. Feeds skew sound-off, so **burn captions in AND upload the SRT** (the sidecar is for accessibility and search) |
 | X | 16:9 or 9:16 | Free accounts ≤ 2:20 | ≤ 512 MB (third-party figure) |
 
 ## Safe zones at 1080×1920
@@ -101,6 +101,26 @@ Rendering rules:
 8. **Size caption boxes from the longest locale.** Vietnamese often runs longer than English.
 9. **Copy.** No unprovable "nhất" (best/most) superlatives in ads. For Vietnamese copy, use the `vi-copywriting` skill.
 
+## Kinetic on-screen text density (not captions)
+
+- ≤ ~5 words (Vietnamese: ≤ ~7 syllables) on screen per beat.
+- Hold each block for `max(0.833 s, chars/15, words/2.7)` from the moment it is readable. **Use chars/13 for
+  Vietnamese, and count syllables as words**: its caption cap is 17 cps versus 20 for English, so scale display text the same way.
+- TikTok's "5–10 words/s" is a ceiling for very short flashes, not a target.
+- With a voiceover, on-screen text must be *keywords*, not the transcript.
+
+## Footage and stills (non-software promos: food, venues, products)
+
+- **Use real photos or footage of the real product.** Never generate images of real menu items, venues or products
+  with AI: it misrepresents what the customer will get. AI B-roll is acceptable only for abstract mood backgrounds,
+  and never with text.
+- Ask the client for assets first. Until they arrive, build with clearly labelled placeholders.
+- **Animate stills in the compositor** (canvas or Remotion transforms: scale 1.0→1.08 over the hold with ease-in-out,
+  slight drift in the film's dominant direction). Avoid ffmpeg `zoompan`, which jitters unless the source is first
+  upscaled to ~4× the output width.
+- Photos need ≥ 2× the displayed size for crisp motion. Put a scrim under any text over a photo (contrast rule 5 in
+  `motion-craft.md`).
+
 ## Music licensing (attach a licence record to every render)
 
 | Source | Rule |
@@ -113,6 +133,7 @@ Rendering rules:
 | Suno | Commercial use **only on Pro/Premier and only via a permitted download** (terms effective 2026-09-03) |
 | Udio | Downloads disabled, so unusable |
 | ElevenLabs Music | Self-serve reportedly excludes film, TV and games |
+| Meta (Instagram/Facebook business accounts) | Meta offers an in-app licensed sound collection for business use, but its exact terms were **not verified** in the 2026-09 research. Treat it like TikTok CML: add sounds in-app only, and check the current Meta terms before claiming coverage |
 | **Procedural synth (`templates/showreel/synth.cjs`)** | Yours, no licence needed. The safest default for stings and short promos |
 
 When no licensed track is available, deliver a no-music master plus a beat cue sheet so the operator can add a cleared
