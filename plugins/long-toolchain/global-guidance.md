@@ -143,7 +143,6 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 <!-- Auto-appended by the nightly knowledge-consolidation job. Rare,
      capped, cross-project lessons only — see docs/run-logs/
      2026-09-12-knowledge-extraction-pipeline.md. -->
-- pnpm's build-script-approval flow (pnpm approve-builds) can leave an unresolved placeholder comment in pnpm-workspace.yaml (e.g. 'esbuild: set this to true or false'); check for and strip it before committing in any pnpm-managed repo — it has already recurred twice in one project.
 - pnpm-workspace.yaml's 'esbuild: set this to true or false' placeholder from pnpm approve-builds keeps recurring as an accidental commit even in unrelated feature branches — now confirmed a 3rd time; a pre-commit diff review should explicitly check this file even when gates are green.
 - `systemctl show -p Environment` dumps a unit's full environment including secret values in plaintext — never run it unfiltered on any unit known to carry secrets; grep for a specific non-secret key, or check behavior via logs/journal instead.
 - A dev-runner branch marked 'paused' is not evidence work happened — two prior BCNV 'paused' commits had zero tool calls in their run-logs. Check the run-log's tool-call count before trusting a paused/blocked status label, across any project using the dev-runner.
@@ -163,7 +162,9 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 - To copy a secret between two repos sharing one Infisical workspace but different per-repo paths, fetch into a shell variable with `infisical secrets get` and set it at the target path — never let the value hit stdout/output; verify after with `list-secret-keys` (names only) on both sides.
 - Before exposing an anon-callable Supabase RPC to the public internet, verify any rate-limit/throttle key it trusts (e.g. an IP hash) is server-derived and signed, not caller-supplied — the anon key + project URL are public, so a client can rotate a supplied value to bypass the limit entirely.
 - Turbopack's dev server refuses a symlinked node_modules — a git worktree that symlinks to the main checkout's node_modules will fail to start; give the worktree a real pnpm hard-linked install instead. Applies to any repo run from a worktree with Turbopack, not just one project.
+- When a test fails after a change, before attributing it to the diff, build an untouched copy of the base branch separately and run the same test there — a flaky/pre-existing failure (e.g. a timing-sensitive UI check) can look diff-caused but reproduces on main too.
 <!-- hq-auto-lessons:end -->
+
 
 
 

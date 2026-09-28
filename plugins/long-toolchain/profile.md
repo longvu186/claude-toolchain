@@ -92,9 +92,12 @@ beliefs. Atoms feed this; this is never just a list of atoms.
   said "yes, build it" in conversation, proceed straight to implementation — don't insert a separate
   spec-doc-to-file + second-review + formal handoff gate for something already agreed. Still explore
   options and get an explicit yes first; this only cuts the paperwork after that yes. Does not apply in
-  explicit Plan Mode or when he's asked for a written artifact. _(established — 2026-07-07: "I didn't
-  initiate you in plan mode, but auto mode. always proceed to build in auto mode."; repo memory:
-  `feedback_auto-mode-skip-gates`)_
+  explicit Plan Mode or when he's asked for a written artifact. Extends to planning itself: once
+  brainstorming has produced an approved spec, that **is** the plan — don't chain a second formal
+  planning pass (e.g. writing-plans) on top before implementing ("you are planning twice"). Prefer fewer
+  clarifying rounds generally — ask only the genuinely load-bearing questions, then build. _(established
+  — 2026-07-07: "I didn't initiate you in plan mode, but auto mode. always proceed to build in auto
+  mode."; repo memory: `feedback_auto-mode-skip-gates` + `feedback_no-double-planning`)_
 - **Routine operational recoveries are standing defaults, not permission requests.** Two established
   instances: (1) a business VPS that already has its own on-host coding agent is a standing dispatch
   target — dispatch the fix over SSH in the same turn, never "should I fix this myself or do you want
@@ -107,6 +110,18 @@ beliefs. Atoms feed this; this is never just a list of atoms.
   critiqued for diverging from the schema; app-wide services (audit, notification, auth, lexicon) sit in
   a separate layer with deliberately zero edges to domain aggregates. _(provisional — one verbatim,
   emphatic statement, 2026-08-27; tobuso memory `feedback-domain-model-not-database-design`)_
+- **A literal spec that would break sibling consistency needs a flag before it's built, not a guess.**
+  When an instruction targets one instance of a repeated UI component and honoring it literally would
+  make it diverge from its siblings, that's a conflict between the literal ask and his own system-first-
+  UI standard — say so in a sentence and offer the consistent read, then build; don't implement literally
+  and let production be the review, and don't over-correct to fully identical either (the fix is usually
+  "same structure, different decorative layer," not picking an extreme). Same principle for screenshot
+  validation: judge the screenshot as a designer would (mismatched siblings, stray rules), not just as
+  proof the data loaded. _(provisional — one instance, 2026-08-12, two production round-trips before
+  landing on the right layer; yen-tu memory `feedback_flag-spec-vs-consistency`)_
+- **Client-side over AI/API by default for simple helpers.** For a "fill/copy this field from that one"
+  style feature, implement it client-side rather than reaching for an API/LLM call, unless he explicitly
+  asks for AI involvement. _(provisional — one instance, yen-tu memory `feedback_no-ai-for-copy-helpers`)_
 
 ## Domain & skill map
 
@@ -279,3 +294,20 @@ ready.json`, or archive the report — this session's toolset has no Bash/file-d
   `kind:"correction"` misclassification at source) are unactioned after 9+ passes recommending them -
   raising this to the user directly now rather than re-noting it a 16th time. Watermark unchanged: line
   6905 (signals) / 1289 (curation queue).
+- 2026-09-28 (nightly) — `profile-signals.jsonl` gained 7 lines (6906–6912) and the curation queue 14
+  (1280–1294): both still zero genuine operator corrections (video-skill research narration, a tobuso
+  rule-table excerpt, prior consolidation-pass self-logging). 17th straight pass with nothing from that
+  source. This pass instead swept `feedback_*.md` across **other** projects' auto-memory dirs
+  (boroearth, yen-tu) for cross-project atoms never folded in — the first time that source has been
+  checked broadly rather than just the most recent per-project `MEMORY.md`. **Promoted:** merged
+  `feedback_no-double-planning` into the existing auto-mode-skip-gates bullet (brainstorming→approved-
+  spec chains straight to implementation, no second writing-plans pass; fewer clarifying rounds).
+  **Added two new provisionals:** flag-spec-vs-consistency (yen-tu, literal per-instance styling spec
+  that breaks sibling consistency needs a flag before building) and client-side-over-AI-for-simple-
+  helpers (yen-tu). **Correctly left out** as already-covered-elsewhere: `feedback_compassionate-chief-
+  of-staff` (Planner-specific application of the already-established operator-mental-health/no-shame
+  principle), `feedback_verify-dev-runner-ui-before-merge` (dev-runner-specific mechanics of the already-
+  established screenshot-backed-validation rule), boroearth's deploy-command/Playwright/mock-DB memories
+  and yen-tu's MCP-env-expansion/secrets-in-chat memories (all project-technical, not user-level; the
+  secrets-in-chat one duplicates existing CLAUDE.md policy). Reset `_consolidation-state.json`. Watermark
+  for next pass: line 6912 (signals) / 1294 (curation queue).
