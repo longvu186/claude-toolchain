@@ -305,9 +305,22 @@ ready.json`, or archive the report — this session's toolset has no Bash/file-d
   **Added two new provisionals:** flag-spec-vs-consistency (yen-tu, literal per-instance styling spec
   that breaks sibling consistency needs a flag before building) and client-side-over-AI-for-simple-
   helpers (yen-tu). **Correctly left out** as already-covered-elsewhere: `feedback_compassionate-chief-
-  of-staff` (Planner-specific application of the already-established operator-mental-health/no-shame
+of-staff` (Planner-specific application of the already-established operator-mental-health/no-shame
   principle), `feedback_verify-dev-runner-ui-before-merge` (dev-runner-specific mechanics of the already-
   established screenshot-backed-validation rule), boroearth's deploy-command/Playwright/mock-DB memories
   and yen-tu's MCP-env-expansion/secrets-in-chat memories (all project-technical, not user-level; the
   secrets-in-chat one duplicates existing CLAUDE.md policy). Reset `_consolidation-state.json`. Watermark
   for next pass: line 6912 (signals) / 1294 (curation queue).
+- 2026-09-29 (nightly) — `profile-signals.jsonl` gained 3 lines (6913–6915: streaming-kit feature-work
+  self-narration) and the curation queue 21 (1295–1314: programmatic-video research/skill-build follow-on,
+  a tobuso watcher task, an mrtuktuk print-server memory update). 18th straight pass with zero genuine
+  operator corrections — everything is project-technical narration already captured in its own repo's
+  memory (the video skill itself, tobuso checkpoint file, mrtuktuk infra memory). Re-swept all
+  `feedback_*.md` across every project's auto-memory dir: only boroearth/yen-tu/personal-hq have any, and
+  all of those are already folded in as of the 2026-09-18/23/28 passes — no new source repo has started
+  using this file shape. No facts promoted, retired, or contradicted. Archiving of `profile-signals.jsonl`
+  remains blocked (Read/Write/Edit/Glob/Grep-only toolset, no Bash/file-move, ~2.8MB file) for the same
+  reason as every pass since 2026-09-19; not re-detailing the two standing fixes again here (Bash access
+  for this job, or fixing the signal-logging hook's `kind:"correction"` misclassification) since they were
+  already raised directly to the user on 2026-09-26/27 — this entry is now purely the terse per-pass log.
+  Reset `_consolidation-state.json`. Watermark for next pass: line 6915 (signals) / 1314 (curation queue).

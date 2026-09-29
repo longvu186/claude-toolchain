@@ -143,8 +143,6 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 <!-- Auto-appended by the nightly knowledge-consolidation job. Rare,
      capped, cross-project lessons only — see docs/run-logs/
      2026-09-12-knowledge-extraction-pipeline.md. -->
-- pnpm-workspace.yaml's 'esbuild: set this to true or false' placeholder from pnpm approve-builds keeps recurring as an accidental commit even in unrelated feature branches — now confirmed a 3rd time; a pre-commit diff review should explicitly check this file even when gates are green.
-- `systemctl show -p Environment` dumps a unit's full environment including secret values in plaintext — never run it unfiltered on any unit known to carry secrets; grep for a specific non-secret key, or check behavior via logs/journal instead.
 - A dev-runner branch marked 'paused' is not evidence work happened — two prior BCNV 'paused' commits had zero tool calls in their run-logs. Check the run-log's tool-call count before trusting a paused/blocked status label, across any project using the dev-runner.
 - AI-context index files (code-index.json, symbol-map.md) drift silently from real code — wrong export names, missing files, stale lastVerified dates. Before using one to write documentation or plan a change, verify claimed exports/paths via grep rather than trusting the index.
 - Testing whether a token/credential actually works by spawning a CLI subprocess with it set in env is unreliable if the subprocess inherits the full environment — an ambient logged-in session can mask a dead/garbage token as "valid". Always test in an isolated env with no ambient credentials.
@@ -163,7 +161,11 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 - Before exposing an anon-callable Supabase RPC to the public internet, verify any rate-limit/throttle key it trusts (e.g. an IP hash) is server-derived and signed, not caller-supplied — the anon key + project URL are public, so a client can rotate a supplied value to bypass the limit entirely.
 - Turbopack's dev server refuses a symlinked node_modules — a git worktree that symlinks to the main checkout's node_modules will fail to start; give the worktree a real pnpm hard-linked install instead. Applies to any repo run from a worktree with Turbopack, not just one project.
 - When a test fails after a change, before attributing it to the diff, build an untouched copy of the base branch separately and run the same test there — a flaky/pre-existing failure (e.g. a timing-sensitive UI check) can look diff-caused but reproduces on main too.
+- GitNexus impact/detect_changes return UNKNOWN or 0 callers uniformly for Next.js server actions invoked via JSX action={fn} props (not callgraph-resolvable) — text search across app/components/lib/e2e is the real discriminator for proving dead code in this pattern, on any Next.js+GitNexus project.
+- GitNexus detect_changes can misattribute a diff hunk to the wrong symbol when its index is stale (line-number drift) — a flagged symbol should be confirmed against the actual git diff hunks before trusting the attribution, on any project running detect_changes against a stale index.
 <!-- hq-auto-lessons:end -->
+
+
 
 
 
