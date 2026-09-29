@@ -1,6 +1,6 @@
 ---
 name: programmatic-video
-description: Use when asked to make, render, edit, plan or review any video or animation — motion graphics, showreel, logo sting, product demo, launch/promo video, landing-page hero loop, TikTok/Reels/Shorts social video, explainer, tutorial or screencast, animated captions/subtitles, voiceover/TTS sync — or when choosing between Remotion, HyperFrames, Manim, Motion Canvas, ffmpeg, Playwright capture, TTS engines or AI video generators (Veo, Kling).
+description: Use when asked to make, render, edit, plan or review any video or animation — motion graphics, showreel, logo sting, product demo, launch/promo video, landing-page hero loop, TikTok/Reels/Shorts social video, explainer, tutorial or screencast, animated captions/subtitles, voiceover/TTS sync, writing a video brief or prompt for another agent — or when choosing between Remotion, HyperFrames, Manim, Motion Canvas, ffmpeg, Playwright capture, TTS engines or AI video generators (Veo, Kling).
 ---
 
 # Programmatic video
@@ -21,6 +21,7 @@ rendering.
 | Vertical social promo (9:16) | Remotion or canvas; captions burned in | `references/social.md` |
 | Narrated explainer / tutorial / math | Remotion or Manim; audio-first timeline | `references/explainer.md` |
 | Voiceover, captions, music, loudness | — | `references/audio-voice-captions.md` |
+| Turning a vague ask into a buildable brief; style register; writing a prompt for another agent | — | `references/brief-patterns.md` |
 | Picking or vetting an engine, licence, MCP or skill pack | — | `references/engines.md` |
 | QA, encoding, sharing a link | — | `references/qa-and-delivery.md` |
 
@@ -56,6 +57,9 @@ time, beat grid, seams).
 | `qa.sh` | `bash qa.sh all <video> [cut_s…]` · `probe` · `sheet` · `seams <video> <cut_s…>` · `frame <video> <t>` · `loudness` · `defects` · `wave` · `dupes <video> [start end]` · `safezone <1080x1920.png>` | Writes into `<video>.qa/`: 4×4 contact sheet, exact cut−1/cut/cut+1 frames, ffprobe summary, LUFS and true peak, black/freeze/silence events, waveform, duplicate-frame ratio, safe-zone overlay |
 | `loudnorm.sh` | `bash loudnorm.sh <in> <out> [I=-14] [TP=-1] [LRA=11]` | Two-pass linear loudnorm at 48 kHz. For video it re-measures after AAC and compensates. Exits non-zero if it can't pass |
 | `share.sh` | `bash share.sh <video-or-dir> [port=8791] [hours=24]` | Player page + Range server + isolated Cloudflare quick tunnel (auto-expiring systemd units). Verifies 200 and 206 publicly before printing the URL |
+
+Motion helpers (closed-form springs, retargeting and stretchy springs, seeded shuffle, log-zoom, on-twos) live in
+`templates/lib/motion.js`. They are pure functions of t, and `node motion.test.cjs` runs the 19-assertion test.
 
 ## Quick reference
 

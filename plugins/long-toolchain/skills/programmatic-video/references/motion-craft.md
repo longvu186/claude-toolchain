@@ -36,7 +36,9 @@ The strongest single source of craft rules is HyperFrames' `motion-doctrine` (Ap
     - Never use `bounce.out` or `elastic.out`.
     - Remotion and Framer spring defaults (m 1, k 100, c 10 → ζ 0.5, ~16% overshoot, ~800 ms settle) are bouncy.
       Override them deliberately.
-13. **Specify springs by ζ and k.** Convert with c = 2ζ√(k·m). Overshoot = e^(−ζπ/√(1−ζ²)).
+13. **Specify springs by ζ and k.** Convert with c = 2ζ√(k·m). Overshoot = e^(−ζπ/√(1−ζ²)). Use the tested
+    closed-form `springStep`/`springTrack` in `templates/lib/motion.js`. A value that retargets is a **sum of one
+    spring per change**, never an integrated physics state.
 14. **Reading time.** `hold_s = max(0.833, chars/15, words/2.7)`, counted from the moment the text is fully readable.
     **Vietnamese: use `chars/13`, and count *syllables* as words** (Vietnamese writes space-separated syllables), so
     24 chars / 6 syllables → max(1.85, 2.2) = **2.2 s**.
