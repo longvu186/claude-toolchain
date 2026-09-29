@@ -650,12 +650,13 @@ description: "Cross-project failure patterns and recovery strategies (150+ docum
 - Anti-pattern: reading tab/modal/selection state from URL `searchParams` inside a Server Component with no caching. Every click changes the param, Next re-runs the whole server component, and re-fetches ALL page data — slow on edge/serverless (Cloudflare/OpenNext) + remote DB (Supabase).
 - Decision matrix for fix:
   - Data already loaded and shared across tabs, must be instant → move tab/modal state to a `"use client"` component with `useState`; fetch once in the server parent and pass as props. Mirror to URL via `window.history.replaceState` for deep-linking WITHOUT triggering a re-fetch.
-  - Each tab needs different/heavy data you don't want to load upfront → keep URL state but make navigation cheap: per-tab Suspense streaming (`loading.tsx`) + Next Router Cache so only the changed slice re-renders.
+  - Each tab needs different/heavy data you don't want to load upfront → keep URL state but make navigation cheap: per-tab `<Suspense>` + your own click-time skeleton. NOT `loading.tsx` — it never fires for a searchParams-only navigation (the segment stays mounted), and `useSearchParams()` only updates at commit, so pending state must come from `<Link onNavigate>` (details: `nextjs-workers-performance`).
   - Modal that should be URL-addressable/shareable → use Intercepting Routes + Parallel Routes (`@modal` slot with `(.)` intercept) — native App Router pattern, no full-page re-render.
 - Always-applicable data-layer fixes (orthogonal, apply regardless of state strategy):
   - Parallelize independent `await`s with `Promise.all`; sequential waterfalls multiply latency on serverless.
   - Never load a whole table then filter in JS — push the filter into the query.
-  - Wrap hot per-request reads (auth/session checks, lookup tables) in React `cache()` to deduplicate within a single request; without it, layout guards and page guards each hit the DB separately.
+  - Wrap hot per-request reads (auth/session checks, lookup tables) in React `cache()` to deduplicate within a single request; without it, layout guards and page guards each hit the DB separately. `cache()` keys on argument IDENTITY: a client-bundle factory returning a fresh object per call silently defeats every loader keyed on it — `cache()` the factory too.
+  - For the full measure-first playbook on Workers/OpenNext/Supabase (placement, per-call cost, chain depth, DO location, cold start, CPU limits) load `nextjs-workers-performance`.
   - Memoize stateless service clients (Supabase client, etc.) as module-scope singletons so they are not recreated per request.
 - Large client-component extractions (~2000 lines JSX) are mechanical but high-transcription-risk. Keep JSX byte-identical and convert only interaction points (`Link` → `button onClick`, `searchParam` → `useState`); rely on `typecheck` + build to catch errors.
 
