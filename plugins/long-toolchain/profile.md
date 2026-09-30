@@ -324,3 +324,20 @@ of-staff` (Planner-specific application of the already-established operator-ment
   for this job, or fixing the signal-logging hook's `kind:"correction"` misclassification) since they were
   already raised directly to the user on 2026-09-26/27 — this entry is now purely the terse per-pass log.
   Reset `_consolidation-state.json`. Watermark for next pass: line 6915 (signals) / 1314 (curation queue).
+- 2026-10-01 (explicit user request, paired with a `/consolidate-project` pass on personal-hq) —
+  `profile-signals.jsonl` gained 64 lines (6916–6979) and the curation queue 3 (1315–1317): same pattern
+  as every pass since 2026-09-19 — dev-runner/test-output/plan-narration text mislabelled
+  `kind:"correction"` (raw vitest pass/fail lines, repeated boilerplate headers, a self-referential entry
+  about this very consolidate-memory/consolidate-project pairing from 2026-09-29). 19th straight pass with
+  zero genuine operator corrections from that source. Re-swept `feedback_*.md` across every project's
+  auto-memory dir: same three repos (boroearth/yen-tu/personal-hq), all already folded in — no new source.
+  No facts promoted, retired, or contradicted this pass. The real work this pass was on the companion
+  `memories/repo/project-profile.md`: it had grown to 7,895 lines with the entire history living inside
+  its own `digest:start`/`digest:end` markers (i.e. the "keep it to ~40-80 lines" always-injected block
+  had become the whole file) — the 2026-09-29 pass's logged "success" on this exact file had not
+  measurably changed it. Read the full file and rewrote it to the intended digest+read-on-demand shape;
+  see that file's own Changelog for detail. Worth a standing note here too: **a logged consolidation
+  "success" on `memories/repo/project-profile.md` is not proof the file actually changed — check the file
+  itself before trusting the run log.** Archiving of `profile-signals.jsonl` remains blocked for the same
+  toolset reason as every pass since 2026-09-19. Reset `_consolidation-state.json`. Watermark for next
+  pass: line 6979 (signals) / 1317 (curation queue).

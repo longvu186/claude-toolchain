@@ -143,8 +143,6 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 <!-- Auto-appended by the nightly knowledge-consolidation job. Rare,
      capped, cross-project lessons only — see docs/run-logs/
      2026-09-12-knowledge-extraction-pipeline.md. -->
-- Postgres sorts NULL first in DESC ordering by default — an unset nullable timestamp column (e.g. an endedAt) can silently jump pre-completion rows to the top of a history list sorted DESC.
-- Next.js 16's dev server exposes a built-in /_next/mcp endpoint (next-devtools-mcp) with live compile/runtime errors, route list, and Server Action IDs — replaces manually grepping .next chunks for Server Action IDs in any Next 16 repo, not just one business.
 - For any third-party agent skill pack (react-best-practices, shadcn, supabase, trailofbits, etc.): pin to a specific commit and vendor it into the repo, never auto-update — skill packs can ship scripts, so auto-update is a supply-chain risk across every project that installs one.
 - Operator prefers validating dev-runner changes against the cloud/production DB directly rather than spinning up local Docker/Supabase test infra — ask before starting any local service; this has now been stated explicitly on at least two projects.
 - For money/session-mutation RPCs in Supabase (any project handling payments): check idempotency key BEFORE the status check, and clamp requested amounts server-side to the remaining balance — status-first ordering lets a racing/duplicate request double-capture payment before idempotency is checked.
@@ -163,7 +161,11 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 - Tests that write to cwd-relative data dirs with real business/module ids clobber live files when run in the real checkout (dev-runner/deploy gates run tests there). DB isolation via temp path is not enough; isolate filesystem paths too.
 - Tests that write files via cwd-relative paths using real business/module ids destroy live operator data when run in the real checkout. DB isolation is not enough; isolate filesystem paths too, and use throwaway ids in every test.
 - VPS shell has TURBOPACK=1 set globally, silently forcing Turbopack in next build and crashing /404 prerender (found on Mr. TukTuk). Use `env -u TURBOPACK` in build scripts plus global-not-found.tsx; check other Next.js business repos for the same hidden failure.
+- Tests run in a live checkout that write cwd-relative data (memory, skills, documents) wipe real operator data; isolate filesystem paths, not just DB, and verify live files after a full suite run.
+- Tailscale SSH hosts ignore /etc/environment (no PAM pam_env). Put env vars in a root-only file sourced ABOVE the `[ -z "$PS1" ] && return` line in ~/.bashrc so one-off `ssh host cmd` also sees them. Test over a fresh non-multiplexed connection.
 <!-- hq-auto-lessons:end -->
+
+
 
 
 
