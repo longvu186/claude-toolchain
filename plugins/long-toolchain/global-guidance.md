@@ -143,9 +143,6 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 <!-- Auto-appended by the nightly knowledge-consolidation job. Rare,
      capped, cross-project lessons only — see docs/run-logs/
      2026-09-12-knowledge-extraction-pipeline.md. -->
-- For any third-party agent skill pack (react-best-practices, shadcn, supabase, trailofbits, etc.): pin to a specific commit and vendor it into the repo, never auto-update — skill packs can ship scripts, so auto-update is a supply-chain risk across every project that installs one.
-- Operator prefers validating dev-runner changes against the cloud/production DB directly rather than spinning up local Docker/Supabase test infra — ask before starting any local service; this has now been stated explicitly on at least two projects.
-- For money/session-mutation RPCs in Supabase (any project handling payments): check idempotency key BEFORE the status check, and clamp requested amounts server-side to the remaining balance — status-first ordering lets a racing/duplicate request double-capture payment before idempotency is checked.
 - A dev-runner account hitting 'You've hit your session limit' is not classified as usage-exhausted by the runner, so it burns retries instead of pausing until reset — check this classifier in any project using the same dev-runner.
 - In Postgres, `ALTER TYPE ... ADD VALUE` must commit before any RLS policy referencing that new enum value runs — split enum additions and dependent policies into separate migrations/transactions to avoid a broken deploy, in any project using enum-gated RLS.
 - pnpm-workspace.yaml's 'esbuild: set this to true or false' placeholder from pnpm approve-builds recurred yet again (now 4th confirmed instance across sessions) as an accidental unrelated diff — always diff-review this file before committing in any pnpm-managed repo.
@@ -163,7 +160,13 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 - VPS shell has TURBOPACK=1 set globally, silently forcing Turbopack in next build and crashing /404 prerender (found on Mr. TukTuk). Use `env -u TURBOPACK` in build scripts plus global-not-found.tsx; check other Next.js business repos for the same hidden failure.
 - Tests run in a live checkout that write cwd-relative data (memory, skills, documents) wipe real operator data; isolate filesystem paths, not just DB, and verify live files after a full suite run.
 - Tailscale SSH hosts ignore /etc/environment (no PAM pam_env). Put env vars in a root-only file sourced ABOVE the `[ -z "$PS1" ] && return` line in ~/.bashrc so one-off `ssh host cmd` also sees them. Test over a fresh non-multiplexed connection.
+- Never run pgrep -fa, ps aux or similar against processes launched by with-secrets or infisical. Their argv contains the machine-identity token and it lands in the transcript. Use pgrep -c or PID-only listings.
+- Any secret whose plaintext appears in a chat transcript must be rotated. Transcripts are mined nightly by consolidateKnowledge(). Create and verify secrets without printing them: store directly into Infisical, then check names only with list-secret-keys.
+- Never prove guardrail enforcement from the model's own prose; it self-censors from CLAUDE.md without calling the tool. Use `--output-format stream-json` and check permission_denials, with a probe rule CLAUDE.md doesn't mention. Also A/B-control any policy mechanism before trusting it.
 <!-- hq-auto-lessons:end -->
+
+
+
 
 
 
