@@ -143,10 +143,6 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 <!-- Auto-appended by the nightly knowledge-consolidation job. Rare,
      capped, cross-project lessons only — see docs/run-logs/
      2026-09-12-knowledge-extraction-pipeline.md. -->
-- AI-context index files (code-index.json, symbol-map.md) drift silently from real code — wrong export names, missing files, stale lastVerified dates. Before using one to write documentation or plan a change, verify claimed exports/paths via grep rather than trusting the index.
-- Testing whether a token/credential actually works by spawning a CLI subprocess with it set in env is unreliable if the subprocess inherits the full environment — an ambient logged-in session can mask a dead/garbage token as "valid". Always test in an isolated env with no ambient credentials.
-- `pkill -f <pattern>` run over SSH can match and kill its own invoking command line (the SSH command itself contains the pattern), terminating the calling session — split kill checks into a self-safe grep/pattern rather than one pkill -f call.
-- gitnexus detect_changes can report risk_level:critical for a pure JSX/text/array-literal diff when the touched component (e.g. a big screen/page component) has a large pre-existing call graph — the label reflects graph size, not actual change risk. Verify diff hunks before trusting a critical label.
 - Postgres sorts NULL first in DESC ordering by default — an unset nullable timestamp column (e.g. an endedAt) can silently jump pre-completion rows to the top of a history list sorted DESC.
 - Next.js 16's dev server exposes a built-in /_next/mcp endpoint (next-devtools-mcp) with live compile/runtime errors, route list, and Server Action IDs — replaces manually grepping .next chunks for Server Action IDs in any Next 16 repo, not just one business.
 - For any third-party agent skill pack (react-best-practices, shadcn, supabase, trailofbits, etc.): pin to a specific commit and vendor it into the repo, never auto-update — skill packs can ship scripts, so auto-update is a supply-chain risk across every project that installs one.
@@ -163,7 +159,15 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 - GitNexus impact/detect_changes return UNKNOWN or 0 callers uniformly for Next.js server actions invoked via JSX action={fn} props (not callgraph-resolvable) — text search across app/components/lib/e2e is the real discriminator for proving dead code in this pattern, on any Next.js+GitNexus project.
 - GitNexus detect_changes can misattribute a diff hunk to the wrong symbol when its index is stale (line-number drift) — a flagged symbol should be confirmed against the actual git diff hunks before trusting the attribution, on any project running detect_changes against a stale index.
 - Debugging remote env-var propagation: Tailscale SSH ignores /etc/environment (no PAM pam_env). Put the var in a root-only file sourced above the PS1 early-return in ~/.bashrc, and never cat files that may hold secrets.
+- Runner pitfalls seen on BCNV: a 'session limit' message is misclassified as an error when the usage API returns 401 for oauth_token pins. A tracked file under gitignored run-logs/.raw breaks remote finalize. An HQ restart orphans the controller while the remote agent keeps committing.
+- Tests that write to cwd-relative data dirs with real business/module ids clobber live files when run in the real checkout (dev-runner/deploy gates run tests there). DB isolation via temp path is not enough; isolate filesystem paths too.
+- Tests that write files via cwd-relative paths using real business/module ids destroy live operator data when run in the real checkout. DB isolation is not enough; isolate filesystem paths too, and use throwaway ids in every test.
+- VPS shell has TURBOPACK=1 set globally, silently forcing Turbopack in next build and crashing /404 prerender (found on Mr. TukTuk). Use `env -u TURBOPACK` in build scripts plus global-not-found.tsx; check other Next.js business repos for the same hidden failure.
 <!-- hq-auto-lessons:end -->
+
+
+
+
 
 
 
