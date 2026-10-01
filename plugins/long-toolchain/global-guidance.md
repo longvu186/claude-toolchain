@@ -52,6 +52,10 @@ at session start). Read the full profile when personalizing approach, scoping, o
 - **Case matrix before code:** for any CRUD or data-mutation feature, enumerate the case matrix
   (happy/negative/boundary/permission/concurrency) as the first artifact, before test or implementation
   code — one step ahead of TDD's red-green loop. Details: `test-case-matrix` skill.
+- **Sign-in/onboarding is a crucial funnel — test it as a stranger, not as me.** Any auth, callback or
+  onboarding change must cover every sign-in button × role × new/existing account (a brand-new account
+  must reach onboarding, never a silent homepage), with the landing decision unit-tested. My admin
+  account passing proves nothing. Details: `feature-auth-system` checklist + `tech-pitfalls`.
 - **Secrets — Infisical only, values never in chat.** Secrets live in Infisical (shared project
   `hq-secrets`, folder `/<repo-slug>` per repo). To _use_ a secret run `with-secrets -- <cmd>` (injects
   into the subprocess env); to _see what exists_ run `list-secret-keys` (names only). NEVER run
@@ -143,6 +147,7 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 <!-- Auto-appended by the nightly knowledge-consolidation job. Rare,
      capped, cross-project lessons only — see docs/run-logs/
      2026-09-12-knowledge-extraction-pipeline.md. -->
+
 - A dev-runner account hitting 'You've hit your session limit' is not classified as usage-exhausted by the runner, so it burns retries instead of pausing until reset — check this classifier in any project using the same dev-runner.
 - In Postgres, `ALTER TYPE ... ADD VALUE` must commit before any RLS policy referencing that new enum value runs — split enum additions and dependent policies into separate migrations/transactions to avoid a broken deploy, in any project using enum-gated RLS.
 - pnpm-workspace.yaml's 'esbuild: set this to true or false' placeholder from pnpm approve-builds recurred yet again (now 4th confirmed instance across sessions) as an accidental unrelated diff — always diff-review this file before committing in any pnpm-managed repo.
@@ -163,51 +168,5 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 - Never run pgrep -fa, ps aux or similar against processes launched by with-secrets or infisical. Their argv contains the machine-identity token and it lands in the transcript. Use pgrep -c or PID-only listings.
 - Any secret whose plaintext appears in a chat transcript must be rotated. Transcripts are mined nightly by consolidateKnowledge(). Create and verify secrets without printing them: store directly into Infisical, then check names only with list-secret-keys.
 - Never prove guardrail enforcement from the model's own prose; it self-censors from CLAUDE.md without calling the tool. Use `--output-format stream-json` and check permission_denials, with a probe rule CLAUDE.md doesn't mention. Also A/B-control any policy mechanism before trusting it.
+
 <!-- hq-auto-lessons:end -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

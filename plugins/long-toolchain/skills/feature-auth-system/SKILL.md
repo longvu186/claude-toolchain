@@ -117,6 +117,7 @@ Implementation notes:
 - MFA selected users bypassing challenge routes because `two_fa_authenticated` was not reset on new sign-in.
 - MFA guard checks executed in the wrong order, causing setup/challenge redirect loops.
 - Missing explicit handling for suspended/blocked/deactivated users in guards and session bootstrap logic.
+- Shared OAuth callback serving several sign-in buttons (e.g. creator + donor), with a role-based landing rule whose default branch falls back to `/`. New sign-ups and existing low-role accounts then land on the homepage from the creator button and never reach onboarding. Operators testing with their own admin account never see it. Details in `tech-pitfalls` → "Shared OAuth Callback Drops Sign-Ups On The Homepage".
 - Middleware calling the auth provider's user-fetch (e.g. Supabase `auth.getUser()`) a second time when the shared client-factory helper (e.g. `createMiddlewareClient()`) already called it internally for its own cookie-refresh side effect — doubles the auth network round-trip on every protected request. Have the factory return the `user` it already fetched (`{ supabase, response, user }`) instead of requiring callers to re-fetch it.
 
 ## Account Lifecycle Baseline
@@ -189,6 +190,7 @@ Use when login is OAuth-only (e.g. Google) **and** email/password sign-in is dis
 - Invite, registration, and login entry paths are covered.
 - New user can login and gets profile row.
 - Existing user returns to intended route after callback.
+- **Sign-in button × role × new/existing landing matrix is tested.** Every sign-in button (creator, donor, invite…), with a brand-new account and an existing account of every role, lands on its intended page: onboarding for a first-time creator, never a silent homepage. The post-login landing decision is a pure, unit-tested function. At least one manual check uses a fresh **non-privileged** Google account, not the operator's admin.
 - Automated auth strategy is explicit: seeded accounts plus first-party bootstrap or `storageState`, not interactive third-party login.
 - Quick-login or test-account UI is limited to local and preview or staging while unpublished and hidden after publish.
 - Role x permission x lifecycle-state matrix exists and matches automated allow and deny coverage.
