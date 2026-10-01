@@ -1,0 +1,193 @@
+{
+  "version": 1,
+  "plugins": [
+    {
+      "id": "context7",
+      "marketplace": "claude-plugins-official",
+      "marketplaceSource": "anthropics/claude-plugins-official",
+      "scope": "all",
+      "reason": "Version-sensitive library docs lookup — every host with a dev repo benefits, no operator credential involved."
+    },
+    {
+      "id": "ralph-loop",
+      "marketplace": "claude-plugins-official",
+      "marketplaceSource": "anthropics/claude-plugins-official",
+      "scope": "all",
+      "reason": "Recurring-prompt loop runner — generic workflow tool, no operator credential involved."
+    },
+    {
+      "id": "frontend-design",
+      "marketplace": "claude-plugins-official",
+      "marketplaceSource": "anthropics/claude-plugins-official",
+      "scope": "all",
+      "reason": "Generic UI/design skill, no operator-specific credential."
+    },
+    {
+      "id": "skill-creator",
+      "marketplace": "claude-plugins-official",
+      "marketplaceSource": "anthropics/claude-plugins-official",
+      "scope": "all",
+      "reason": "Generic skill-authoring tool, no operator-specific credential."
+    },
+    {
+      "id": "code-simplifier",
+      "marketplace": "claude-plugins-official",
+      "marketplaceSource": "anthropics/claude-plugins-official",
+      "scope": "all",
+      "reason": "Generic code-quality agent, no operator-specific credential."
+    },
+    {
+      "id": "claude-md-management",
+      "marketplace": "claude-plugins-official",
+      "marketplaceSource": "anthropics/claude-plugins-official",
+      "scope": "all",
+      "reason": "Generic CLAUDE.md maintenance tool, no operator-specific credential."
+    },
+    {
+      "id": "playwright",
+      "marketplace": "claude-plugins-official",
+      "marketplaceSource": "anthropics/claude-plugins-official",
+      "scope": "all",
+      "reason": "Browser automation used across dev-runner repos, no operator-specific credential."
+    },
+    {
+      "id": "github",
+      "marketplace": "claude-plugins-official",
+      "marketplaceSource": "anthropics/claude-plugins-official",
+      "scope": "all",
+      "reason": "Wraps gh/git over the fleet's existing SSH-based git auth (see github-auth-ssh-only) — no separate operator SaaS token shipped."
+    },
+    {
+      "id": "code-review",
+      "marketplace": "claude-plugins-official",
+      "marketplaceSource": "anthropics/claude-plugins-official",
+      "scope": "all",
+      "reason": "Generic code review workflow, no operator-specific credential."
+    },
+    {
+      "id": "claude-code-setup",
+      "marketplace": "claude-plugins-official",
+      "marketplaceSource": "anthropics/claude-plugins-official",
+      "scope": "all",
+      "reason": "Generic Claude Code configuration helper, no operator-specific credential."
+    },
+    {
+      "id": "security-guidance",
+      "marketplace": "claude-plugins-official",
+      "marketplaceSource": "anthropics/claude-plugins-official",
+      "scope": "all",
+      "reason": "Generic security review guidance, no operator-specific credential."
+    },
+    {
+      "id": "feature-dev",
+      "marketplace": "claude-plugins-official",
+      "marketplaceSource": "anthropics/claude-plugins-official",
+      "scope": "all",
+      "reason": "Generic feature-development workflow agents, no operator-specific credential."
+    },
+    {
+      "id": "typescript-lsp",
+      "marketplace": "claude-plugins-official",
+      "marketplaceSource": "anthropics/claude-plugins-official",
+      "scope": "all",
+      "reason": "Generic TypeScript language-server integration, no operator-specific credential."
+    },
+    {
+      "id": "superpowers",
+      "marketplace": "claude-plugins-official",
+      "marketplaceSource": "anthropics/claude-plugins-official",
+      "scope": "all",
+      "reason": "Generic process/skill-discipline skill set, no operator-specific credential."
+    },
+    {
+      "id": "remember",
+      "marketplace": "claude-plugins-official",
+      "marketplaceSource": "anthropics/claude-plugins-official",
+      "scope": "all",
+      "reason": "Generic session-memory helper, no operator-specific credential."
+    },
+    {
+      "id": "coderabbit",
+      "marketplace": "claude-plugins-official",
+      "marketplaceSource": "anthropics/claude-plugins-official",
+      "scope": "all",
+      "reason": "Generic code review integration, no operator-specific credential (CodeRabbit auth, if any, is per-repo, not an operator account)."
+    },
+    {
+      "id": "cloudflare",
+      "marketplace": "claude-plugins-official",
+      "marketplaceSource": "anthropics/claude-plugins-official",
+      "scope": "all",
+      "reason": "Cloudflare docs/skill reference — retrieval-first, no live API token embedded in the plugin itself."
+    },
+    {
+      "id": "vercel",
+      "marketplace": "claude-plugins-official",
+      "marketplaceSource": "anthropics/claude-plugins-official",
+      "scope": "hq-only",
+      "reason": "Operator SaaS credential — must never reach a client-owned VPS."
+    },
+    {
+      "id": "supabase",
+      "marketplace": "claude-plugins-official",
+      "marketplaceSource": "anthropics/claude-plugins-official",
+      "scope": "hq-only",
+      "reason": "Operator SaaS credential — must never reach a client-owned VPS."
+    },
+    {
+      "id": "chrome-devtools-mcp",
+      "marketplace": "claude-plugins-official",
+      "marketplaceSource": "anthropics/claude-plugins-official",
+      "scope": "hq-only",
+      "reason": "Redundant with Playwright under the MCP-sprawl policy — kept on HQ only, not rolled out fleet-wide."
+    },
+    {
+      "id": "posthog",
+      "marketplace": "claude-plugins-official",
+      "marketplaceSource": "anthropics/claude-plugins-official",
+      "scope": "hq-only",
+      "reason": "Operator SaaS credential — must never reach a client-owned VPS."
+    },
+    {
+      "id": "neon",
+      "marketplace": "claude-plugins-official",
+      "marketplaceSource": "anthropics/claude-plugins-official",
+      "scope": "hq-only",
+      "reason": "Operator SaaS credential — must never reach a client-owned VPS."
+    }
+  ],
+  "mcpServers": [
+    {
+      "name": "next-devtools-mcp",
+      "command": "npx",
+      "args": ["-y", "next-devtools-mcp@latest"],
+      "scope": "all",
+      "reason": "Placeholder for a later phase (Next.js 16 dev-server MCP for Server Action IDs/route list) — not yet rolled out.",
+      "enabled": false
+    }
+  ],
+  "tools": [
+    {
+      "name": "uv",
+      "check": "uv --version",
+      "install": "curl -LsSf https://astral.sh/uv/0.11.24/install.sh | sh",
+      "minVersion": "0.11.24",
+      "scope": "all",
+      "reason": "Python toolchain used by skills fleet-wide (environment-quirks). Installed via the pinned astral.sh script on every host, client VPSes included — parity requires it."
+    },
+    {
+      "name": "node",
+      "check": "node --version",
+      "minVersion": "22",
+      "scope": "all",
+      "reason": "Node major must match HQ's for skills/hooks to behave identically. Check-only — this manifest never reinstalls the Node runtime."
+    },
+    {
+      "name": "claude",
+      "check": "claude --version",
+      "minVersion": "2.1.281",
+      "scope": "all",
+      "reason": "Claude Code CLI. Updated via claude-cli-update.ts's updateOneHostCli, not this manifest's generic shell converge — see capability-manifest.ts's buildConvergeScript."
+    }
+  ]
+}
