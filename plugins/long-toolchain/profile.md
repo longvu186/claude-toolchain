@@ -341,3 +341,18 @@ of-staff` (Planner-specific application of the already-established operator-ment
   itself before trusting the run log.** Archiving of `profile-signals.jsonl` remains blocked for the same
   toolset reason as every pass since 2026-09-19. Reset `_consolidation-state.json`. Watermark for next
   pass: line 6979 (signals) / 1317 (curation queue).
+- 2026-10-01 (same-day re-run, explicit user request, paired with a `/consolidate-project` pass) —
+  Reviewed new `profile-signals.jsonl` lines 6980–7050 (+71) and curation-queue lines 1318–1323 (+6): same
+  dev-runner-narration-mislabelled-`kind:"correction"` pattern (HQ-DEV-300 clean-worktree-build summary and
+  HQ-DEV-287/runaway-classify fix text, each re-logged across 5+ `sessionId`s verbatim — worker-offline
+  return shape, the R5 negative-check recipe, WAL/`BEGIN IMMEDIATE` note, "A: No, do not block") plus one
+  bcnv-specific audit-write finding that belongs in bcnv's own memory. 20th straight pass, zero genuine
+  operator corrections from that source. Re-swept `feedback_*.md` across every project's auto-memory dir:
+  same three repos (boroearth/yen-tu/personal-hq), same files as the last four passes — no new source.
+  Checked two personal-hq `feedback_*` files not yet explicitly cross-checked
+  (`personal-creds-on-remote-hosts-ok`, `hq-must-match-code-server-capability`): both are correctly scoped
+  as toolchain/project-technical (already indexed in personal-hq's own `MEMORY.md`), not cross-project
+  operator preferences — no promotion. No facts promoted, retired, or contradicted this pass. Archiving of
+  `profile-signals.jsonl` remains blocked (Read/Write/Edit/Glob/Grep-only toolset, no Bash/file-move) for
+  the same reason as every pass since 2026-09-19. Reset `_consolidation-state.json`. Watermark for next
+  pass: line 7050 (signals) / 1323 (curation queue).
