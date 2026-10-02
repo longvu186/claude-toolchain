@@ -638,6 +638,11 @@ description: "Cross-project failure patterns and recovery strategies (150+ docum
 - At guard time, encode the current internal location (pathname + query) into the redirect value so post-auth return stays deterministic.
 - For multi-step funnels with multiple context params (for example product/referrer/entity IDs), use one shared path-builder contract across both page-render and server-action redirect code; duplicated builders drift and silently drop context during auth or error handoffs.
 
+## Next.js `cookies.set(name, "", { maxAge: 0 })` Does Not Delete The Cookie
+
+- In Next.js `NextResponse`/`ResponseCookies`, a zero `maxAge` is dropped when serializing. The header becomes `name=; Path=/; …` with no `Max-Age` and no `Expires`, which leaves an **empty session cookie**. Any guard that checks presence (`cookies.get(name) !== undefined`) still sees it as set. Found 2026-10-02 in streaming-kit: a "cleared" donor-intent cookie kept redirecting viewers away from onboarding.
+- Use `response.cookies.delete({ name, path })`, which emits `Expires=Thu, 01 Jan 1970`. Assert the `Set-Cookie` header in a request-level test, not just the app behaviour. Grep for `maxAge: 0` in any Next.js repo.
+
 ## Shared OAuth Callback Drops Sign-Ups On The Homepage (Door × Role Landing Gap)
 
 - **Symptom:** a user reports "clicked Sign in with Google, got bounced straight back to the homepage, no Google screen". The operator can't reproduce it, even in incognito. Sign-in actually **succeeded**; the landing rule sent them to `/`. Google skips its own screen when the browser has one Google session with prior consent, so the round trip looks like nothing happened.
