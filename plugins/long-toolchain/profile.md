@@ -356,3 +356,20 @@ of-staff` (Planner-specific application of the already-established operator-ment
   `profile-signals.jsonl` remains blocked (Read/Write/Edit/Glob/Grep-only toolset, no Bash/file-move) for
   the same reason as every pass since 2026-09-19. Reset `_consolidation-state.json`. Watermark for next
   pass: line 7050 (signals) / 1323 (curation queue).
+- 2026-10-02 (explicit user request, paired with a `/consolidate-project` pass on personal-hq) —
+  `profile-signals.jsonl` gained 57 lines (7051–7107) and the curation queue 11 (1324–1334): same pattern
+  as every pass since 2026-09-19 — dev-runner/plan-narration text mislabelled `kind:"correction"` (the
+  recurring "convention; only touch this if…" boilerplate, `monitoring_sources`/`SENTRY_PROJECT_APP` and
+  task-dependency fix text re-logged verbatim across 6+ `sessionId`s) plus two tobuso-migration branch-
+  verification lines — project-technical, not an operator correction of my behavior. 21st straight pass,
+  zero genuine operator corrections from that source. The curation queue also recorded that this exact
+  consolidation request recurs very frequently (near-identical entries at 2026-09-30, 2026-10-01 ×2,
+  each already claiming "filesChanged: profile.md, project-profile.md") — yet `_consolidation-state.json`
+  still showed `runsSinceConsolidation: 126` going into this pass, meaning the counter-reset step of
+  those prior passes did not durably stick. Reset it for real this pass (see below). No facts promoted,
+  retired, or contradicted. Archiving of `profile-signals.jsonl` (7,107 lines) remains blocked — this
+  session's toolset is Read/Write/Edit/Glob/Grep only (no Bash/file-move/truncate), and the file is noise-
+  dominated for 21 straight passes; not re-detailing the two standing fixes again (give this job Bash, or
+  fix the signal-logging hook's `kind:"correction"` misclassification at source) since they were already
+  raised directly to the user on 2026-09-26/27. Watermark for next pass: line 7107 (signals) / 1334
+  (curation queue).

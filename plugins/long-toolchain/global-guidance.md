@@ -147,8 +147,6 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 <!-- Auto-appended by the nightly knowledge-consolidation job. Rare,
      capped, cross-project lessons only — see docs/run-logs/
      2026-09-12-knowledge-extraction-pipeline.md. -->
-
-- A dev-runner account hitting 'You've hit your session limit' is not classified as usage-exhausted by the runner, so it burns retries instead of pausing until reset — check this classifier in any project using the same dev-runner.
 - In Postgres, `ALTER TYPE ... ADD VALUE` must commit before any RLS policy referencing that new enum value runs — split enum additions and dependent policies into separate migrations/transactions to avoid a broken deploy, in any project using enum-gated RLS.
 - pnpm-workspace.yaml's 'esbuild: set this to true or false' placeholder from pnpm approve-builds recurred yet again (now 4th confirmed instance across sessions) as an accidental unrelated diff — always diff-review this file before committing in any pnpm-managed repo.
 - Dev-runner UI-feature tasks silently skip live browser verification when the only reachable port is the live prod service and no dedicated preview port was assigned to the task — assign a distinct port to every UI-touching dev task across any business using this dev-runner.
@@ -168,5 +166,6 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 - Never run pgrep -fa, ps aux or similar against processes launched by with-secrets or infisical. Their argv contains the machine-identity token and it lands in the transcript. Use pgrep -c or PID-only listings.
 - Any secret whose plaintext appears in a chat transcript must be rotated. Transcripts are mined nightly by consolidateKnowledge(). Create and verify secrets without printing them: store directly into Infisical, then check names only with list-secret-keys.
 - Never prove guardrail enforcement from the model's own prose; it self-censors from CLAUDE.md without calling the tool. Use `--output-format stream-json` and check permission_denials, with a probe rule CLAUDE.md doesn't mention. Also A/B-control any policy mechanism before trusting it.
-
+- Never grep or cat build output that inlines env (e.g. .open-next/cloudflare/next-env.mjs holds real secrets in plaintext). Inspect with filename-only/count flags (grep -l/-c) or key-name-only extraction, since printed values land in the transcript and force rotation.
 <!-- hq-auto-lessons:end -->
+
