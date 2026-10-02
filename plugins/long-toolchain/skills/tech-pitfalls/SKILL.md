@@ -988,6 +988,7 @@ description: "Cross-project failure patterns and recovery strategies (150+ docum
 
 - Symptom: `TurbopackInternalError: Symlink [project]/node_modules is invalid, it points out of the filesystem root` when a Next.js/Turbopack project's `node_modules` is a symlink to a directory outside the current project root (common when using `git worktree add` and symlinking the main repo's `node_modules` in to avoid a full reinstall).
 - Fix: copy the real `node_modules` into the worktree (`cp -r`, or a hardlink-aware copy) instead of symlinking. Applies to any Next.js/Turbopack project using git worktrees with dependencies that live outside the worktree directory.
+- **Worse with OpenNext/Cloudflare (2026-10-02, streaming-kit prod outage):** a webpack `next build` and `opennextjs-cloudflare build` from a symlinked-`node_modules` worktree both **exit 0**, and typecheck passes. But the deployed Worker returns 500 on **every** route with `Dynamic require of "/.next/server/middleware-manifest.json" is not supported`. Rolled back within about 2 minutes. Rules: (1) never build a deployable artifact from a symlinked `node_modules`; do a real install (`npm ci`/pnpm) in the worktree. (2) Before `deploy`, run the built worker in local workerd (`wrangler dev --port <free> --ip 127.0.0.1`) and curl `/` and one page for 200. (3) Note the previous version id first, so `wrangler rollback <id> -y` is one command away.
 
 ## An Auto-Assigned Isolation Worktree Can Be Pinned To A Stale Branch/Commit
 
