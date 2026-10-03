@@ -105,7 +105,13 @@ beliefs. Atoms feed this; this is never just a list of atoms.
   a fleet host means re-pin the longvu186 credential and retry without asking — "always do that… we have
   always done that" _(2026-09-21; tobuso memory `feedback-copy-longvu186-auth-to-fleet-hosts`)_. Only
   pause for something genuinely destructive/ambiguous (irreversible data loss, a prod cutover, minting a
-  brand-new secret or access grant). _(established)_
+  brand-new secret or access grant) — confirmed concretely 2026-07-08 (VPS hardening): even mid-session on
+  an already-approved 9-phase plan, both generating a break-glass root password and naming the email/IdP
+  for a new Cloudflare Access policy got stopped for a fresh explicit confirmation, because approving the
+  plan approved the _goal_ ("set a break-glass password"), not the _specific values_ nobody had spoken
+  aloud yet. A generated low-stakes value in the same session (an ntfy topic name — routing token, not a
+  credential) went through without friction, so the line is credential/access-grant risk specifically, not
+  "anything generated." _(established; tobuso memory `feedback-credential-and-access-grant-gating`)_
 - **Domain modelling ≠ database design.** A DDD domain model is feature/business-focused and must not be
   critiqued for diverging from the schema; app-wide services (audit, notification, auth, lexicon) sit in
   a separate layer with deliberately zero edges to domain aggregates. _(provisional — one verbatim,
@@ -173,7 +179,10 @@ internalized into CLAUDE.md or a skill.)_
   before reporting it done — a false "resolved" costs more trust than an honest "not done yet." Extends
   to guardrails (positive-control a lint/policy check on a deliberate violation before trusting green)
   and to "blocked" reports (a subagent's "hard-blocked" is not evidence — probe it yourself before
-  relaying it). _(established)_
+  relaying it). _(established — second instance 2026-09-19, tobuso: two implementation agents reported
+  "hard-blocked" on ssh/network after retries; relaying that verdict drew a direct "why are you blocked?
+  you were never blocked" — one `ssh` probe in the main session returned immediately. Repo memory:
+  `feedback-do-remote-work-directly-not-via-subagents`.)_
 - Dev/code-writing work is scoped and assigned to a dev agent; general chat never writes code directly. _(established — repo memory: `feedback_dev-work-to-dev-agent`)_
 - An earlier "deploy"/"go ahead" authorizes that specific action, not a later or larger batch of changes — re-confirm per turn/scope, even though his day-to-day instructions carry standing approval to execute the work itself. _(established — repo memory: `feedback_deploy-authorization-per-turn` + `feedback_operator-approval-is-standing`; the two coexist: standing approval covers doing the work, deploy/publish/send actions still need a fresh confirm each time)_
 - A delete authorization covers the intent, not every row a query happens to match: enumerate the
@@ -373,3 +382,25 @@ of-staff` (Planner-specific application of the already-established operator-ment
   fix the signal-logging hook's `kind:"correction"` misclassification at source) since they were already
   raised directly to the user on 2026-09-26/27. Watermark for next pass: line 7107 (signals) / 1334
   (curation queue).
+- 2026-10-03 (explicit user request, paired with a `/consolidate-project` pass on personal-hq) —
+  `profile-signals.jsonl` gained 101 lines (7108–7208) and the curation queue 8 (1335–1342): same pattern
+  as every pass since 2026-09-19 (dev-runner/plan-narration/grading text mislabelled `kind:"correction"`,
+  re-logged verbatim across 8+ `sessionId`s during an HQ-DEV-303/304/308 grading pass) plus one notable
+  self-referential line worth flagging rather than promoting: "A consolidation pass can log 'rewrote to
+  digest+read-on-demand shape' without actually doing it" — independent confirmation of the exact failure
+  mode this session's prompt was guarding against ("apply...for real...rather than just reporting"). 23rd
+  straight pass, zero new *cross-project operator* corrections from the signal file itself. Swept
+  tobuso-migration's `memory/feedback-*.md` fully for the first time (prior passes only checked
+  boroearth/yen-tu/personal-hq) and found six files not yet reviewed: three were self-authored agent
+  postmortems already folded in by measured-not-grepped-estimates and guardrail-positive-control (same
+  62-vs-38-statement and eslint-boundaries-silent-pass incidents, word-for-word); one
+  (tailscale-ssh-forward-owner) is VPS-infra-technical, out of scope here per the 2026-09-26 precedent;
+  two were genuine new cross-project evidence and got folded in as citations on existing bullets rather
+  than new facts: credential/access-grant gating now has a concrete instance (2026-07-08 VPS hardening,
+  break-glass password + Access-policy email both stopped mid-already-approved-plan) under "Routine
+  operational recoveries are standing defaults," and the subagent-"blocked"-verdict correction now has a
+  second instance (2026-09-19 tobuso, "why are you blocked? you were never blocked") under "Open
+  corrections to honor." No facts promoted as new bullets, retired, or contradicted. Archiving of
+  `profile-signals.jsonl` (7,208 lines) remains blocked for the same toolset reason as every pass since
+  2026-09-19; not re-raising the two standing fixes again (already surfaced directly 2026-09-26/27).
+  Watermark for next pass: line 7208 (signals) / 1342 (curation queue).
