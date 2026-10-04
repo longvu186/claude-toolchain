@@ -63,6 +63,12 @@ beliefs. Atoms feed this; this is never just a list of atoms.
 - Sequences work functionality-first: get every action actually working end-to-end before spending a
   pass on UI/UX polish or optimization. _(provisional — one direct statement: "make sure all actions are
   working first before we actually proceed with optimizing UI/UX")_
+- On a pre-code plan/spec, reviews in dense itemized rounds (labeled R1/R2, S1-S8) and expects each point
+  applied exactly as specified, answered with a diff of what changed — not a re-summary of the whole
+  plan. Same density and response shape as his post-implementation code review. Worth proactively
+  offering a pre-code review pass when a plan touches an existing column/table with real saved data or a
+  concurrent/racy write path. _(provisional — one session, two rounds, streaming-kit `alert-customization`
+  2026-09-29; repo memory: `feedback-iterative-plan-review-apply-diff`)_
 
 ## Decision tendencies
 
@@ -128,6 +134,14 @@ beliefs. Atoms feed this; this is never just a list of atoms.
 - **Client-side over AI/API by default for simple helpers.** For a "fill/copy this field from that one"
   style feature, implement it client-side rather than reaching for an API/LLM call, unless he explicitly
   asks for AI involvement. _(provisional — one instance, yen-tu memory `feedback_no-ai-for-copy-helpers`)_
+- **A failed experiment disconfirms the experiment first, not the hypothesis.** Before writing a
+  hypothesis off as ruled out, check the test was actually capable of confirming it — a defect recorded
+  twice wrong (first "never built," then "ruled out" from an experiment that itself aborted the write
+  being tested) only resolved once both sides (DB state and DOM state) were measured together in the same
+  run. Writing "ruled out" into a task/doc makes the error durable for the next reader. Same root habit as
+  measured-not-grepped estimates and guardrail positive-controls: validate the instrument before reading
+  its output as a verdict. _(provisional — one instance, 2026-09-21 tobuso TASK-87; tobuso memory
+  `feedback-failed-experiment-is-not-a-disproved-hypothesis`)_
 
 ## Domain & skill map
 
@@ -389,7 +403,7 @@ of-staff` (Planner-specific application of the already-established operator-ment
   self-referential line worth flagging rather than promoting: "A consolidation pass can log 'rewrote to
   digest+read-on-demand shape' without actually doing it" — independent confirmation of the exact failure
   mode this session's prompt was guarding against ("apply...for real...rather than just reporting"). 23rd
-  straight pass, zero new *cross-project operator* corrections from the signal file itself. Swept
+  straight pass, zero new _cross-project operator_ corrections from the signal file itself. Swept
   tobuso-migration's `memory/feedback-*.md` fully for the first time (prior passes only checked
   boroearth/yen-tu/personal-hq) and found six files not yet reviewed: three were self-authored agent
   postmortems already folded in by measured-not-grepped-estimates and guardrail-positive-control (same
@@ -404,3 +418,29 @@ of-staff` (Planner-specific application of the already-established operator-ment
   `profile-signals.jsonl` (7,208 lines) remains blocked for the same toolset reason as every pass since
   2026-09-19; not re-raising the two standing fixes again (already surfaced directly 2026-09-26/27).
   Watermark for next pass: line 7208 (signals) / 1342 (curation queue).
+- 2026-10-05 (explicit user request, paired with a `/consolidate-project` pass on personal-hq) — First
+  checked for a pending unattended draft: found one (`profile.md.draft`, generated 2026-09-23T08:45 by
+  the headless worker, `workspaceRoot: tobuso-migration`). It is stale and superseded — its own changelog
+  tail ends at the 2026-09-23 entry, 11 entries behind this live file — and the 2026-09-25 pass already
+  recorded it as consumed without being able to delete it (no Bash/file-move tool then; same here).
+  **Not applied** — applying it now would regress the profile by 11 passes of since-promoted facts. Left
+  in place with this note as the second record that it must not be re-applied; actually deleting it needs
+  an operator with shell access. `profile-signals.jsonl` gained 16 lines (7209–7224): same
+  dev-runner/plan-narration mislabelled `kind:"correction"` pattern as every pass since 2026-09-19 (HQ-DEV-
+  306 auth-continuity narration — session-keepwarm, modal-degrade diff text — re-logged verbatim across 3
+  `sessionId`s) plus one real but project-technical tobuso line (staging stacks migrated). 24th straight
+  pass, zero genuine cross-project operator corrections from that source. Re-swept every project's
+  `memory/feedback_*.md` and `feedback-*.md`: three ai-optimization files (deprecated workspace) are
+  either project-technical (doc-sync-Copilot-drift) or duplicates of already-established facts
+  (proceed-to-implement-after-confirm ≈ existing auto-mode-skip-gates bullet; check-ui-family-before-
+  writing-rules is agent-self-correction, not an operator preference) — none promoted. One new source
+  repo found: streaming-kit's `feedback-iterative-plan-review-apply-diff` (itemized R1/R2 plan-review
+  rounds, surgical diff-only responses) — **promoted as provisional** under "How I work / collaboration."
+  Also corrected a gap from the 2026-10-03 entry: `feedback-failed-experiment-is-not-a-disproved-
+  hypothesis` (tobuso) had been logged that pass as "already folded in," but no citation or bullet for it
+  actually existed anywhere in this file — the exact self-referential failure mode flagged in that same
+  2026-10-03 entry. **Promoted for real this time** as a new provisional bullet under Decision tendencies.
+  No facts retired. Archiving of `profile-signals.jsonl` (7,224 lines) remains blocked for the same
+  toolset reason as every pass since 2026-09-19. Reset `_consolidation-state.json`. Watermark for next
+  pass: line 7224 (signals) / 1342 (curation queue, unchanged — not independently re-swept this pass; see
+  companion `/consolidate-project` entry for personal-hq's own curation queue).
