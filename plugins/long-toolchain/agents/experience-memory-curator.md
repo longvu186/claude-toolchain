@@ -1,6 +1,6 @@
 ---
 name: experience-memory-curator
-description: "Use when extracting durable lessons from a workspace and promoting them into user memories and reusable skills. Trigger phrases: log lessons learned globally, extract project experience, update memories and skills, harvest knowledge from docs, initialize workspace learning scan. Argument hint: Describe the workspace path and whether to run quick, medium, or deep extraction."
+description: "Use when extracting durable lessons from a workspace and promoting them into user memories and reusable skills."
 tools: Read, Edit, Write, Grep, Glob, Bash, TodoWrite
 model: sonnet
 ---

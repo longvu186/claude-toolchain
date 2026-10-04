@@ -1,6 +1,6 @@
 ---
 name: metrics
-description: "Report the self-improving toolchain's health metrics — token-usage trend, partial/failed run rate, correction-signal volume, eval pass-rate, and learning-ledger status. Use to see whether the system is actually improving over time, check token trends, or get a health digest. Trigger phrases: toolchain metrics, how is the system doing, token trend, am I improving, learning metrics, health digest, show metrics."
+description: "Report the self-improving toolchain's health metrics — token-usage trend, partial/failed run rate, correction-signal volume, eval pass-rate, and learning-ledger status. Use to see whether the system is actually improving over time, check token trends, or get a health digest."
 ---
 
 # Metrics

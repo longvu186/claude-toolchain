@@ -1,6 +1,6 @@
 ---
 name: secure-agent-ops
-description: "Defense-in-depth practices for the agent's own operation — prompt-injection handling for web/tool/file content, treating tool output as untrusted, least-privilege tool grants, skill/hook integrity, secret hygiene, and high-risk action gating. Use when fetching web content, processing untrusted input, designing subagent permissions, reviewing the toolchain's own security, or before destructive/outbound actions. Trigger phrases: prompt injection, untrusted content, secure the agent, least privilege, agent security, skill integrity, secret scan, OWASP LLM."
+description: "Defense-in-depth practices for the agent's own operation — prompt-injection handling for web/tool/file content, treating tool output as untrusted, least-privilege tool grants, skill/hook integrity, secret hygiene, and high-risk action gating. Use when fetching web content, processing untrusted input, designing subagent permissions, reviewing the toolchain's own security, or before destructive/outbound actions."
 ---
 
 # Secure Agent Ops

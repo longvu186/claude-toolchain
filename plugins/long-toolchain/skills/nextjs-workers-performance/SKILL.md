@@ -1,6 +1,6 @@
 ---
 name: nextjs-workers-performance
-description: "Server-side latency playbook for Next.js App Router on Cloudflare Workers (OpenNext) with Supabase — slow navigations, slow tabs/steps, query waterfalls, Durable Object/cache placement, cold starts, CPU limits. Measure-first: geography, per-call cost, chain depth, dedupe, then UI feedback. Trigger phrases: navigation is slow, tabs slow, page takes seconds, nav latency, query waterfall, parallelize queries, cold start, Workers CPU limit, exceededCpu 503, placement, Durable Object latency, use cache slow, prefetch storm, skeleton doesn't show."
+description: "Server-side latency playbook for Next.js App Router on Cloudflare Workers (OpenNext) with Supabase — slow navigations, slow tabs/steps, query waterfalls, Durable Object/cache placement, cold starts, CPU limits. Measure-first: geography, per-call cost, chain depth, dedupe, then UI feedback."
 ---
 
 # Next.js + OpenNext + Cloudflare Workers + Supabase — performance playbook

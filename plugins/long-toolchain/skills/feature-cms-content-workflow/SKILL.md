@@ -1,6 +1,6 @@
 ---
 name: feature-cms-content-workflow
-description: "FEATURE SKILL - Build CMS editorial workflows for content teams with lifecycle-complete content operations. Use for article CRUD, status pipelines, assignment/review flows, scheduling, media handling, and publishing/deploy handoffs. Trigger phrases: build cms, editorial workflow, article management, content statuses, review flow, scheduling, media library."
+description: "FEATURE SKILL - Build CMS editorial workflows for content teams with lifecycle-complete content operations. Use for article CRUD, status pipelines, assignment/review flows, scheduling, media handling, and publishing/deploy handoffs."
 argument-hint: "Describe content types, status pipeline, assignment/review requirements, scheduling rules, and media strategy."
 ---
 

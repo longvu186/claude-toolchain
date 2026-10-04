@@ -1,6 +1,6 @@
 ---
 name: pptx-speaker-video-extraction
-description: "Reconstruct reliable speaker-to-video mappings and bios from an organizer-supplied .pptx deck when its embedded hyperlinks are stale/tangled (copy-pasted from a prior year). Use for conference/event speaker onboarding: extracting names, talk titles, photos, and correct video links from a slide deck. Trigger phrases: pptx speaker extraction, speaker deck, extract hyperlinks from pptx, reconcile speaker videos, YouTube oEmbed verification, video description scraping."
+description: "Reconstruct reliable speaker-to-video mappings and bios from an organizer-supplied .pptx deck when its embedded hyperlinks are stale/tangled (copy-pasted from a prior year). Use for conference/event speaker onboarding: extracting names, talk titles, photos, and correct video links from a slide deck."
 ---
 
 # PPTX Speaker/Video Extraction

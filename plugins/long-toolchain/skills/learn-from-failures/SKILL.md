@@ -1,6 +1,6 @@
 ---
 name: learn-from-failures
-description: "Reflective improvement pass (GEPA-style) — read failed/partial runs, corrections, and raw traces, diagnose the root cause in natural language, and propose the smallest guidance/skill/prompt edit that prevents recurrence. Use to auto-learn from bugs and mistakes, turn recurring failures into durable fixes, or review what keeps going wrong. Trigger phrases: learn from failures, why do we keep failing, turn bugs into improvements, reflective improvement, propose fixes from run logs, what should we change."
+description: "Reflective improvement pass (GEPA-style) — read failed/partial runs, corrections, and raw traces, diagnose the root cause in natural language, and propose the smallest guidance/skill/prompt edit that prevents recurrence. Use to auto-learn from bugs and mistakes, turn recurring failures into durable fixes, or review what keeps going wrong."
 ---
 
 # Learn From Failures

@@ -1,6 +1,6 @@
 ---
 name: feature-crm-contact-opportunity-management
-description: "FEATURE SKILL - Build CRM contact and opportunity operations with complete lifecycle actions, ownership controls, and operational safeguards. Use for contact management, deal pipelines, account ownership, and CRM admin tooling. Trigger phrases: build CRM, contact management, deal pipeline, opportunity management, sales admin."
+description: "FEATURE SKILL - Build CRM contact and opportunity operations with complete lifecycle actions, ownership controls, and operational safeguards. Use for contact management, deal pipelines, account ownership, and CRM admin tooling."
 argument-hint: "Describe entities (contacts/accounts/opportunities), role model, pipeline stages, and deletion/archive policy."
 ---
 

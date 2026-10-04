@@ -1,6 +1,6 @@
 ---
 name: audit-skills
-description: "Audit the toolchain's skills and subagents against Anthropic Agent Skills best practices — SKILL.md size, progressive disclosure, description/triggering quality, gerund naming, and least-privilege tool grants. Use to review skill/agent health, before adding many skills, or to find token bloat and over-privileged agents. Trigger phrases: audit skills, review skills, skill health, skill best practices, check subagents, least privilege audit, skill token bloat."
+description: "Audit the toolchain's skills and subagents against Anthropic Agent Skills best practices — SKILL.md size, progressive disclosure, description/triggering quality, gerund naming, and least-privilege tool grants. Use to review skill/agent health, before adding many skills, or to find token bloat and over-privileged agents."
 ---
 
 # Audit Skills

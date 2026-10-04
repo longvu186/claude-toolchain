@@ -1,6 +1,6 @@
 ---
 name: knowledge-cache
-description: "Read-first / write-back project knowledge cache so agents stop re-searching for the same facts. Use when about to search for or having just discovered a run/build/deploy/test command, an env var, a key function location, an API call signature, or a cross-page styling convention. Trigger phrases: deploy command, build command, how do I run this, run the app, where is the deploy script, project commands, command registry, styling conventions, design system doc, cross-page consistency, project facts, knowledge cache, stop re-searching, memoize this."
+description: "Read-first / write-back project knowledge cache so agents stop re-searching for the same facts. Use when about to search for or having just discovered a run/build/deploy/test command, an env var, a key function location, an API call signature, or a cross-page styling convention."
 ---
 
 # Knowledge Cache — convert search into lookup

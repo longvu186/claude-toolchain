@@ -1,6 +1,6 @@
 ---
 name: project-nonfunctional-requirements
-description: "PLANNING SKILL - Interview framework for non-functional requirements: performance, security, SEO, accessibility, deployment, legal/compliance, and scalability. Knows when to skip irrelevant probes. Trigger phrases: non-functional requirements, performance requirements, security requirements, SEO requirements, deployment strategy, compliance, scalability."
+description: "PLANNING SKILL - Interview framework for non-functional requirements: performance, security, SEO, accessibility, deployment, legal/compliance, and scalability. Knows when to skip irrelevant probes."
 argument-hint: "Describe the project type (public site, internal tool, e-commerce, etc.) so irrelevant probes can be skipped."
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: debugging
-description: Systematic debugging and root-cause investigation through structured hypothesis testing. Use when a bug's cause is unknown, fixes keep regressing, or multiple symptoms may share a root cause. This skill LEADS root-cause diagnosis of a failing or flaky/intermittent test (quality-manager authors and runs tests but does not diagnose them). For a KNOWN recurring trap, check tech-pitfalls first. Trigger phrases: investigate bug, debug this, find root cause, why is this failing, trace this issue, flaky test root cause.
+description: Systematic debugging and root-cause investigation through structured hypothesis testing. Use when a bug's cause is unknown, fixes keep regressing, or multiple symptoms may share a root cause. This skill LEADS root-cause diagnosis of a failing or flaky/intermittent test (quality-manager authors and runs tests but does not diagnose them). For a KNOWN recurring trap, check tech-pitfalls first.
 ---
 
 # Systematic Debugging & Root Cause Investigation

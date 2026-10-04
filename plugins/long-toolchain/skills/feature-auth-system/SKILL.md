@@ -1,6 +1,6 @@
 ---
 name: feature-auth-system
-description: "FEATURE SKILL - Build and harden authentication systems for web apps with explicit account lifecycle and moderation states. Use for OAuth/email flows, role models, route guards, callback handling, profile bootstrap, auth UX states, seeded test accounts, quick login, and non-prod auth bypass for automated role testing. Trigger phrases: build auth, oauth setup, login flow, protected routes, role-based auth, callback redirect, Google auth bypass, test accounts, quick login."
+description: "FEATURE SKILL - Build and harden authentication systems for web apps with explicit account lifecycle and moderation states. Use for OAuth/email flows, role models, route guards, callback handling, profile bootstrap, auth UX states, seeded test accounts, quick login, and non-prod auth bypass for automated role testing."
 argument-hint: "Describe auth providers, role model, protected areas, and deployment model (SSR/static)."
 ---
 

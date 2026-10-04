@@ -1,6 +1,6 @@
 ---
 name: feature-saas-foundations
-description: "FEATURE SKILL - Build SaaS tenant, organization, workspace, and membership foundations with explicit RBAC, invite lifecycle, seat ownership, and tenant isolation. Use for org setup, team membership, invites, workspace access, role assignment, ownership transfer, and admin membership tooling. Trigger phrases: tenant membership, org roles, team invite, SaaS foundation, workspace access, multi-tenant RBAC."
+description: "FEATURE SKILL - Build SaaS tenant, organization, workspace, and membership foundations with explicit RBAC, invite lifecycle, seat ownership, and tenant isolation. Use for org setup, team membership, invites, workspace access, role assignment, ownership transfer, and admin membership tooling."
 argument-hint: "Describe tenant model, membership roles, invite flow, seat policy, ownership rules, and admin/staff capabilities."
 ---
 

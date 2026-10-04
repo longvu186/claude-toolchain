@@ -1,6 +1,6 @@
 ---
 name: environment-quirks
-description: "Environment-specific gotchas and workarounds for this user's stack. Use when working on Windows/PowerShell, Supabase, Cloudflare Pages/Workers, Vercel, Tailwind v4, Storybook, Electron packaging, or Bubble.io capture, to avoid known platform pitfalls. Trigger phrases: windows quirk, powershell error, supabase auth, cloudflare pages ssl, vercel env, tailwind v4, electron packaging, bubble capture."
+description: "Environment-specific gotchas and workarounds for this user's stack. Use when working on Windows/PowerShell, Supabase, Cloudflare Pages/Workers, Vercel, Tailwind v4, Storybook, Electron packaging, or Bubble.io capture, to avoid known platform pitfalls."
 ---
 
 # Environment Quirks

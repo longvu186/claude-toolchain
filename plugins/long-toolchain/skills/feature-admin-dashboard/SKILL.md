@@ -1,6 +1,6 @@
 ---
 name: feature-admin-dashboard
-description: "FEATURE SKILL - Build admin/staff dashboards with role-gated navigation, lifecycle-complete data operations, and operational safeguards. Use for admin layout, permission checks, moderation flows, analytics cards, and staff tooling UX. Trigger phrases: build admin, admin panel, role-based dashboard, moderation UI, staff tools."
+description: "FEATURE SKILL - Build admin/staff dashboards with role-gated navigation, lifecycle-complete data operations, and operational safeguards. Use for admin layout, permission checks, moderation flows, analytics cards, and staff tooling UX."
 argument-hint: "Describe target roles, admin modules, required operations (CRUD/moderation/analytics/lifecycle actions), and scroll/layout constraints."
 ---
 

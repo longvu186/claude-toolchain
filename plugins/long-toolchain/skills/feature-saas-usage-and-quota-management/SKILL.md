@@ -1,6 +1,6 @@
 ---
 name: feature-saas-usage-and-quota-management
-description: "FEATURE SKILL - Build SaaS usage tracking and quota enforcement with lifecycle-complete tenant operations and safe admin controls. Use for plan limits, overage handling, tenant admin operations, and quota-based controls. Trigger phrases: SaaS usage tracking, quota enforcement, plan limits, tenant operations, overage handling."
+description: "FEATURE SKILL - Build SaaS usage tracking and quota enforcement with lifecycle-complete tenant operations and safe admin controls. Use for plan limits, overage handling, tenant admin operations, and quota-based controls."
 argument-hint: "Describe tenancy model, usage meters, quota policies, plan tiers, and admin lifecycle actions."
 ---
 

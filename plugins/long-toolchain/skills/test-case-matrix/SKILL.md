@@ -1,6 +1,6 @@
 ---
 name: test-case-matrix
-description: "Use before writing any test or implementation code for CRUD or data-mutation feature work (create/update/delete endpoints, RPCs, forms, migrations that change write behavior) — produce an explicit case matrix (happy path / negative / boundary / permission / concurrency) as the first artifact, before any test code exists. Runs one step before superpowers:test-driven-development's red-green loop, which starts at 'write a failing test'. Trigger phrases: CRUD feature, data mutation, new API route, new RPC, form submission handling, entity create/update/delete, case matrix, edge cases before coding, permission matrix, concurrency cases."
+description: "Use before writing any test or implementation code for CRUD or data-mutation feature work (create/update/delete endpoints, RPCs, forms, migrations that change write behavior) — produce an explicit case matrix (happy path / negative / boundary / permission / concurrency) as the first artifact, before any test code exists. Runs one step before superpowers:test-driven-development's red-green loop, which starts at 'write a failing test'."
 ---
 
 # Test Case Matrix — enumerate before you test

@@ -1,6 +1,6 @@
 ---
 name: feature-blog-public-experience
-description: "FEATURE SKILL - Build public blog/news experiences: home feed, article detail, taxonomy pages, search, SEO, and engagement actions. Use for list/detail flows, related content, comments/saves/shares, and crawl-friendly page output. Trigger phrases: build blog page, article list page, category page, tag page, search page, seo for blog."
+description: "FEATURE SKILL - Build public blog/news experiences: home feed, article detail, taxonomy pages, search, SEO, and engagement actions. Use for list/detail flows, related content, comments/saves/shares, and crawl-friendly page output."
 argument-hint: "Describe content discovery surfaces, SEO requirements, engagement features, and deployment model (SSR/static)."
 ---
 

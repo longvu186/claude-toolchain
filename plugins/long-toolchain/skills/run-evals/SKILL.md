@@ -1,6 +1,6 @@
 ---
 name: run-evals
-description: "Run the toolchain eval suite to measure skill/subagent triggering accuracy and output quality, then report pass-rate and regressions vs the last run. Use to establish a baseline before changing skills/agents, to check a change didn't regress triggering, or to grow the eval set from a new failure. Trigger phrases: run evals, eval suite, check triggering accuracy, skill eval, measure toolchain quality, eval baseline."
+description: "Run the toolchain eval suite to measure skill/subagent triggering accuracy and output quality, then report pass-rate and regressions vs the last run. Use to establish a baseline before changing skills/agents, to check a change didn't regress triggering, or to grow the eval set from a new failure."
 ---
 
 # Run Evals

@@ -1,6 +1,6 @@
 ---
 name: consolidate-project
-description: "Synthesis pass that rolls up a project's episodic memory (run-logs, curation queue, GitNexus structure) into the living quick-understanding doc memories/repo/project-profile.md. Use to refresh project understanding, rebuild the context/architecture map, or after meaningful changes to a repo. Trigger phrases: consolidate project, update project understanding, refresh project profile, rebuild context doc, update project-profile, what have we learned about this project."
+description: "Synthesis pass that rolls up a project's episodic memory (run-logs, curation queue, GitNexus structure) into the living quick-understanding doc memories/repo/project-profile.md. Use to refresh project understanding, rebuild the context/architecture map, or after meaningful changes to a repo."
 ---
 
 # Consolidate Project

@@ -1,6 +1,6 @@
 ---
 name: feature-user-moderation-and-appeals
-description: "FEATURE SKILL - Build complete user moderation systems with suspension, blocking, ban appeals, and restoration workflows. Use for user management, moderation consoles, abuse handling, and account recovery paths. Trigger phrases: user moderation, suspend user, block unblock, ban appeals, restore account, moderation workflow."
+description: "FEATURE SKILL - Build complete user moderation systems with suspension, blocking, ban appeals, and restoration workflows. Use for user management, moderation consoles, abuse handling, and account recovery paths."
 argument-hint: "Describe roles, moderation actions, appeal policy, recovery window, and required audit/compliance constraints."
 ---
 

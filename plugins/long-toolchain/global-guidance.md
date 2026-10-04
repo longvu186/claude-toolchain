@@ -115,10 +115,8 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 
 ## Web research
 
-- Public page reads: prefer `~/.claude/scripts/crawl4ai-url.ps1` (default `markdown`; `json` for links;
-  `-BypassCache` when freshness matters) before browser tools.
-- Escalate to Playwright/browser only for screenshots, login/session reuse, multi-step interaction, or
-  when crawl output is blocked/insufficient. Load the `crawl4ai-web-research` skill when URLs are central.
+- Public page reads: use `WebFetch`. Escalate to Playwright/browser for screenshots, login/session
+  reuse, multi-step interaction, or when a fetch is blocked or insufficient.
 
 ## Memory discipline
 
@@ -150,19 +148,16 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 - In Postgres, `ALTER TYPE ... ADD VALUE` must commit before any RLS policy referencing that new enum value runs — split enum additions and dependent policies into separate migrations/transactions to avoid a broken deploy, in any project using enum-gated RLS.
 - pnpm-workspace.yaml's 'esbuild: set this to true or false' placeholder from pnpm approve-builds recurred yet again (now 4th confirmed instance across sessions) as an accidental unrelated diff — always diff-review this file before committing in any pnpm-managed repo.
 - Dev-runner UI-feature tasks silently skip live browser verification when the only reachable port is the live prod service and no dedicated preview port was assigned to the task — assign a distinct port to every UI-touching dev task across any business using this dev-runner.
-- To copy a secret between two repos sharing one Infisical workspace but different per-repo paths, fetch into a shell variable with `infisical secrets get` and set it at the target path — never let the value hit stdout/output; verify after with `list-secret-keys` (names only) on both sides.
+- Copying a secret between per-repo Infisical paths needs the operator: reading a value (`infisical secrets get`) is blocked by the guard above, and agents can't self-grant it. Verify afterwards with `list-secret-keys` (names only) on both sides.
 - Before exposing an anon-callable Supabase RPC to the public internet, verify any rate-limit/throttle key it trusts (e.g. an IP hash) is server-derived and signed, not caller-supplied — the anon key + project URL are public, so a client can rotate a supplied value to bypass the limit entirely.
 - Turbopack's dev server refuses a symlinked node_modules — a git worktree that symlinks to the main checkout's node_modules will fail to start; give the worktree a real pnpm hard-linked install instead. Applies to any repo run from a worktree with Turbopack, not just one project.
 - When a test fails after a change, before attributing it to the diff, build an untouched copy of the base branch separately and run the same test there — a flaky/pre-existing failure (e.g. a timing-sensitive UI check) can look diff-caused but reproduces on main too.
 - GitNexus impact/detect_changes return UNKNOWN or 0 callers uniformly for Next.js server actions invoked via JSX action={fn} props (not callgraph-resolvable) — text search across app/components/lib/e2e is the real discriminator for proving dead code in this pattern, on any Next.js+GitNexus project.
 - GitNexus detect_changes can misattribute a diff hunk to the wrong symbol when its index is stale (line-number drift) — a flagged symbol should be confirmed against the actual git diff hunks before trusting the attribution, on any project running detect_changes against a stale index.
-- Debugging remote env-var propagation: Tailscale SSH ignores /etc/environment (no PAM pam_env). Put the var in a root-only file sourced above the PS1 early-return in ~/.bashrc, and never cat files that may hold secrets.
 - Runner pitfalls seen on BCNV: a 'session limit' message is misclassified as an error when the usage API returns 401 for oauth_token pins. A tracked file under gitignored run-logs/.raw breaks remote finalize. An HQ restart orphans the controller while the remote agent keeps committing.
-- Tests that write to cwd-relative data dirs with real business/module ids clobber live files when run in the real checkout (dev-runner/deploy gates run tests there). DB isolation via temp path is not enough; isolate filesystem paths too.
-- Tests that write files via cwd-relative paths using real business/module ids destroy live operator data when run in the real checkout. DB isolation is not enough; isolate filesystem paths too, and use throwaway ids in every test.
+- Tests run in a live checkout that write cwd-relative data (memory, skills, documents) with real business/module ids destroy live operator data. Isolate filesystem paths as well as the DB, use throwaway ids in every test, and check live files survive a full suite run.
 - VPS shell has TURBOPACK=1 set globally, silently forcing Turbopack in next build and crashing /404 prerender (found on Mr. TukTuk). Use `env -u TURBOPACK` in build scripts plus global-not-found.tsx; check other Next.js business repos for the same hidden failure.
-- Tests run in a live checkout that write cwd-relative data (memory, skills, documents) wipe real operator data; isolate filesystem paths, not just DB, and verify live files after a full suite run.
-- Tailscale SSH hosts ignore /etc/environment (no PAM pam_env). Put env vars in a root-only file sourced ABOVE the `[ -z "$PS1" ] && return` line in ~/.bashrc so one-off `ssh host cmd` also sees them. Test over a fresh non-multiplexed connection.
+- Tailscale SSH hosts ignore /etc/environment (no PAM pam_env). Put env vars in a root-only file sourced ABOVE the `[ -z "$PS1" ] && return` line in ~/.bashrc so one-off `ssh host cmd` also sees them. Test over a fresh non-multiplexed connection. Never cat files that may hold secrets.
 - Never run pgrep -fa, ps aux or similar against processes launched by with-secrets or infisical. Their argv contains the machine-identity token and it lands in the transcript. Use pgrep -c or PID-only listings.
 - Any secret whose plaintext appears in a chat transcript must be rotated. Transcripts are mined nightly by consolidateKnowledge(). Create and verify secrets without printing them: store directly into Infisical, then check names only with list-secret-keys.
 - Never prove guardrail enforcement from the model's own prose; it self-censors from CLAUDE.md without calling the tool. Use `--output-format stream-json` and check permission_denials, with a probe rule CLAUDE.md doesn't mention. Also A/B-control any policy mechanism before trusting it.

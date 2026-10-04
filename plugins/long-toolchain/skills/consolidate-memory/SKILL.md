@@ -1,6 +1,6 @@
 ---
 name: consolidate-memory
-description: "Synthesis pass that rolls up episodic memory (run-logs, curation queue, correction signals, per-project memories) into the durable cross-project user profile. Use when refreshing the model of the user, merging duplicate memories, promoting repeated patterns, or retiring stale facts. Trigger phrases: consolidate memory, update my profile, what have you learned about me, synthesize memories, refresh user profile, memory consolidation."
+description: "Synthesis pass that rolls up episodic memory (run-logs, curation queue, correction signals, per-project memories) into the durable cross-project user profile. Use when refreshing the model of the user, merging duplicate memories, promoting repeated patterns, or retiring stale facts."
 ---
 
 # Memory Consolidation

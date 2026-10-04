@@ -1,6 +1,6 @@
 ---
 name: tech-pitfalls
-description: "Cross-project failure patterns and recovery strategies (150+ documented). Use when something breaks unexpectedly, a fix keeps regressing, or before implementing in an area with known traps such as auth/billing/webhooks, SSR/hydration, Next.js static export, imported landing pages, Postgres error codes, OAuth, migrations, Playwright/E2E, or visual regression. Trigger phrases: why did this break, recurring failure, known pitfall, regression, keeps failing. Boundary: for a NEW bug whose cause is unknown, lead with the debugging skill; tech-pitfalls is for recognizing KNOWN recurring traps and checking them before/while implementing."
+description: "Cross-project failure patterns and recovery strategies (150+ documented). Use when something breaks unexpectedly, a fix keeps regressing, or before implementing in an area with known traps such as auth/billing/webhooks, SSR/hydration, Next.js static export, imported landing pages, Postgres error codes, OAuth, migrations, Playwright/E2E, or visual regression."
 ---
 
 # Reusable Tech Pitfalls

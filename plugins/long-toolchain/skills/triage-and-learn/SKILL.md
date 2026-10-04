@@ -1,6 +1,6 @@
 ---
 name: triage-and-learn
-description: "Triage a bug or issue to root cause, fix it, then turn the lesson into a durable improvement proposal so the same class of bug teaches the system once. Use when the user pastes a bug/error/stack trace/failing behavior and wants it fixed AND captured. Trigger phrases: triage this bug, fix this issue, here's an error, debug and remember, learn from this bug, this keeps happening."
+description: "Triage a bug or issue to root cause, fix it, then turn the lesson into a durable improvement proposal so the same class of bug teaches the system once. Use when the user pastes a bug/error/stack trace/failing behavior and wants it fixed AND captured."
 ---
 
 # Triage And Learn

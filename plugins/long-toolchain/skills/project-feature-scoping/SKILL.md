@@ -1,6 +1,6 @@
 ---
 name: project-feature-scoping
-description: "PLANNING SKILL - Interview framework for feature decomposition, user class definition, phasing strategy, and edge case elicitation during project initiation. Draws from existing feature-skills to ask informed follow-ups. Trigger phrases: feature scoping, feature planning, user stories, phasing strategy, feature decomposition, MVP scope."
+description: "PLANNING SKILL - Interview framework for feature decomposition, user class definition, phasing strategy, and edge case elicitation during project initiation. Draws from existing feature-skills to ask informed follow-ups."
 argument-hint: "Describe the product concept and known features. The skill guides structured decomposition from there."
 ---
 

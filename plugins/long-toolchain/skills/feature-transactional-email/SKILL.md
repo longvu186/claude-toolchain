@@ -1,6 +1,6 @@
 ---
 name: feature-transactional-email
-description: "FEATURE SKILL - Design and implement transactional email automation for event/ticketing/payment flows. Use for registration confirmation, payment confirmation, ticket delivery, payment reminder, VietQR in email, Zoho SMTP via nodemailer, idempotent email sends, fire-and-forget email pattern, Vercel Cron reminder jobs, and email tracking columns. Trigger phrases: transactional email, email automation, ticket email, payment confirmation email, registration email, payment reminder cron, VietQR email, Zoho SMTP, nodemailer."
+description: "FEATURE SKILL - Design and implement transactional email automation for event/ticketing/payment flows. Use for registration confirmation, payment confirmation, ticket delivery, payment reminder, VietQR in email, Zoho SMTP via nodemailer, idempotent email sends, fire-and-forget email pattern, Vercel Cron reminder jobs, and email tracking columns."
 argument-hint: "Describe triggers (form submit, webhook, cron), email types needed, SMTP provider, and QR code requirements."
 ---
 

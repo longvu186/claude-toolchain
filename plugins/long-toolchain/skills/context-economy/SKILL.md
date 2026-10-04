@@ -1,6 +1,6 @@
 ---
 name: context-economy
-description: "Token, context, subagent, and tool best practices for the agents themselves — prompt-cache stability, compaction, just-in-time context, progressive disclosure, subagent model routing, and the 7-element tool design rules. Use when optimizing token usage, designing/reviewing skills/subagents/hooks/tools, deciding what to load into context, or auditing context bloat. Trigger phrases: token optimization, reduce tokens, context bloat, prompt caching, compaction, subagent design, tool design, just-in-time context, progressive disclosure."
+description: "Token, context, subagent, and tool best practices for the agents themselves — prompt-cache stability, compaction, just-in-time context, progressive disclosure, subagent model routing, and the 7-element tool design rules. Use when optimizing token usage, designing/reviewing skills/subagents/hooks/tools, deciding what to load into context, or auditing context bloat."
 ---
 
 # Context Economy

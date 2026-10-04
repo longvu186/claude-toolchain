@@ -1,6 +1,6 @@
 ---
 name: deep-interview
-description: "Socratic requirements interviewer for any scope — features, bugs, refactors, architecture decisions. Asks one question at a time targeting the weakest clarity dimension. Tracks ambiguity score and entities across rounds. Use for requirements gathering, problem clarification, spec writing, and decision crystallization. Trigger phrases: deep interview, clarify requirements, what exactly do you need, scope this feature, interview me, requirements interview. Argument hint: Describe what you want to clarify: a feature idea, a bug to investigate, an architecture choice, or a vague requirement. The agent will interview you to crystallize it."
+description: "Socratic requirements interviewer for any scope — features, bugs, refactors, architecture decisions. Asks one question at a time targeting the weakest clarity dimension. Tracks ambiguity score and entities across rounds. Use for requirements gathering, problem clarification, spec writing, and decision crystallization."
 tools: Read, Grep, Glob
 model: opus
 ---

@@ -1,6 +1,6 @@
 ---
 name: project-tech-stack-interview
-description: "PLANNING SKILL - Interview framework for technology stack and architecture decisions during project initiation. Covers rendering strategy, frontend/backend/hosting/media/CI-CD selection, and stack-specific edge case probes informed by existing technical skills. Trigger phrases: tech stack interview, architecture decisions, stack selection, project tech setup."
+description: "PLANNING SKILL - Interview framework for technology stack and architecture decisions during project initiation. Covers rendering strategy, frontend/backend/hosting/media/CI-CD selection, and stack-specific edge case probes informed by existing technical skills."
 argument-hint: "Provide any known tech preferences or constraints. The skill guides a structured interview from there."
 ---
 
