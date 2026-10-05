@@ -444,3 +444,18 @@ of-staff` (Planner-specific application of the already-established operator-ment
   toolset reason as every pass since 2026-09-19. Reset `_consolidation-state.json`. Watermark for next
   pass: line 7224 (signals) / 1342 (curation queue, unchanged — not independently re-swept this pass; see
   companion `/consolidate-project` entry for personal-hq's own curation queue).
+- 2026-10-05 (second same-day pass, explicit user request, paired with a `/consolidate-project` pass) —
+  Re-checked the pending draft (`profile.md.draft`, still the stale 2026-09-23T08:45 snapshot, 11+ passes
+  behind this live file): still not applied, same reason as the pass six hours earlier. `profile-
+  signals.jsonl` gained 134 lines (7225–7358) and personal-hq's curation queue 24 (1343–1366): same
+  dev-runner/plan-narration mislabelled `kind:"correction"` pattern as every pass since 2026-09-19 (HQ-
+  DEV-312/313 auth-continuity and auto-switch narration — "convention; only touch this if…" boilerplate,
+  "Re-login or use a dispatched sdk-cli session instead of retrying," the fail-closed try/catch guard —
+  each re-logged verbatim across 8+ `sessionId`s) plus a handful of project-technical lines (mrtuktuk POS
+  hidden-items note, a bcnv Gotrue-vs-Supabase-auth question) correctly out of scope here. 25th straight
+  pass, zero genuine cross-project operator corrections from that source. Re-swept every project's
+  `memory/feedback_*.md`/`feedback-*.md`: identical file set to six hours ago (ai-optimization, boroearth,
+  yen-tu, personal-hq, tobuso-migration, streaming-kit) — no new source repo, no new file. No facts
+  promoted, retired, or contradicted. Archiving of `profile-signals.jsonl` (7,358 lines) remains blocked
+  for the same toolset reason as every pass since 2026-09-19. Reset `_consolidation-state.json`.
+  Watermark for next pass: line 7358 (signals) / 1366 (curation queue).
