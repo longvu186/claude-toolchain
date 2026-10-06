@@ -38,6 +38,9 @@ at session start). Read the full profile when personalizing approach, scoping, o
   reaches the feature **by clicks only** (no `page.goto` to the feature) — deep-link tests alone prove nothing
   about reachability. Report the click path to the user together with "it's live". Operator ruling 2026-10-06
   after a fully deployed control-plane editor was unreachable from the sidebar.
+- **An e2e suite that was not run, or that loaded 0 tests, is not verification.** Never accept "spec written but
+  not run" as done — run it, open the screenshots, and gate on a minimum loaded-test count (`playwright test
+--list`) so one broken import can't silently zero the suite (control plane loaded 0 tests for 3 days, 2026-10).
 - **UI validation is screenshot-backed**, not code-inspection-only, before deploying touched surfaces.
   Prefer focused regression suites over full-matrix reruns unless shared layout/routing/tokens change.
 - **Build gates:** `typecheck` + build must pass before any deploy. Close code-changing sessions with
