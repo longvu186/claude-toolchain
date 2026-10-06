@@ -30,6 +30,14 @@ at session start). Read the full profile when personalizing approach, scoping, o
 - **System-first UI:** push repeated headers, footers, buttons, cards, toolbars, empty states, and
   section shells into shared tokens/variants/layout shells before page-local styling. For parity work,
   align container max-width, cross-view paddings, and primary font early.
+- **Every feature must be reachable and testable by a human — by default, never as an afterthought.** A new
+  page/section/action is not done until a person can get there from the app's primary navigation (sidebar/top
+  nav → visible links/buttons) without typing a URL, and the primary call-to-action on the way does the safe,
+  expected thing. Plans for UI work always include a "reachable from <nav entry> via <click path>" acceptance
+  criterion. Verification and e2e specs must include at least one test that starts at the landing page and
+  reaches the feature **by clicks only** (no `page.goto` to the feature) — deep-link tests alone prove nothing
+  about reachability. Report the click path to the user together with "it's live". Operator ruling 2026-10-06
+  after a fully deployed control-plane editor was unreachable from the sidebar.
 - **UI validation is screenshot-backed**, not code-inspection-only, before deploying touched surfaces.
   Prefer focused regression suites over full-matrix reruns unless shared layout/routing/tokens change.
 - **Build gates:** `typecheck` + build must pass before any deploy. Close code-changing sessions with
@@ -145,6 +153,7 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 <!-- Auto-appended by the nightly knowledge-consolidation job. Rare,
      capped, cross-project lessons only — see docs/run-logs/
      2026-09-12-knowledge-extraction-pipeline.md. -->
+
 - In Postgres, `ALTER TYPE ... ADD VALUE` must commit before any RLS policy referencing that new enum value runs — split enum additions and dependent policies into separate migrations/transactions to avoid a broken deploy, in any project using enum-gated RLS.
 - pnpm-workspace.yaml's 'esbuild: set this to true or false' placeholder from pnpm approve-builds recurred yet again (now 4th confirmed instance across sessions) as an accidental unrelated diff — always diff-review this file before committing in any pnpm-managed repo.
 - Dev-runner UI-feature tasks silently skip live browser verification when the only reachable port is the live prod service and no dedicated preview port was assigned to the task — assign a distinct port to every UI-touching dev task across any business using this dev-runner.
@@ -162,5 +171,5 @@ Use strong tools when they materially reduce guesswork; don't front-load tool us
 - Any secret whose plaintext appears in a chat transcript must be rotated. Transcripts are mined nightly by consolidateKnowledge(). Create and verify secrets without printing them: store directly into Infisical, then check names only with list-secret-keys.
 - Never prove guardrail enforcement from the model's own prose; it self-censors from CLAUDE.md without calling the tool. Use `--output-format stream-json` and check permission_denials, with a probe rule CLAUDE.md doesn't mention. Also A/B-control any policy mechanism before trusting it.
 - Never grep or cat build output that inlines env (e.g. .open-next/cloudflare/next-env.mjs holds real secrets in plaintext). Inspect with filename-only/count flags (grep -l/-c) or key-name-only extraction, since printed values land in the transcript and force rotation.
-<!-- hq-auto-lessons:end -->
 
+<!-- hq-auto-lessons:end -->
