@@ -459,3 +459,28 @@ of-staff` (Planner-specific application of the already-established operator-ment
   promoted, retired, or contradicted. Archiving of `profile-signals.jsonl` (7,358 lines) remains blocked
   for the same toolset reason as every pass since 2026-09-19. Reset `_consolidation-state.json`.
   Watermark for next pass: line 7358 (signals) / 1366 (curation queue).
+- 2026-10-06 (explicit user request, paired with a `/consolidate-project` pass) — Re-checked the
+  pending draft (`profile.md.draft` + `_consolidation-draft-ready.json`): both still present, still
+  the same stale 2026-09-23T08:45 snapshot 11+ passes behind this live file — not applied, same reason
+  as the two 2026-10-05 passes (this session's toolset is again Read/Write/Edit/Glob/Grep only, no
+  Bash/file-delete). `profile-signals.jsonl` gained 102 lines (7359–7460) and personal-hq's curation
+  queue 15 (1367–1381): same dev-runner/plan-narration mislabelled `kind:"correction"` pattern as every
+  pass since 2026-09-19 (the recurring "convention; only touch this if…" boilerplate, HQ-DEV-313
+  token-validation text, the BetterStack fingerprint/systemd-timer playbook lines, each re-logged
+  verbatim across 8+ `sessionId`s) plus a full evening of BCNV CRM/Getfly-migration orchestration
+  narration (dispatch loops, merge/gate logs, a Getfly-data audit, a Supabase key-rotation runbook) —
+  real work, but project-technical to bcnv, already captured in bcnv's own run-logs and a new
+  `subagent-secret-exposure-guardrails` memory written there this session. 26th straight pass, zero
+  genuine cross-project operator corrections from the signal file. Re-swept every project's
+  `memory/feedback_*.md`/`feedback-*.md`: same six repos as every pass since 2026-09-28 (ai-optimization,
+  boroearth, yen-tu, personal-hq, tobuso-migration, streaming-kit) — no new source repo. Checked three
+  tobuso files by name for the first time: `feedback-size-refactors-by-parsing-call-sites` and
+  `feedback-a-green-check-may-be-checking-nothing` are both already folded in verbatim (confirmed in the
+  2026-10-03 entry); `feedback-deployed-is-not-discoverable` (2026-10-06, the control-plane
+  reachability incident) is already codified at the `~/.claude/CLAUDE.md` policy level — it's the exact
+  "Every feature must be reachable and testable by a human" rule with today's date as its origin — so no
+  duplicate profile promotion. No facts promoted, retired, or contradicted. Archiving of
+  `profile-signals.jsonl` (7,460 lines) remains blocked for the same toolset reason as every pass since
+  2026-09-19; not re-raising the two standing fixes again (already surfaced directly 2026-09-26/27).
+  Reset `_consolidation-state.json`. Watermark for next pass: line 7460 (signals) / 1381 (curation
+  queue).
