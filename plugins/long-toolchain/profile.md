@@ -109,7 +109,8 @@ beliefs. Atoms feed this; this is never just a list of atoms.
   target — dispatch the fix over SSH in the same turn, never "should I fix this myself or do you want
   to" _(2026-08-19/08-20; repo memory `feedback_dispatch-fix-to-remote-host-agent`)_; (2) a Claude 401 on
   a fleet host means re-pin the longvu186 credential and retry without asking — "always do that… we have
-  always done that" _(2026-09-21; tobuso memory `feedback-copy-longvu186-auth-to-fleet-hosts`)_. Only
+  always done that" _(2026-09-21; tobuso memory `feedback-copy-longvu186-auth-to-fleet-hosts`; third instance 2026-10-07, bcnv: "no, just copy our
+  auth over")_. Only
   pause for something genuinely destructive/ambiguous (irreversible data loss, a prod cutover, minting a
   brand-new secret or access grant) — confirmed concretely 2026-07-08 (VPS hardening): even mid-session on
   an already-approved 9-phase plan, both generating a break-glass root password and naming the email/IdP
@@ -484,3 +485,20 @@ of-staff` (Planner-specific application of the already-established operator-ment
   2026-09-19; not re-raising the two standing fixes again (already surfaced directly 2026-09-26/27).
   Reset `_consolidation-state.json`. Watermark for next pass: line 7460 (signals) / 1381 (curation
   queue).
+- 2026-10-07 (explicit user request, paired with a `/consolidate-project` pass) — Re-checked the
+  pending draft (`profile.md.draft` + `_consolidation-draft-ready.json`): both still present, still the
+  same stale 2026-09-23T08:45 snapshot, now 14+ passes behind this live file — not applied, same reason
+  as every pass since 2026-09-25 (this session's toolset is again Read/Write/Edit/Glob/Grep only, no
+  Bash/file-delete). `profile-signals.jsonl` gained exactly 1 line (7461): a bcnv correction, "no, just
+  copy our auth over" — not a new fact, a third concrete instance of the already-established
+  copy-fleet-auth-without-asking bullet, folded in as a citation rather than a new bullet.
+  Personal-hq's curation queue gained 15 entries (1382–1396): all bcnv dev-runner task-notification/
+  implicit-run noise with empty preference/correction/lesson fields — zero new atoms. 27th straight
+  pass with no genuine new cross-project operator correction from the signal file itself. Re-swept
+  every project's `memory/feedback_*.md`/`feedback-*.md`: identical six repos as every pass since
+  2026-09-28 (ai-optimization, boroearth, yen-tu, personal-hq, tobuso-migration, streaming-kit) — no new
+  source repo; bcnv (heavy activity this week) has a `memory/` dir but zero `feedback*`-named files, all
+  project-technical, correctly out of scope. No facts promoted as new bullets, retired, or contradicted.
+  Archiving of `profile-signals.jsonl` (7,461 lines) remains blocked for the same toolset reason as every
+  pass since 2026-09-19. Reset `_consolidation-state.json`. Watermark for next pass: line 7461 (signals)
+  / 1396 (curation queue).
