@@ -104,21 +104,29 @@ beliefs. Atoms feed this; this is never just a list of atoms.
   clarifying rounds generally — ask only the genuinely load-bearing questions, then build. _(established
   — 2026-07-07: "I didn't initiate you in plan mode, but auto mode. always proceed to build in auto
   mode."; repo memory: `feedback_auto-mode-skip-gates` + `feedback_no-double-planning`)_
-- **Routine operational recoveries are standing defaults, not permission requests.** Two established
-  instances: (1) a business VPS that already has its own on-host coding agent is a standing dispatch
-  target — dispatch the fix over SSH in the same turn, never "should I fix this myself or do you want
-  to" _(2026-08-19/08-20; repo memory `feedback_dispatch-fix-to-remote-host-agent`)_; (2) a Claude 401 on
-  a fleet host means re-pin the longvu186 credential and retry without asking — "always do that… we have
-  always done that" _(2026-09-21; tobuso memory `feedback-copy-longvu186-auth-to-fleet-hosts`; third instance 2026-10-07, bcnv: "no, just copy our
-  auth over")_. Only
-  pause for something genuinely destructive/ambiguous (irreversible data loss, a prod cutover, minting a
-  brand-new secret or access grant) — confirmed concretely 2026-07-08 (VPS hardening): even mid-session on
-  an already-approved 9-phase plan, both generating a break-glass root password and naming the email/IdP
-  for a new Cloudflare Access policy got stopped for a fresh explicit confirmation, because approving the
-  plan approved the _goal_ ("set a break-glass password"), not the _specific values_ nobody had spoken
-  aloud yet. A generated low-stakes value in the same session (an ntfy topic name — routing token, not a
-  credential) went through without friction, so the line is credential/access-grant risk specifically, not
-  "anything generated." _(established; tobuso memory `feedback-credential-and-access-grant-gating`)_
+- **Routine operational recoveries are standing defaults, not permission requests — except credential
+  provisioning, which is reversed.** One established instance remains: a business VPS that already has
+  its own on-host coding agent is a standing dispatch target — dispatch the fix over SSH in the same
+  turn, never "should I fix this myself or do you want to" _(2026-08-19/08-20; repo memory
+  `feedback_dispatch-fix-to-remote-host-agent`)_. The former second instance — "a Claude 401 on a fleet
+  host means re-pin the longvu186 credential and retry without asking" — is **retired as of 2026-10-08**:
+  after a `follow_shared` auto-copy left a stale/wrong account (`wassup`) live in a host's cached env for
+  days (the tobuso "org disabled" incident), he shut the mechanism off entirely — "shut down any auto
+  copy, I'll login manually into the server. we won't auto copy anymore, I'll provide logins for each
+  server" — and it's now enforced in code (main@558de9f0): no shared-account fallback, fleet host token
+  writes gated off by default, every fleet credential slot `unmanaged`. Never re-propose auto-copying or
+  re-pinning a credential to a remote host without being asked; a 401/auth failure there is now a "tell
+  him, he logs in manually" case, not a silent self-heal. _(established; repo memory
+  `feedback_no-auto-credential-copy-to-hosts`, supersedes `feedback-copy-longvu186-auth-to-fleet-hosts`)_
+  Only pause for something genuinely destructive/ambiguous (irreversible data loss, a prod cutover,
+  minting a brand-new secret or access grant) — confirmed concretely 2026-07-08 (VPS hardening): even
+  mid-session on an already-approved 9-phase plan, both generating a break-glass root password and naming
+  the email/IdP for a new Cloudflare Access policy got stopped for a fresh explicit confirmation, because
+  approving the plan approved the _goal_ ("set a break-glass password"), not the _specific values_ nobody
+  had spoken aloud yet. A generated low-stakes value in the same session (an ntfy topic name — routing
+  token, not a credential) went through without friction, so the line is credential/access-grant risk
+  specifically, not "anything generated." _(established; tobuso memory
+  `feedback-credential-and-access-grant-gating`)_
 - **Domain modelling ≠ database design.** A DDD domain model is feature/business-focused and must not be
   critiqued for diverging from the schema; app-wide services (audit, notification, auth, lexicon) sit in
   a separate layer with deliberately zero edges to domain aggregates. _(provisional — one verbatim,
@@ -204,6 +212,15 @@ internalized into CLAUDE.md or a skill.)_
   candidate set first and preserve rows that are evidence for an open question. _(provisional — one
   2026-09-20 Tobuso instance where 12 of 17 "stale" links were the sole evidence for an open client
   question; tobuso memory `feedback-authorization-to-delete-is-not-blanket`)_
+- Never auto-copy/re-pin a credential to a remote host without being asked — he now provisions every
+  fleet host login himself; HQ's job is to report an auth failure, not self-heal it by propagating a
+  token. _(established — 2026-10-08, reversing the 2026-09-21/2026-10-07 standing-default reading;
+  repo memory `feedback_no-auto-credential-copy-to-hosts`, enforced main@558de9f0)_
+- An absent/disabled scheduled job (timer, cron) isn't necessarily drift — check for a deliberate
+  disable (e.g. an `INTENTIONALLY_OFF` list) and ask about intent before recommending `enable --now`; he
+  turns things off on purpose and re-enabling spends agent tokens he didn't ask for. _(provisional — one
+  2026-10-08 instance, personal-hq research/questions/recommendations timers; repo memory
+  `feedback_research-questions-recs-on-demand-only`)_
 
 ## Anti-patterns to avoid with me
 
@@ -218,7 +235,11 @@ internalized into CLAUDE.md or a skill.)_
   one evidence-backed challenge is the right call, a second reads as not listening.
 - Don't add collapse/hide/pin UI behavior when he asked for "compact" — that means vertical density.
 - Don't ask permission for a routine recovery that is already a standing default (dispatch to an
-  on-host agent, re-pin fleet auth) — just do it and report.
+  on-host agent) — just do it and report.
+- Don't auto-copy, re-pin, or propagate a credential/token to a remote host without being asked — that
+  mechanism was shut off 2026-10-08; a fleet host auth failure gets reported, not silently fixed.
+- Don't recommend enabling/installing a disabled timer or automation without first checking whether it
+  was deliberately turned off — absence isn't automatically drift.
 - Don't size or defer work on a grep count — measure real call sites before calling something "too big."
 - Don't relay a subagent's "blocked" verdict without probing it yourself.
 
@@ -502,3 +523,22 @@ of-staff` (Planner-specific application of the already-established operator-ment
   Archiving of `profile-signals.jsonl` (7,461 lines) remains blocked for the same toolset reason as every
   pass since 2026-09-19. Reset `_consolidation-state.json`. Watermark for next pass: line 7461 (signals)
   / 1396 (curation queue).
+- 2026-10-09 (explicit user request, paired with a `/consolidate-project` pass) — 28th pass, and the
+  first in many to surface a genuine cross-project correction. `profile-signals.jsonl` gained 2 lines
+  (7462–7463): one bcnv-specific ("no, we do not need OA reauth" — out of scope here) and one personal-hq
+  line already captured below. Curation queue gained 27 entries (1397–1423): almost all dev-runner/bcnv
+  implicit-run noise, except confirming the same correction. **Retired** the "Claude 401 on a fleet host →
+  re-pin credential and retry without asking" half of the standing-operational-recoveries bullet: re-swept
+  personal-hq's `memory/feedback_*.md` (triggered by a new MEMORY.md entry not yet folded in) and found
+  `feedback_no-auto-credential-copy-to-hosts` (2026-10-08, enforced main@558de9f0) — the operator shut the
+  whole auto-copy mechanism off after it left a stale account live on a host for days ("we won't auto copy
+  anymore, I'll provide logins for each server"). This directly contradicts the established bullet from
+  2026-09-21/2026-10-07, so it was **rewritten, not left alongside the old reading** — the dispatch-to-
+  on-host-agent half of that bullet is unaffected and stays. **Promoted two new items:** the credential-
+  reversal itself (established, strong citation) and a provisional — don't recommend re-enabling a
+  disabled timer without checking it was deliberately off (`feedback_research-questions-recs-on-demand-
+  only`, same source line). Updated the matching Anti-patterns bullets to match. No other new cross-
+  project atoms found in the rest of the re-swept `feedback_*.md` set (same six repos as every pass since
+  2026-09-28). Archiving of `profile-signals.jsonl` (7,463 lines) remains blocked for the same toolset
+  reason as every pass since 2026-09-19 — this pass's toolset again had no Bash/file-truncate tool.
+  Watermark for next pass: line 7463 (signals) / 1423 (curation queue).
