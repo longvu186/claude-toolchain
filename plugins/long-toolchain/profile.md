@@ -542,3 +542,22 @@ of-staff` (Planner-specific application of the already-established operator-ment
   2026-09-28). Archiving of `profile-signals.jsonl` (7,463 lines) remains blocked for the same toolset
   reason as every pass since 2026-09-19 — this pass's toolset again had no Bash/file-truncate tool.
   Watermark for next pass: line 7463 (signals) / 1423 (curation queue).
+- 2026-10-09 (same-day re-run, explicit user request, paired with a `/consolidate-project` pass) — Zero
+  new evidence of substance. `profile-signals.jsonl` gained 187 lines (7464–7650): same dev-runner/plan-
+  narration mislabelled `kind:"correction"` pattern as every pass since 2026-09-19 (HQ-DEV-334 token-
+  health-check narration — the policy-refused regex, `tokenUnhealthy()`, auto-switch skip logic, each
+  re-logged verbatim across 10+ `sessionId`s — plus the recurring "convention; only touch this if…"/
+  "lazy-load skills instead of dropping the change" boilerplate). Two lines were real but out of scope
+  here: a bcnv-specific OA-reauth note, and one too-fragmentary tobuso line ("no, skip that." with no
+  attached context to act on). 29th straight pass, zero genuine cross-project operator corrections from
+  the signal file itself. Personal-hq's own curation queue (companion `/consolidate-project` input)
+  confirms the same: only two "corrections" entries since the last watermark, both changelog-narration
+  fragments ("Confirm by actually calling one tool from each in…"), not operator feedback. Re-checked the
+  pending draft (`profile.md.draft` + `_consolidation-draft-ready.json`): both still present, still the
+  same stale 2026-09-23T08:45 snapshot, now 15+ passes behind this live file — not applied, same reason as
+  every pass since 2026-09-25 (no Bash/file-delete tool this session either). No facts promoted, retired,
+  or contradicted. Not re-raising the two standing fixes again (give this job Bash, or fix the
+  signal-logging hook's `kind:"correction"` misclassification at source) — already surfaced directly
+  2026-09-26/27, unactioned since. Archiving of `profile-signals.jsonl` (7,650 lines) remains blocked for
+  the same toolset reason as every pass since 2026-09-19. Reset `_consolidation-state.json`. Watermark for
+  next pass: line 7650 (signals) / 1433 (curation queue).
