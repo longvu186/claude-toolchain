@@ -561,3 +561,29 @@ of-staff` (Planner-specific application of the already-established operator-ment
   2026-09-26/27, unactioned since. Archiving of `profile-signals.jsonl` (7,650 lines) remains blocked for
   the same toolset reason as every pass since 2026-09-19. Reset `_consolidation-state.json`. Watermark for
   next pass: line 7650 (signals) / 1433 (curation queue).
+- 2026-10-10 (explicit user request, paired with a `/consolidate-project` pass) — 30th straight pass.
+  `profile-signals.jsonl` gained 34 lines (7651–7684): same dev-runner/plan-narration mislabelled
+  `kind:"correction"` pattern as every pass since 2026-09-19 (HQ-DEV-338 mid-run-steering diff text — the
+  `chat.inject` dispatch, the "turn actually over" `session_state_changed:'idle'` note, the Turbopack-
+  symlink/env-copy fix — re-logged verbatim across 4 `sessionId`s). Curation queue gained 4 entries
+  (1434–1437): the prior pass's own self-log plus two empty-content chat runs and a changelog-writing run
+  with an "and do not repeat any earlier entries" style note — no genuine preference/correction/lesson.
+  Zero new cross-project operator corrections from either source. Re-checked the pending draft
+  (`profile.md.draft` + `_consolidation-draft-ready.json`): both still present, still the same stale
+  2026-09-23T08:45 snapshot, now 16+ passes behind this live file — not applied, same reason as every pass
+  since 2026-09-25 (no Bash/file-delete tool this session). Re-swept every project's
+  `memory/feedback_*.md`/`feedback-*.md`: three new tobuso files since the last sweep —
+  `feedback-process-every-frame-of-source-recordings` (full-frame video transcription before a Bubble
+  spec) and `feedback-check-checkout-branch-before-deploy` (re-verify branch/HEAD/dirty-state immediately
+  before a shared-checkout deploy) are both project-technical mechanics, correctly out of scope here;
+  `feedback-docs-quality-over-cost` explicitly scopes itself as a tobuso-only override of this profile's
+  "prompt-budget conscious" line ("large context is fine, we want maximum quality rather than cost
+  optimization") and does not actually contradict the cross-project claim, which is about the
+  always-loaded digest specifically, not documentation depth — left in tobuso's own memory, no promotion.
+  No facts promoted, retired, or contradicted. Worth flagging once rather than re-noting per pass:
+  `feedback-check-checkout-branch-before-deploy` describes a pattern (concurrent sessions deploying from
+  one shared checkout) that isn't tobuso-specific — any project with a single primary checkout used by
+  multiple sessions has the same race; candidate for `tech-pitfalls` promotion if it recurs elsewhere.
+  Archiving of `profile-signals.jsonl` (7,684 lines) remains blocked for the same toolset reason as every
+  pass since 2026-09-19. Reset `_consolidation-state.json`. Watermark for next pass: line 7684 (signals) /
+  1437 (curation queue).
