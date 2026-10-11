@@ -459,7 +459,7 @@ of-staff` (Planner-specific application of the already-established operator-ment
   repo found: streaming-kit's `feedback-iterative-plan-review-apply-diff` (itemized R1/R2 plan-review
   rounds, surgical diff-only responses) — **promoted as provisional** under "How I work / collaboration."
   Also corrected a gap from the 2026-10-03 entry: `feedback-failed-experiment-is-not-a-disproved-
-  hypothesis` (tobuso) had been logged that pass as "already folded in," but no citation or bullet for it
+hypothesis` (tobuso) had been logged that pass as "already folded in," but no citation or bullet for it
   actually existed anywhere in this file — the exact self-referential failure mode flagged in that same
   2026-10-03 entry. **Promoted for real this time** as a new provisional bullet under Decision tendencies.
   No facts retired. Archiving of `profile-signals.jsonl` (7,224 lines) remains blocked for the same
@@ -469,7 +469,7 @@ of-staff` (Planner-specific application of the already-established operator-ment
 - 2026-10-05 (second same-day pass, explicit user request, paired with a `/consolidate-project` pass) —
   Re-checked the pending draft (`profile.md.draft`, still the stale 2026-09-23T08:45 snapshot, 11+ passes
   behind this live file): still not applied, same reason as the pass six hours earlier. `profile-
-  signals.jsonl` gained 134 lines (7225–7358) and personal-hq's curation queue 24 (1343–1366): same
+signals.jsonl` gained 134 lines (7225–7358) and personal-hq's curation queue 24 (1343–1366): same
   dev-runner/plan-narration mislabelled `kind:"correction"` pattern as every pass since 2026-09-19 (HQ-
   DEV-312/313 auth-continuity and auto-switch narration — "convention; only touch this if…" boilerplate,
   "Re-login or use a dispatched sdk-cli session instead of retrying," the fail-closed try/catch guard —
@@ -537,7 +537,7 @@ of-staff` (Planner-specific application of the already-established operator-ment
   on-host-agent half of that bullet is unaffected and stays. **Promoted two new items:** the credential-
   reversal itself (established, strong citation) and a provisional — don't recommend re-enabling a
   disabled timer without checking it was deliberately off (`feedback_research-questions-recs-on-demand-
-  only`, same source line). Updated the matching Anti-patterns bullets to match. No other new cross-
+only`, same source line). Updated the matching Anti-patterns bullets to match. No other new cross-
   project atoms found in the rest of the re-swept `feedback_*.md` set (same six repos as every pass since
   2026-09-28). Archiving of `profile-signals.jsonl` (7,463 lines) remains blocked for the same toolset
   reason as every pass since 2026-09-19 — this pass's toolset again had no Bash/file-truncate tool.
@@ -587,3 +587,19 @@ of-staff` (Planner-specific application of the already-established operator-ment
   Archiving of `profile-signals.jsonl` (7,684 lines) remains blocked for the same toolset reason as every
   pass since 2026-09-19. Reset `_consolidation-state.json`. Watermark for next pass: line 7684 (signals) /
   1437 (curation queue).
+- 2026-10-12 (explicit user request, paired with a `/consolidate-project` pass) — 31st straight pass.
+  `profile-signals.jsonl` is unchanged at exactly 7,684 lines — the first fully zero-growth gap in this
+  file's history (confirmed via the companion `/consolidate-project` pass: no new commits past `bb0323c6`,
+  no new `docs/run-logs/*.md`, and no `.remember/today-2026-10-11*.md` was ever created, i.e. a genuinely
+  idle day, not a missed sweep). `lesson-signals.jsonl` still does not exist. Re-swept every project's
+  `memory/feedback_*.md`/`feedback-*.md`: identical file set to the 2026-10-10 pass (ai-optimization,
+  boroearth, yen-tu, personal-hq, tobuso-migration, streaming-kit) — no new file, no new source repo.
+  Re-checked the pending draft (`profile.md.draft` + `_consolidation-draft-ready.json`): both still
+  present, still the same stale 2026-09-23T08:45 snapshot, now 17+ passes behind this live file — not
+  applied, same reason as every pass since 2026-09-25 (this session's toolset is again Read/Write/Edit/
+  Glob/Grep only, no Bash/file-delete, so the marker can be overwritten but not removed, which would just
+  relabel the same stuck state rather than fix it). The `now.md` buffer entry about a failed same-day
+  third consolidation attempt ("the sandbox couldn't read the logs needed for a full run") is not a new
+  fact — it's another instance of the same toolset-gap already tracked here, not a user correction. No
+  facts promoted, retired, or contradicted. Reset `_consolidation-state.json`. Watermark unchanged: line
+  7684 (signals) / 1437 (curation queue).
