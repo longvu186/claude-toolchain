@@ -603,3 +603,19 @@ only`, same source line). Updated the matching Anti-patterns bullets to match. N
   fact — it's another instance of the same toolset-gap already tracked here, not a user correction. No
   facts promoted, retired, or contradicted. Reset `_consolidation-state.json`. Watermark unchanged: line
   7684 (signals) / 1437 (curation queue).
+- 2026-10-12 (second same-day pass, explicit user request, paired with a `/consolidate-project` pass) —
+  32nd straight pass. `profile-signals.jsonl` gained 13 lines (7685–7697), all the same dev-runner/
+  plan-narration mislabelled `kind:"correction"` pattern as every pass since 2026-09-19 (HQ-DEV-335
+  chat-cost-baseline-as-post-deploy-step narration, the recurring "convention; only touch this if…"
+  boilerplate, a className-assertion-regression-test note — re-logged verbatim across 3 `sessionId`s).
+  Curation queue gained 3 entries (1438–1440): two are this exact consolidation command's own prior-day
+  self-logs, one is an unrelated screenshot-QA run with no preference/correction/lesson content. Zero
+  genuine cross-project operator corrections from either source. Re-swept every project's
+  `memory/feedback_*.md`/`feedback-*.md`: identical six repos and files as every sweep since 2026-09-28
+  (ai-optimization, boroearth, yen-tu, personal-hq, tobuso-migration, streaming-kit) — no new file, no new
+  source repo. Did not re-check the stale `profile.md.draft`/`_consolidation-draft-ready.json` marker this
+  pass (confirmed unchanged as of the first 2026-10-12 pass six hours earlier; still the 2026-09-23T08:45
+  snapshot, 18+ passes behind, still undeletable with this session's Read/Write/Edit/Glob/Grep-only
+  toolset). No facts promoted, retired, or contradicted. Archiving of `profile-signals.jsonl` (7,697 lines)
+  remains blocked for the same toolset reason as every pass since 2026-09-19. Reset
+  `_consolidation-state.json`. Watermark for next pass: line 7697 (signals) / 1440 (curation queue).
