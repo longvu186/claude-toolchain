@@ -619,3 +619,21 @@ only`, same source line). Updated the matching Anti-patterns bullets to match. N
   toolset). No facts promoted, retired, or contradicted. Archiving of `profile-signals.jsonl` (7,697 lines)
   remains blocked for the same toolset reason as every pass since 2026-09-19. Reset
   `_consolidation-state.json`. Watermark for next pass: line 7697 (signals) / 1440 (curation queue).
+- 2026-10-14 (explicit user request, paired with a `/consolidate-project` pass) — 33rd straight pass.
+  `profile-signals.jsonl` gained 4 lines (7698–7701): three are in-session debugging frustration from a
+  `mrtuktuk-food-app` session ("still nothing printed out" / "nothing happened" / "we'll deal with this in
+  our app") — operator reaction to a specific bug, not a standing preference or process correction; one is
+  a `tobuso-migration` domain-technical directive about multipart-event temp-copy semantics — project
+  implementation detail, not cross-project. Curation queue gained 2 entries (1441–1442): this command's own
+  prior-day self-log plus an implicit run with no content. Zero genuine cross-project operator corrections
+  from either source — the 19th consecutive pass with nothing to promote, retire, or contradict (standing
+  pattern tracked since 2026-09-19, not re-raised in detail here). Re-swept every project's
+  `memory/feedback_*.md`/`feedback-*.md`: identical file set to every sweep since 2026-09-28 (no new file,
+  no new source repo). The stale `profile.md.draft`/`_consolidation-draft-ready.json` marker (2026-09-23T08:45
+  snapshot) is unchanged, now 20+ passes behind — still undeletable with this session's Read/Write/Edit/
+  Glob/Grep-only toolset, same reason as every pass since 2026-09-25. No facts promoted, retired, or
+  contradicted. The companion `/consolidate-project` pass did real work this time (see that file's own
+  Changelog): compressed its long-overdue-oversized "Pending" digest section from ~109 to ~37 lines,
+  the first actual digest-budget compression either consolidation skill has performed in this project
+  rather than a Changelog-only append. Reset `_consolidation-state.json`. Watermark for next pass: line
+  7701 (signals) / 1442 (curation queue).
