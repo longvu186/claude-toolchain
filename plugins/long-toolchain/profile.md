@@ -637,3 +637,15 @@ only`, same source line). Updated the matching Anti-patterns bullets to match. N
   the first actual digest-budget compression either consolidation skill has performed in this project
   rather than a Changelog-only append. Reset `_consolidation-state.json`. Watermark for next pass: line
   7701 (signals) / 1442 (curation queue).
+- 2026-10-15 (explicit user request, paired with a `/consolidate-project` pass) — 34th straight pass.
+  `profile-signals.jsonl` unchanged at exactly 7,701 lines — second fully-zero-growth gap (same pattern
+  as 2026-10-12). Curation queue gained 4 entries (1443–1446): two are this command's own prior-day
+  self-logs, one an empty implicit run, one a changelog-writing run with no genuine preference beyond
+  "don't repeat earlier entries" boilerplate — zero genuine operator corrections. Re-swept every
+  project's `memory/feedback_*.md`/`feedback-*.md`: identical file set to every sweep since 2026-10-10
+  (ai-optimization, boroearth, yen-tu, personal-hq, tobuso-migration, streaming-kit) — no new file, no
+  new source repo. Re-checked the pending draft (`profile.md.draft` + `_consolidation-draft-ready.json`):
+  both still present, still the same stale 2026-09-23T08:45 snapshot, now 22+ passes behind this live
+  file — not applied, same reason as every pass since 2026-09-25 (this session's toolset is again
+  Read/Write/Edit/Glob/Grep only, no Bash/file-delete). No facts promoted, retired, or contradicted.
+  Reset `_consolidation-state.json`. Watermark unchanged: line 7701 (signals) / 1446 (curation queue).
