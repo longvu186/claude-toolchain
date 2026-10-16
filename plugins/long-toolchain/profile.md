@@ -221,6 +221,12 @@ internalized into CLAUDE.md or a skill.)_
   turns things off on purpose and re-enabling spends agent tokens he didn't ask for. _(provisional — one
   2026-10-08 instance, personal-hq research/questions/recommendations timers; repo memory
   `feedback_research-questions-recs-on-demand-only`)_
+- A blanket "do all" permission doesn't erase attribution: when it includes setting
+  secrets/credentials (even on his own say-so), report plainly "I set A, B, C (source: ...)" separately
+  from what's still open, and fix any doc that would otherwise read as if he set it. _(provisional — one
+  2026-10-16 instance, tobuso prod Worker secrets set under a blanket yes, docs still said "set by the
+  operator"; tobuso-migration memory `feedback-report-credential-setting-as-mine`, ties to
+  `feedback-credential-and-access-grant-gating`)_
 
 ## Anti-patterns to avoid with me
 
@@ -649,3 +655,20 @@ only`, same source line). Updated the matching Anti-patterns bullets to match. N
   file — not applied, same reason as every pass since 2026-09-25 (this session's toolset is again
   Read/Write/Edit/Glob/Grep only, no Bash/file-delete). No facts promoted, retired, or contradicted.
   Reset `_consolidation-state.json`. Watermark unchanged: line 7701 (signals) / 1446 (curation queue).
+- 2026-10-16 (explicit user request, paired with a `/consolidate-project` pass) — 35th straight pass.
+  `profile-signals.jsonl` gained 14 lines (7702–7715): same dev-runner/changelog-narration mislabelled
+  `kind:"correction"` pattern as every pass since 2026-09-19 (HQ-DEV-339 soft-cap and HQ-DEV-338
+  `chat.inject` diff text re-logged verbatim across 2 `sessionId`s) plus two real but project-technical
+  bcnv UI bugs (hair-length dropdown, raw i18n keys in a filter panel) — out of scope here. Curation
+  queue gained 4 entries (1447–1450): two are this command's own prior-day self-logs, one an unrelated
+  landing-page demo run, one a changelog-writing run (HQ-DEV-339/338/3/33 deploy summary) with no new
+  operator preference. Re-swept every project's `memory/feedback_*.md`/`feedback-*.md`: one new file
+  since the last sweep — tobuso-migration's `feedback-report-credential-setting-as-mine` (2026-10-16,
+  operator called out an agent report that let prod-Worker secret-setting read as if he'd done it under
+  a blanket "do all"). **Promoted** as a new provisional bullet under "Open corrections to honor,"
+  cross-referenced to the existing credential-and-access-grant-gating bullet. No facts retired or
+  contradicted. Re-checked the pending draft (`profile.md.draft` + `_consolidation-draft-ready.json`):
+  both still present, still the same stale 2026-09-23T08:45 snapshot, now 23+ passes behind this live
+  file — not applied, same reason as every pass since 2026-09-25 (this session's toolset is again
+  Read/Write/Edit/Glob/Grep only, no Bash/file-delete). Reset `_consolidation-state.json`. Watermark for
+  next pass: line 7715 (signals) / 1450 (curation queue).
