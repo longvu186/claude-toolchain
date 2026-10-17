@@ -672,3 +672,21 @@ only`, same source line). Updated the matching Anti-patterns bullets to match. N
   file — not applied, same reason as every pass since 2026-09-25 (this session's toolset is again
   Read/Write/Edit/Glob/Grep only, no Bash/file-delete). Reset `_consolidation-state.json`. Watermark for
   next pass: line 7715 (signals) / 1450 (curation queue).
+- 2026-10-17 (explicit user request, paired with a `/consolidate-project` pass) — 36th straight pass.
+  `profile-signals.jsonl` gained 22 lines (7716–7737): same dev-runner/plan-narration mislabelled
+  `kind:"correction"` pattern as every pass since 2026-09-19 (tonight's own fleet-toolchain-stale-
+  false-positive fix narration — the age-only-finding gate, the `probe=auth` distinction, the
+  Canceled-status-invisible-to-reconciler line — re-logged verbatim across 3 `sessionId`s) plus one
+  real but project-technical bcnv line (Infisical CLOUDFLARE_* delivery to a host needs the operator,
+  out of scope here). Curation queue gained 12 entries (1451–1462): the prior pass's own self-log, a
+  changelog-writing run, and ten bcnv dispatch/task-notification entries with no preference/
+  correction/lesson content. Zero genuine cross-project operator corrections from either source.
+  Re-swept every project's `memory/feedback_*.md`/`feedback-*.md`: identical file set to every sweep
+  since 2026-10-10 (ai-optimization, boroearth, yen-tu, personal-hq, tobuso-migration, streaming-kit)
+  — no new file, no new source repo; bcnv still has zero `feedback*`-named files despite continued
+  heavy activity. Re-checked the pending draft (`profile.md.draft` + `_consolidation-draft-ready.json`):
+  both still present, still the same stale 2026-09-23T08:45 snapshot, now 24+ passes behind this live
+  file — not applied, same reason as every pass since 2026-09-25 (this session's toolset is again
+  Read/Write/Edit/Glob/Grep only, no Bash/file-delete). No facts promoted, retired, or contradicted.
+  Reset `_consolidation-state.json`. Watermark for next pass: line 7737 (signals) / 1462 (curation
+  queue).
