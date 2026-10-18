@@ -690,3 +690,23 @@ only`, same source line). Updated the matching Anti-patterns bullets to match. N
   Read/Write/Edit/Glob/Grep only, no Bash/file-delete). No facts promoted, retired, or contradicted.
   Reset `_consolidation-state.json`. Watermark for next pass: line 7737 (signals) / 1462 (curation
   queue).
+- 2026-10-18 (explicit user request, paired with a `/consolidate-project` pass) — 37th straight pass.
+  `profile-signals.jsonl` gained 24 lines (7738–7761), all from tonight's own HQ-DEV-340 dispatch-launch-
+  recovery session (the `launch failed: (\d+)` pid-parse regex, the no-blind-retry-of-an-actually-launched
+  run rule, the stdin-swallow bash -l test-must-show-FAILS note, probe=auth handling) — same dev-runner/
+  implementation-narration mislabelled `kind:"correction"` pattern as every pass since 2026-09-19, already
+  captured in personal-hq's own run log and `.remember/now.md`. Curation queue gained 6 entries
+  (1463–1468): the prior pass's own self-log plus five implicit/bcnv task-notification runs with empty
+  preference/correction/lesson fields. Zero genuine cross-project operator corrections from either source.
+  Re-swept every project's `memory/feedback_*.md`/`feedback-*.md`: identical file set to every sweep since
+  2026-10-10 (ai-optimization, boroearth, yen-tu, personal-hq, tobuso-migration, streaming-kit) — no new
+  file, no new source repo; bcnv still has zero `feedback*`-named files. Re-checked the pending draft
+  (`profile.md.draft` + `_consolidation-draft-ready.json`): both still present, still the stale
+  2026-09-23T08:45 snapshot (`workspaceRoot: tobuso-migration`), now 25+ passes behind this live file —
+  not applied, same reason as every pass since 2026-09-25 (this session's toolset is again Read/Write/
+  Edit/Glob/Grep/MCP only, no Bash/file-delete). No facts promoted, retired, or contradicted this pass.
+  Archiving of `profile-signals.jsonl` (7,761 lines) remains blocked for the same toolset reason as every
+  pass since 2026-09-19; not re-raising the two standing fixes again (give this job Bash, or fix the
+  signal-logging hook's `kind:"correction"` misclassification at source) since they were already surfaced
+  directly to the user 2026-09-26/27. Reset `_consolidation-state.json`. Watermark for next pass: line
+  7761 (signals) / 1468 (curation queue).
