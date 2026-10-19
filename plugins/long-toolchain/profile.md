@@ -710,3 +710,20 @@ only`, same source line). Updated the matching Anti-patterns bullets to match. N
   signal-logging hook's `kind:"correction"` misclassification at source) since they were already surfaced
   directly to the user 2026-09-26/27. Reset `_consolidation-state.json`. Watermark for next pass: line
   7761 (signals) / 1468 (curation queue).
+- 2026-10-19 (explicit user request, paired with a `/consolidate-project` pass) — 38th straight pass.
+  Both signal sources unchanged since the last watermark: `profile-signals.jsonl` still exactly 7,761
+  lines, personal-hq's curation queue still exactly 1,468 — third fully zero-growth gap (after 2026-10-12
+  and 2026-10-15). Checked today's one new run log (2026-10-18 16:48, a bcnv public-forms draft/date-format
+  fix): real work, but project-technical to bcnv, already captured in bcnv's own memory/changelog via
+  `memory_appendChangelog`/`memory_upsertFact` — no cross-project atom. Re-swept every project's
+  `memory/feedback_*.md`/`feedback-*.md`: identical 46-file set across the same six repos as every sweep
+  since 2026-10-10 (ai-optimization, boroearth, yen-tu, personal-hq, tobuso-migration, streaming-kit) — no
+  new file, no new source repo; bcnv still has zero `feedback*`-named files despite heavy activity. No
+  facts promoted, retired, or contradicted. Did not re-check the stale `profile.md.draft` marker this pass
+  (unchanged for 25+ passes per the 2026-10-18 entry; this session again has no Bash/file-delete tool).
+  Stating plainly rather than re-logging per pass: the cross-project signal sources (`profile-
+signals.jsonl`, the curation queue) have produced a genuine new operator correction on roughly 1 pass in
+  10 since 2026-09-19 — most growth is dev-runner/plan-narration text mislabelled `kind:"correction"`, and
+  real signal instead arrives via per-project `feedback-*.md` files, which this pass already sweeps every
+  time. Reset `_consolidation-state.json`. Watermark unchanged: line 7761 (signals) / 1468 (curation
+  queue).
