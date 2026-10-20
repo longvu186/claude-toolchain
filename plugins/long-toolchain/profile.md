@@ -727,3 +727,15 @@ signals.jsonl`, the curation queue) have produced a genuine new operator correct
   real signal instead arrives via per-project `feedback-*.md` files, which this pass already sweeps every
   time. Reset `_consolidation-state.json`. Watermark unchanged: line 7761 (signals) / 1468 (curation
   queue).
+- 2026-10-20 (explicit user request, paired with a `/consolidate-project` pass) — 39th straight pass.
+  `profile-signals.jsonl` unchanged at exactly 7,761 lines — fourth fully zero-growth gap (after 2026-10-12,
+  2026-10-15, 2026-10-19). Curation queue gained 4 entries (1469-1472): two are this command's own prior-two-
+  day self-logs, one a changelog-writing run with only the existing "don't repeat earlier entries"
+  boilerplate, one an implicit run that wrote to bcnv's own memory - project-technical, out of scope. Zero
+  genuine cross-project operator corrections from either source. Re-swept every project's
+  `memory/feedback_*.md`/`feedback-*.md`: identical 46-file set across the same six repos as every sweep
+  since 2026-10-10 - no new file, no new source repo. The stale `profile.md.draft` +
+  `_consolidation-draft-ready.json` marker (2026-09-23T08:45 snapshot) is unchanged, now 27+ passes behind
+  this live file - still undeletable with this session's Read/Write/Edit/Glob/Grep/MCP-only toolset, same
+  reason as every pass since 2026-09-25. No facts promoted, retired, or contradicted. Reset
+  `_consolidation-state.json`. Watermark unchanged: line 7761 (signals) / 1472 (curation queue).
