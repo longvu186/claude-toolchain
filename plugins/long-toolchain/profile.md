@@ -310,3 +310,11 @@ internalized into CLAUDE.md or a skill.)_
   as the entire condensed span; not re-raising the two standing fixes again (already surfaced directly to
   the user 2026-09-26/27). Reset `_consolidation-state.json`. Watermark for next pass: line 7799 (signals)
   / 1491 (curation queue).
+- 2026-10-22 (explicit user request, paired with a `/consolidate-project` pass) — 43rd pass since
+  2026-09-19. `profile-signals.jsonl` gained 1 line (7800, the tobuso-migration e2e-evidence-reading
+  checklist — task instruction text, not a user correction) and personal-hq's curation queue gained 8
+  (1492–1499, implicit-run/changelog-writing narration). Re-swept every project's `memory/feedback_*.md`
+  (grepped for 2026-10-20/21/22 dates): no new file since the 2026-10-21 sweep. No facts promoted,
+  retired, or contradicted. Archiving of `profile-signals.jsonl` remains blocked for the same toolset
+  reason (no Bash/file-delete this session either). Reset `_consolidation-state.json`. Watermark for next
+  pass: line 7800 (signals) / 1499 (curation queue).
