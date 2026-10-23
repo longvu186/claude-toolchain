@@ -318,3 +318,12 @@ internalized into CLAUDE.md or a skill.)_
   retired, or contradicted. Archiving of `profile-signals.jsonl` remains blocked for the same toolset
   reason (no Bash/file-delete this session either). Reset `_consolidation-state.json`. Watermark for next
   pass: line 7800 (signals) / 1499 (curation queue).
+- 2026-10-23 (explicit user request, paired with a `/consolidate-project` pass) — 44th pass since
+  2026-09-19. `profile-signals.jsonl` gained 2 lines (7801–7802: an `ingestChatImage` implementation
+  blurb re-logged as a "correction," and a one-line `bcnv` project note about color/length tracking —
+  neither is a cross-project operator correction). Personal-hq's curation queue gained 3 (1500–1502:
+  two changelog-writing-task runs plus this pass's own prior run-log entry). Re-swept every project's
+  `memory/feedback_*.md` for 2026-10-22/23: no new file. No facts promoted, retired, or contradicted.
+  Archiving of `profile-signals.jsonl` (7,802 lines) remains blocked — this session's toolset again has
+  no Bash/file-delete tool, same standing issue raised 2026-09-26/27. Reset `_consolidation-state.json`.
+  Watermark for next pass: line 7802 (signals) / 1502 (curation queue).
