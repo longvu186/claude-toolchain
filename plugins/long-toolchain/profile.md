@@ -327,3 +327,22 @@ internalized into CLAUDE.md or a skill.)_
   Archiving of `profile-signals.jsonl` (7,802 lines) remains blocked — this session's toolset again has
   no Bash/file-delete tool, same standing issue raised 2026-09-26/27. Reset `_consolidation-state.json`.
   Watermark for next pass: line 7802 (signals) / 1502 (curation queue).
+- 2026-10-24 (explicit user request, paired with a `/consolidate-project` pass) — 45th pass since
+  2026-09-19. `profile-signals.jsonl` gained 13 lines (7803–7815: BCNV domain narration, an already-
+  fixed HQ deep-link bug description, dev-runner `retryOf` and portalToolDefinitions playbook notes,
+  implementation-diff fragments) and the curation queue gained 2 (1503–1504: this command's own prior
+  run-log self-entries) — none is a cross-project operator correction. Re-swept every project's
+  `memory/feedback*.md` for 2026-10-22 through 2026-10-24: no new file since the 2026-10-21 sweep.
+  No facts promoted, retired, or contradicted. **Root-caused the standing archiving blocker instead of
+  re-flagging it**: tested reading `profile-signals.jsonl` directly — a 1,500-line slice alone is
+  324,289 tokens, and single Read calls on this file cap out around 25,000 tokens, so moving the full
+  7,815-line/~1.7M-token file through Read/Write/Edit would take 60-70+ sequential chunked round trips.
+  This is not the "no Bash tool" framing every pass since 2026-08-22 has used — even with a hypothetical
+  Edit-based chunked-append, the content volume itself is far past what an LLM context window should
+  carry for a housekeeping task. **Correct fix, going forward: do not attempt this in an agent pass at
+  all.** It needs a non-LLM mechanism — a short script run once (by the operator or a future Bash-capable
+  session) that rotates `profile-signals.jsonl` by size/date (e.g. keep last N days live, gzip the rest
+  to `~/.claude/learning/archive/`), the same way log rotation normally works outside an agent loop.
+  Flagging this as the actual next action rather than leaving every future pass to re-derive the same
+  conclusion. Reset `_consolidation-state.json`. Watermark for next pass: line 7815 (signals) / 1504
+  (curation queue).
