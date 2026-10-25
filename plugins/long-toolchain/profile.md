@@ -346,3 +346,13 @@ internalized into CLAUDE.md or a skill.)_
   Flagging this as the actual next action rather than leaving every future pass to re-derive the same
   conclusion. Reset `_consolidation-state.json`. Watermark for next pass: line 7815 (signals) / 1504
   (curation queue).
+- 2026-10-25 (explicit user request, paired with a `/consolidate-project` pass) — 46th pass since
+  2026-09-19. `profile-signals.jsonl` gained 0 lines (still 7,815) — no new cross-project signal at all
+  this pass. Personal-hq's curation queue gained 2 (1505–1506): this command's own prior run-log
+  self-entry, and the nightly changelog-writing task's instruction text re-logged as a "preference
+  candidate" ("and do not repeat any earlier entries") — hook noise, not an operator correction.
+  Re-swept every project's `memory/feedback*.md` for 2026-10-24/25: no new file since the 2026-10-21
+  sweep. No facts promoted, retired, or contradicted. Archiving of `profile-signals.jsonl` remains the
+  standing non-LLM housekeeping item identified 2026-10-24 (file far too large for an agent pass to move
+  via Read/Write/Edit) — not re-raising it again this pass. Reset `_consolidation-state.json`. Watermark
+  for next pass: line 7815 (signals) / 1506 (curation queue).
