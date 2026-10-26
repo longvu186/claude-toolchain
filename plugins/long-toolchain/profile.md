@@ -310,49 +310,27 @@ internalized into CLAUDE.md or a skill.)_
   as the entire condensed span; not re-raising the two standing fixes again (already surfaced directly to
   the user 2026-09-26/27). Reset `_consolidation-state.json`. Watermark for next pass: line 7799 (signals)
   / 1491 (curation queue).
-- 2026-10-22 (explicit user request, paired with a `/consolidate-project` pass) — 43rd pass since
-  2026-09-19. `profile-signals.jsonl` gained 1 line (7800, the tobuso-migration e2e-evidence-reading
-  checklist — task instruction text, not a user correction) and personal-hq's curation queue gained 8
-  (1492–1499, implicit-run/changelog-writing narration). Re-swept every project's `memory/feedback_*.md`
-  (grepped for 2026-10-20/21/22 dates): no new file since the 2026-10-21 sweep. No facts promoted,
-  retired, or contradicted. Archiving of `profile-signals.jsonl` remains blocked for the same toolset
-  reason (no Bash/file-delete this session either). Reset `_consolidation-state.json`. Watermark for next
-  pass: line 7800 (signals) / 1499 (curation queue).
-- 2026-10-23 (explicit user request, paired with a `/consolidate-project` pass) — 44th pass since
-  2026-09-19. `profile-signals.jsonl` gained 2 lines (7801–7802: an `ingestChatImage` implementation
-  blurb re-logged as a "correction," and a one-line `bcnv` project note about color/length tracking —
-  neither is a cross-project operator correction). Personal-hq's curation queue gained 3 (1500–1502:
-  two changelog-writing-task runs plus this pass's own prior run-log entry). Re-swept every project's
-  `memory/feedback_*.md` for 2026-10-22/23: no new file. No facts promoted, retired, or contradicted.
-  Archiving of `profile-signals.jsonl` (7,802 lines) remains blocked — this session's toolset again has
-  no Bash/file-delete tool, same standing issue raised 2026-09-26/27. Reset `_consolidation-state.json`.
-  Watermark for next pass: line 7802 (signals) / 1502 (curation queue).
-- 2026-10-24 (explicit user request, paired with a `/consolidate-project` pass) — 45th pass since
-  2026-09-19. `profile-signals.jsonl` gained 13 lines (7803–7815: BCNV domain narration, an already-
-  fixed HQ deep-link bug description, dev-runner `retryOf` and portalToolDefinitions playbook notes,
-  implementation-diff fragments) and the curation queue gained 2 (1503–1504: this command's own prior
-  run-log self-entries) — none is a cross-project operator correction. Re-swept every project's
-  `memory/feedback*.md` for 2026-10-22 through 2026-10-24: no new file since the 2026-10-21 sweep.
-  No facts promoted, retired, or contradicted. **Root-caused the standing archiving blocker instead of
-  re-flagging it**: tested reading `profile-signals.jsonl` directly — a 1,500-line slice alone is
-  324,289 tokens, and single Read calls on this file cap out around 25,000 tokens, so moving the full
-  7,815-line/~1.7M-token file through Read/Write/Edit would take 60-70+ sequential chunked round trips.
-  This is not the "no Bash tool" framing every pass since 2026-08-22 has used — even with a hypothetical
-  Edit-based chunked-append, the content volume itself is far past what an LLM context window should
-  carry for a housekeeping task. **Correct fix, going forward: do not attempt this in an agent pass at
-  all.** It needs a non-LLM mechanism — a short script run once (by the operator or a future Bash-capable
-  session) that rotates `profile-signals.jsonl` by size/date (e.g. keep last N days live, gzip the rest
-  to `~/.claude/learning/archive/`), the same way log rotation normally works outside an agent loop.
-  Flagging this as the actual next action rather than leaving every future pass to re-derive the same
-  conclusion. Reset `_consolidation-state.json`. Watermark for next pass: line 7815 (signals) / 1504
+- **2026-10-22 → 2026-10-25 (passes 43–46, condensed 2026-10-26)** — Same pattern as the 09-19→10-20
+  span: `profile-signals.jsonl` crept 7799→7815 and the curation queue 1491→1506, almost entirely
+  dev-runner/changelog-writing-task narration re-logged as `kind:"correction"`, plus one genuine
+  housekeeping finding on 10-24 — **root-caused why the standing archiving blocker can't be closed in an
+  agent pass**: a 1,500-line slice of `profile-signals.jsonl` alone is ~324,000 tokens, so moving the
+  full file through Read/Write/Edit would take 60-70+ chunked round trips; it needs a non-LLM rotation
+  script (keep last N days live, gzip the rest to `~/.claude/learning/archive/`), not another agent pass
+  attempting it. No facts promoted, retired, or contradicted across these four passes.
+- 2026-10-26 (explicit user request, paired with a `/consolidate-project` pass) — 47th pass since
+  2026-09-19. `profile-signals.jsonl` gained 92 lines (7816–7907) and personal-hq's curation queue
+  gained 6 (1507–1512). Same standing pattern: the bulk is identical templated worktree boilerplate
+  (the "convention; only touch this if..." / "Should be committed soon..." / POS-cart-bug block)
+  re-logged verbatim across 7 different dev-runner `sessionId`s, plus task-scoped BCNV reconciliation-
+  revert design narration and two bcnv-specific remarks ("don't run any automation, fix root cause
+  first"; "usage consumption is low") that are contextual to that one conversation, not general
+  operator-behavior corrections. Re-swept every project's `memory/feedback*.md`: the only files not
+  already reflected here (`feedback_hq-must-match-code-server-capability`,
+  `feedback_verify-dev-runner-ui-before-merge`, `feedback_compassionate-chief-of-staff`,
+  `feedback_operator-approval-is-standing`) are all 64–91 days old and already covered — the first two
+  are personal-hq-project-scoped (dev-runner/HQ-parity, not a cross-project trait), the mental-health
+  one is already the digest's "help must reduce load, not add ceremony or shame-based framing" line, and
+  the approval one is already in "Open corrections to honor". No facts promoted, retired, or
+  contradicted. Reset `_consolidation-state.json`. Watermark for next pass: line 7907 (signals) / 1512
   (curation queue).
-- 2026-10-25 (explicit user request, paired with a `/consolidate-project` pass) — 46th pass since
-  2026-09-19. `profile-signals.jsonl` gained 0 lines (still 7,815) — no new cross-project signal at all
-  this pass. Personal-hq's curation queue gained 2 (1505–1506): this command's own prior run-log
-  self-entry, and the nightly changelog-writing task's instruction text re-logged as a "preference
-  candidate" ("and do not repeat any earlier entries") — hook noise, not an operator correction.
-  Re-swept every project's `memory/feedback*.md` for 2026-10-24/25: no new file since the 2026-10-21
-  sweep. No facts promoted, retired, or contradicted. Archiving of `profile-signals.jsonl` remains the
-  standing non-LLM housekeeping item identified 2026-10-24 (file far too large for an agent pass to move
-  via Read/Write/Edit) — not re-raising it again this pass. Reset `_consolidation-state.json`. Watermark
-  for next pass: line 7815 (signals) / 1506 (curation queue).
