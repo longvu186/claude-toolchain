@@ -14,7 +14,7 @@ beliefs. Atoms feed this; this is never just a list of atoms.
 ## Profile digest (injected each session)
 
 - **Who:** Solo builder, Vietnamese (thinks/reasons in English). Builds production web apps **and** heavily engineers his own AI toolchain (personal-hq). Highly systematic; invests in automation and tooling, not just features.
-- **Comms:** Terse, direct. Action over explanation — implement, don't describe. Challenges assumptions and asks "is X actually better than Y?" — expects evidence, not agreement.
+- **Comms:** Terse, direct. Action over explanation — implement, don't describe. Challenges assumptions and asks "is X actually better than Y?" — expects evidence, not agreement. **Cannot read code/diffs** ("painful, I don't understand most of it") — code review output must be plain-language behavior (what changed, how to see it, what could break, what's unverified), not file:line lists or jargon as the main deliverable.
 - **Decision lens:** Architecture over wording. Automation over polling/manual upkeep. Prompt-budget conscious (keep always-loaded context tiny). Verify before claiming done — including the external effect, not just a local build passing.
 - **Before asking him anything:** sweep what the system already holds (HQ data, git log, memories, closed tasks, past sessions). Most "open questions" are already answered somewhere.
 - **Hard rules:** i18n Vietnamese-first (never hardcode VN text). `typecheck`+build must pass before any deploy. UI validation is screenshot-backed, not code-only. Styled confirm modals, never native `window.confirm`. System-first UI (shared tokens/shells before page-local).
@@ -63,6 +63,13 @@ beliefs. Atoms feed this; this is never just a list of atoms.
 - Sequences work functionality-first: get every action actually working end-to-end before spending a
   pass on UI/UX polish or optimization. _(provisional — one direct statement: "make sure all actions are
   working first before we actually proceed with optimizing UI/UX")_
+- **Cannot read code or diffs himself** and merge/ship decisions rest entirely on what he's told — so a
+  review safeguard that assumes he'll read the diff is not a safeguard. Put code-reading on the machine
+  (independent evaluator, test-quality/revert-check gates) and put his decision on plain-language
+  behavior: what changed, how to see it work, what could break, and what was/was-not verified — diffs
+  and file:line lists stay a footnote, never the headline. _(established — 2026-10-26, said directly
+  while filing AI-slop-prevention dev tasks after a first checklist wrongly assumed he'd review code;
+  repo memory: `feedback_operator-cannot-read-code-review`, drove HQ-DEV-350/351)_
 - On a pre-code plan/spec, reviews in dense itemized rounds (labeled R1/R2, S1-S8) and expects each point
   applied exactly as specified, answered with a diff of what changed — not a re-summary of the whole
   plan. Same density and response shape as his post-implementation code review. Worth proactively
@@ -248,6 +255,9 @@ internalized into CLAUDE.md or a skill.)_
   was deliberately turned off — absence isn't automatically drift.
 - Don't size or defer work on a grep count — measure real call sites before calling something "too big."
 - Don't relay a subagent's "blocked" verdict without probing it yourself.
+- Don't hand him diffs, file:line lists, or jargon as the primary report of a code change — he can't
+  read them. Lead with plain-language behavior and verification status; keep technical evidence as a
+  footnote.
 
 ## Changelog
 
@@ -334,3 +344,18 @@ internalized into CLAUDE.md or a skill.)_
   the approval one is already in "Open corrections to honor". No facts promoted, retired, or
   contradicted. Reset `_consolidation-state.json`. Watermark for next pass: line 7907 (signals) / 1512
   (curation queue).
+- 2026-10-27 (explicit user request, paired with a `/consolidate-project` pass) — 48th pass since
+  2026-09-19. `profile-signals.jsonl` gained 316 lines (7908–8223), personal-hq's curation queue 15
+  (1513–1527): same standing pattern (the "convention; only touch this if..." / POS-cart-bug / revert-
+  check / review-brief boilerplate re-logged verbatim across many dev-runner `sessionId`s, plus task-
+  scoped Mr. TukTuk/BCNV narration), no genuine cross-project correction in either file. **One real
+  promotion this pass**, found only because the per-project `feedback_*.md` sweep was re-run file-by-
+  file rather than trusted from the prior pass's summary: `feedback_operator-cannot-read-code-review.md`
+  (personal-hq, created 2026-10-26T06:41, before the 2026-10-26 consolidation ran) was present in that
+  pass's own grep results but never actually read or reflected — promoted now as an established fact
+  (added to the digest, "How I work", and Anti-patterns: he cannot read diffs/code, so review output
+  must lead with plain-language behavior, not file:line jargon). Re-swept every other project's
+  `memory/feedback*.md`; no other unreflected file found. Archiving of `profile-signals.jsonl` (8,223
+  lines) remains blocked by the same no-Bash-tool limitation as every pass since 2026-09-26 — not
+  re-raising it again here. Reset `_consolidation-state.json`. Watermark for next pass: line 8223
+  (signals) / 1527 (curation queue).
