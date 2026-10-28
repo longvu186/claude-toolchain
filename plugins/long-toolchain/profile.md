@@ -359,3 +359,17 @@ internalized into CLAUDE.md or a skill.)_
   lines) remains blocked by the same no-Bash-tool limitation as every pass since 2026-09-26 — not
   re-raising it again here. Reset `_consolidation-state.json`. Watermark for next pass: line 8223
   (signals) / 1527 (curation queue).
+- 2026-10-28 (explicit user request, paired with a `/consolidate-project` pass) — 49th pass since
+  2026-09-19. `profile-signals.jsonl` gained 220 lines (8224–8443), personal-hq's curation queue 11
+  (1528–1538): same standing pattern — the bulk is identical dev-runner worktree/deploy boilerplate
+  ("convention; only touch this if…", "Should be committed soon…", Turbopack-symlinks-env-files,
+  "bump in a clean worktree or raise an incident instead of reporting deployLaunched: true") re-logged
+  verbatim across ~25 `sessionId`s on mrtuktuk-food-app, plus one repeated task-scoped payroll-audit
+  security-review checklist (session `4bce9f67`, 4 runs) and tobuso-migration routing/e2e findings —
+  none is a genuine cross-project operator-behavior correction. Curation queue entries were all
+  implicit-run/changelog-writing-task boilerplate. Re-swept every project's `memory/feedback*.md`: file
+  list unchanged from the 2026-10-27 sweep, no new file found (checked specifically for an mrtuktuk
+  feedback dir — none exists; the payroll-audit finding is task-scoped technical content, not an
+  operator correction, so it correctly isn't profile material). No facts promoted, retired, or
+  contradicted. Reset `_consolidation-state.json`. Watermark for next pass: line 8443 (signals) / 1538
+  (curation queue).
