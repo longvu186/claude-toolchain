@@ -1,6 +1,6 @@
 ---
 name: programmatic-video
-description: Use when asked to make, render, edit, plan or review any video or animation — motion graphics, showreel, logo sting, product demo, launch/promo video, landing-page hero loop, TikTok/Reels/Shorts social video, explainer, tutorial or screencast, animated captions/subtitles, voiceover/TTS sync, writing a video brief or prompt for another agent — or when choosing between Remotion, HyperFrames, Manim, Motion Canvas, ffmpeg, Playwright capture, TTS engines or AI video generators (Veo, Kling).
+description: Use when asked to make, render, edit, plan or review any video or animation — motion graphics, showreel, logo sting, product demo, launch/promo video, landing-page hero loop, TikTok/Reels/Shorts social video, explainer, tutorial or screencast, animated captions/subtitles, voiceover/TTS sync, sound effects/music sync, editing recorded footage (talking-head cuts, removing silences/stutters, long video to shorts), copying the motion of a reference video, writing a video brief or prompt for another agent — or when choosing between Remotion, HyperFrames, Manim, Motion Canvas, ffmpeg, Playwright capture, TTS engines or AI video generators (Veo, Kling).
 ---
 
 # Programmatic video
@@ -20,13 +20,22 @@ rendering.
 | Product demo / launch video / hero loop from a real app | Playwright capture of a seeded app + a coded camera, cursor and captions | `references/product-demo.md` |
 | Vertical social promo (9:16) | Remotion or canvas; captions burned in | `references/social.md` |
 | Narrated explainer / tutorial / math | Remotion or Manim; audio-first timeline | `references/explainer.md` |
+| **Editing recorded footage**: talking head, vlog, webinar → shorts, screen recording with voice | Word-level transcript → silence and mistake passes → per-segment ffmpeg render | `references/footage-editing.md` |
+| Any **brand-facing** film (launch, promo, feature, ad, sting): direction, measured motion, seams, demo cursor, independent critic loop, style menu | — | `references/direction-and-review.md` |
+| Sound effects, music sync, beat grid, mix, SFX licences | Procedural engine or CC0 kit | `references/sound-design.md` |
 | Voiceover, captions, music, loudness | — | `references/audio-voice-captions.md` |
 | Turning a vague ask into a buildable brief; style register; writing a prompt for another agent | — | `references/brief-patterns.md` |
-| Picking or vetting an engine, licence, MCP or skill pack | — | `references/engines.md` |
+| Picking or vetting an engine, licence, MCP or skill pack | — | `references/engines.md` (+ `vendor/README.md` for what is already vendored) |
 | QA, encoding, sharing a link | — | `references/qa-and-delivery.md` |
 
 Always also skim `references/motion-craft.md` (25 checkable rules: easing, durations, stagger, overshoot, reading
 time, beat grid, seams).
+
+**For a business's video:**
+- First read `data/documents/<module>/video/brand.md`, `MOTION.md` and `taste.md`. If they're missing, run the brand
+  intake in `direction-and-review.md` §1.
+- After delivery, append the operator's reactions to `taste.md`.
+- The builder never grades its own film. Use the critic loop in §8.
 
 ## Workflow
 

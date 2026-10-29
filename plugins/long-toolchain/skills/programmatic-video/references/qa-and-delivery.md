@@ -17,6 +17,26 @@ Run `bash scripts/qa.sh all <video.mp4> [cut_times_s...]`. It writes into `<vide
 | `defects.txt`: blackdetect / freezedetect / silencedetect | Accidental black, frozen frames, audio gaps |
 | `wave.png`: waveform | Audio transients vs the cue grid (px per second = width / duration) |
 
+**Second-layer measured gates (added 2026-10-30, vendored and smoke-tested on this VPS).** Run these as well, and
+quote their numbers:
+
+```bash
+VD=~/.claude/skills/programmatic-video/vendor; P=~/.cache/programmatic-video/venv/bin/python   # venv: vendor/README.md
+python3 -I $VD/motionmaxxing@8c8ec0f2a6f6/scripts/look.py out.mp4 --out out.qa/look --expect <s> [--expect-audio]
+$P -I $VD/cinetic@ecfa6605de1a/scripts/forensics.py out.mp4 --cuts <s,s,…> --json out.qa/forensics.json
+$P -I $VD/cinetic@ecfa6605de1a/scripts/av-audit.py out.mp4 --cues cues.json --json out.qa/av.json
+```
+
+| Script | What it adds |
+|---|---|
+| `look.py` | G0 length/audio, G2 no run of more than 3 flat frames, G3 end hold ≤ 1.4 s and final shot ≤ 25 %; cut detection; cut-to-sound-onset sync; motion level vs the human-film band |
+| `forensics.py` | One-frame pops, stalls, dead holds, ghost frames, judder, sharpness steps, banding, seam pops. Declare designed cuts and colour floods with `--cuts`, or they fail as pops |
+| `av-audit.py` | Onsets against cues, loud sounds on still picture, clicks from unfaded sample edges, flat loudness range, AAC lag |
+
+What they found on the 09-28 showreel, which had passed `qa.sh`: 14 clicks, loud effects over still frames, a 1.3 LU
+loudness range (too flat) and a −1.6 f median onset lag. Footage-edit QA is in `footage-editing.md`; the
+critic/verifier loop is in `direction-and-review.md` §8.
+
 Then, by hand:
 - **Mid-motion frame of every entrance** (`qa.sh frame <video> <t>`). This catches collisions that exist only
   mid-interpolation.
