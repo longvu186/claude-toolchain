@@ -373,3 +373,20 @@ internalized into CLAUDE.md or a skill.)_
   operator correction, so it correctly isn't profile material). No facts promoted, retired, or
   contradicted. Reset `_consolidation-state.json`. Watermark for next pass: line 8443 (signals) / 1538
   (curation queue).
+- 2026-10-29 (explicit user request, paired with a `/consolidate-project` pass) — 50th pass since
+  2026-09-19. `profile-signals.jsonl` gained 45 lines (8444–8488), personal-hq's curation queue 2
+  (1539–1540): same standing pattern — mrtuktuk-food-app worktree/deploy boilerplate repeated across
+  ~7 `sessionId`s (the "convention; only touch this if…" / "Should be committed soon…" block, Supabase
+  identity-linking and OAuth-session-expired-marks-host-loaded notes, "bump in a clean worktree or raise
+  an incident instead of reporting deployLaunched: true"), plus personal-hq-itself narration (an operator
+  chat-UI instruction about grouping tool-run steps — already being built as dev-task `be449bff`'s chat
+  unit paging; HQ-worker cgroup memory-limit change; HQ-DEV-345/347/348/350/351 review-gate status) — all
+  project-scoped, correctly out of cross-project scope (same disposition as prior passes' personal-hq
+  narration). One technical lesson worth flagging as a `tech-pitfalls` candidate rather than a profile
+  fact: "any auto-load/auto-continue effect keyed on scroll position must verify its container is
+  actually visible" (root cause of the `e6b914a8` chat-pagination fix) — generic enough to apply beyond
+  personal-hq's chat UI, not yet promoted since it's a single instance. Curation queue entries were both
+  meta (this consolidation request itself, logged twice). Re-swept every project's `memory/feedback*.md`
+  via `MEMORY.md`'s index: no file not already reflected in this profile. No facts promoted, retired, or
+  contradicted. Reset `_consolidation-state.json`. Watermark for next pass: line 8488 (signals) / 1540
+  (curation queue).
