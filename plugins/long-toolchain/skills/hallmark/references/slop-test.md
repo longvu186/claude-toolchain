@@ -1,4 +1,4 @@
-# Slop test — 58 gates + pre-emit self-critique
+# Slop test — 64 gates + pre-emit self-critique
 
 Run this list before handing back any output. Every answer must be **no**. Update the Step 5 preview block's `Slop test` row to reflect the actual outcome of this run.
 
@@ -185,7 +185,19 @@ Universal. Every emitted page must render flawlessly at 320 px, 375 px, 414 px, 
 
 57. **Studied DNA discarded for a catalog theme.** Did a `study` diagnosis emit earlier in the conversation, AND does the build's CSS stamp's `theme:` field name a catalog theme (Specimen, Midnight, Brutal, Garden, Atelier, Newsprint, Terminal, Manifesto, Almanac, Sport, Studio, Riso, Bloom, Coral, Cobalt, Aurora, Editorial, Carnival, Lumen, Hum) rather than `studied-DNA (source: ...)` — without the user having explicitly pivoted ("use Newsprint instead", "ignore the DNA", "rotate to a different theme")? Auto-fail. The studied DNA was meant to be the system (SKILL.md § 2.6 Condition 0); defaulting back to catalog is the attractor pull. Fix: re-emit using the studied DNA's tokens directly (paper OKLCH, accent OKLCH, named candidate fonts, macrostructure, archetypes) and update the stamp to `theme: studied-DNA (source: <URL or image>)` with the inline values. This gate is trivially passed when no recent study exists in conversation scope.
 
-The CSS stamp at Step 6 records mobile pass alongside contrast: `· mobile: pass (34, 49, 50–57)`.
+## Spacing & borders — measured (run `scripts/spacing-border-audit.js` at 375 and 1280 px)
+
+Rules, thresholds and fixes: [`spacing-and-borders.md`](spacing-and-borders.md). These gates are answered from the
+**rendered** page (the script's findings or computed styles), never from the class list.
+
+59. **Cramped inset.** Does any text sit closer to a painted edge of its container (border, differing fill, or shadow) than `max(8px, 0.5em)` horizontally or `max(4px, 0.3em)` vertically, measured from the glyph box? Chips and badges included. Fix: step the padding up the scale — never shrink the type to fit.
+60. **Body text against the viewport edge.** Does any paragraph / list item's text start or end closer than 16px to the viewport edge (12px at ≤ 480px)? Fix: a container with ≥ 16px (ideally 24–32px) inline padding, or constrain the overflowing element's width.
+61. **Heading rhythm inverted.** On two or more headings, is the space below the heading (to its own content) ≥ 12px larger than the space above it (to the previous block)? Fix: open the space above (≈ 2× the space below).
+62. **Monotonous spacing.** Of the page's non-zero padding / margin / gap values, is one value more than 60% of all samples with 3 or fewer distinct values in total? Fix: tighten inner groups a step, widen section gaps two steps.
+63. **Edge slop.** Any of: a 2–6px coloured side stripe (`border-left/right` or `inset Npx 0 0` shadow) on a card / callout / alert / row that is not a selection or `aria-current` indicator; that stripe on a rounded box; a row of ≥ 3 sibling cards each wearing a hairline border **and** a ≥ 32px soft shadow (ghost cards); a bordered or shadowed card nested inside another card. Fix per `spacing-and-borders.md` § 4.
+64. **Radius drift.** More than 4 distinct corner radii on the page (pill and circle excluded), or a radius > 24px on a surface ≥ 240 × 120px, or nested rounded boxes not following `inner = outer − padding`? Fix: the `--radius-*` scale in `spacing-and-borders.md` § 5.
+
+The CSS stamp at Step 6 records mobile pass alongside contrast: `· mobile: pass (34, 49, 50–57) · spacing: pass (59–64)`.
 
 ---
 

@@ -30,19 +30,25 @@ Three equal columns, each with an icon above a two-line heading above a three-li
 
 A bordered container with cards inside it. Or: a card containing another card containing a small "micro-card". Visual nesting with no semantic reason.
 
-**Fix.** Pick one containment layer. Usually the outer one is the wrong one.
+**Fix.** Pick one containment layer. Usually the outer one is the wrong one. Inside a surface, separate with dividers, a fill-only tinted row or spacing — a tint with no border and no shadow is a row, not a card. Measured by gate 63 ([`spacing-and-borders.md`](spacing-and-borders.md) § 1).
 
 ### The gradient headline
 
 A headline with `background-clip: text` fill set to a linear gradient (usually purple-to-pink or blue-to-cyan). Signals "AI generated" faster than almost anything else.
 
-**Fix.** Solid ink. If you want the headline to feel alive, use weight or italic or a display face — not a gradient fill.
+**Fix.** Solid ink. If you want the headline to feel alive, use weight, size or a display face — not a gradient fill (and not italic: headings stay roman, discipline 6).
 
 ### The side-stripe card
 
 A card with a thick coloured border on one edge (usually left, 4–6px, purple or green). Very recognisable; very 2018-SaaS-AI.
 
-**Fix.** Use a hairline border all around, or no border, or a small accent square beside the heading. Never an asymmetric thick stripe.
+**Fix.** Use a hairline border all around, or no border, or a small accent square beside the heading. Never an asymmetric thick stripe. The same tell drawn as `box-shadow: inset 3px 0 0 <colour>` counts. On a rounded card it is worse — the straight stripe fights the curved corner. **Exempt:** a stripe that *is* a selection or current-page state (`aria-current`, `aria-selected`, `data-state=active`). Measured by gate 63.
+
+### The ghost card
+
+A row of cards that each wear a 1px hairline border **and** a wide, soft drop shadow (blur ≥ 32px). Two elevation systems on one surface; a row of them reads as the default nobody chose.
+
+**Fix.** Declare elevation once per surface: a defined edge (hairline, no shadow) **or** a soft lift (shadow, no border). One floating panel — a popover, a dialog — may carry both. Gate 63.
 
 ### Full-viewport centred hero
 

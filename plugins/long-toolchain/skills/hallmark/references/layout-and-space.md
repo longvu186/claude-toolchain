@@ -31,6 +31,7 @@ Layout is where "AI-generated" gets caught. Equal columns, everything centred, e
 
 - Use `gap` for sibling spacing. It's cleaner than stacked margins, it participates in flex/grid, and it collapses predictably.
 - Use `margin` only for optical adjustments or breaking out of the flow. Never `margin` for a list of siblings.
+- **Inset floors, heading rhythm, borders and the `--radius-*` scale live in [`spacing-and-borders.md`](spacing-and-borders.md)** — with measured thresholds and an audit script. Emit the radius tokens in `tokens.css` alongside these spacing tokens.
 
 ## Grids
 
