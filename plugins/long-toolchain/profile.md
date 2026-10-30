@@ -61,8 +61,10 @@ beliefs. Atoms feed this; this is never just a list of atoms.
   direct statement, but consistent with the batch-review / multi-agent-validation pattern seen across
   dev-runner sessions)_
 - Sequences work functionality-first: get every action actually working end-to-end before spending a
-  pass on UI/UX polish or optimization. _(provisional — one direct statement: "make sure all actions are
-  working first before we actually proceed with optimizing UI/UX")_
+  pass on UI/UX polish or optimization. _(established — two independent instances across different
+  projects: "make sure all actions are working first before we actually proceed with optimizing UI/UX";
+  and 2026-10-29 on mrtuktuk-food-app, "complete any missing features, and start actually testing and
+  UI/UX evaluate and update the deploy")_
 - **Cannot read code or diffs himself** and merge/ship decisions rest entirely on what he's told — so a
   review safeguard that assumes he'll read the diff is not a safeguard. Put code-reading on the machine
   (independent evaluator, test-quality/revert-check gates) and put his decision on plain-language
@@ -389,4 +391,17 @@ internalized into CLAUDE.md or a skill.)_
   meta (this consolidation request itself, logged twice). Re-swept every project's `memory/feedback*.md`
   via `MEMORY.md`'s index: no file not already reflected in this profile. No facts promoted, retired, or
   contradicted. Reset `_consolidation-state.json`. Watermark for next pass: line 8488 (signals) / 1540
+  (curation queue).
+- 2026-10-30 (explicit user request, paired with a `/consolidate-project` pass) — 51st pass since
+  2026-09-19. `profile-signals.jsonl` gained 100 lines (8489–8588), personal-hq's curation queue 3
+  (1541–1543): same standing pattern — mrtuktuk-food-app dev-runner worktree/deploy boilerplate repeated
+  across ~10 `sessionId`s (the "convention; only touch this if…" / ".raw untrack" / "Author such files
+  with Write/Edit instead of Bash heredocs" block, plus task-scoped accounting/write-off/printer-bridge
+  bug notes), no genuine new cross-project correction in either file. **One promotion this pass**: a
+  second, cross-project instance of the functionality-first ordering preference (mrtuktuk-food-app,
+  2026-10-29, "complete any missing features, and start actually testing and UI/UX evaluate and update
+  the deploy") met the established threshold — promoted from provisional. Re-swept every project's
+  `memory/feedback*.md`: file list unchanged from the 2026-10-27 sweep, no new file found. Archiving of
+  `profile-signals.jsonl` (8,588 lines) remains blocked by the same no-Bash-tool limitation as every pass
+  since 2026-09-26. Reset `_consolidation-state.json`. Watermark for next pass: line 8588 (signals) / 1543
   (curation queue).
